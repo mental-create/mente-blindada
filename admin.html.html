@@ -1,0 +1,1378 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Mente Blindada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: #f5f7fa;
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            color: white;
+            padding: 20px 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            font-size: 24px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+        }
+
+        .header-user {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .user-info {
+            text-align: right;
+        }
+
+        .user-name {
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .user-role {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .btn-logout {
+            padding: 8px 16px;
+            background: rgba(255,255,255,0.2);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .btn-logout:hover {
+            background: rgba(255,255,255,0.3);
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 30px;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .stat-icon {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 15px;
+        }
+
+        .stat-icon.users {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+
+        .stat-icon.posts {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        }
+
+        .stat-icon.messages {
+            background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        }
+
+        .stat-icon.sales {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 800;
+            color: #1a237e;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        /* Navigation Tabs */
+        .nav-tabs {
+            background: white;
+            border-radius: 15px;
+            padding: 10px;
+            margin-bottom: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .nav-tab {
+            padding: 12px 24px;
+            background: none;
+            border: 2px solid transparent;
+            color: #666;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 14px;
+        }
+
+        .nav-tab:hover {
+            background: #f5f7fa;
+        }
+
+        .nav-tab.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Content Sections */
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Forms */
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a237e;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group.full-width {
+            grid-column: 1/-1;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="url"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            transition: all 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        textarea {
+            min-height: 120px;
+            resize: vertical;
+        }
+
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* Buttons */
+        .btn {
+            padding: 12px 24px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: none;
+            font-size: 14px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            color: white;
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #f5576c 0%, #f093fb 100%);
+            color: white;
+        }
+
+        .btn-warning {
+            background: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            color: white;
+        }
+
+        .btn-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        /* Tables */
+        .table-wrapper {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background: #f5f7fa;
+        }
+
+        th {
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            color: #333;
+            font-size: 14px;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        td {
+            padding: 15px;
+            border-bottom: 1px solid #f0f0f0;
+            font-size: 14px;
+        }
+
+        tbody tr:hover {
+            background: #fafafa;
+        }
+
+        /* Status Badges */
+        .badge {
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .badge-success {
+            background: #e8f5e9;
+            color: #2e7d32;
+        }
+
+        .badge-warning {
+            background: #fff3e0;
+            color: #e65100;
+        }
+
+        .badge-danger {
+            background: #ffebee;
+            color: #c62828;
+        }
+
+        .badge-info {
+            background: #e3f2fd;
+            color: #1565c0;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 5px;
+        }
+
+        .btn-icon {
+            padding: 8px;
+            border-radius: 8px;
+            background: #f5f7fa;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-size: 16px;
+        }
+
+        .btn-icon:hover {
+            background: #e0e0e0;
+        }
+
+        /* Search Bar */
+        .search-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 12px 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 14px;
+        }
+
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .loading-spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 48px;
+            margin-bottom: 20px;
+            opacity: 0.5;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .nav-tabs {
+                flex-direction: column;
+            }
+
+            .nav-tab {
+                width: 100%;
+                text-align: center;
+            }
+
+            .header-content {
+                flex-direction: column;
+                gap: 15px;
+            }
+
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s ease;
+        }
+
+        .modal-header {
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #1a237e;
+        }
+
+        .modal-close {
+            float: right;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .modal-close:hover {
+            color: #333;
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <h1>🛡️ Painel Administrativo</h1>
+            <div class="header-user">
+                <div class="user-info">
+                    <div class="user-name" id="adminName">Admin</div>
+                    <div class="user-role">Administrador</div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Sair</button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Container -->
+    <div class="container">
+        <!-- Dashboard Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon users">👥</div>
+                <div class="stat-value" id="totalUsers">0</div>
+                <div class="stat-label">Usuários Ativos</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon posts">📝</div>
+                <div class="stat-value" id="totalPosts">0</div>
+                <div class="stat-label">Posts no Feed</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon messages">💬</div>
+                <div class="stat-value" id="totalMessages">0</div>
+                <div class="stat-label">Mensagens Pendentes</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon sales">💰</div>
+                <div class="stat-value" id="totalSales">0</div>
+                <div class="stat-label">Vendas do Mês</div>
+            </div>
+        </div>
+
+        <!-- Navigation Tabs -->
+        <div class="nav-tabs">
+            <button class="nav-tab active" onclick="switchTab('dashboard')">📊 Dashboard</button>
+            <button class="nav-tab" onclick="switchTab('feed')">📋 Feed</button>
+            <button class="nav-tab" onclick="switchTab('community')">💬 Comunidade</button>
+            <button class="nav-tab" onclick="switchTab('users')">👥 Usuários</button>
+            <button class="nav-tab" onclick="switchTab('content')">📚 Conteúdo</button>
+            <button class="nav-tab" onclick="switchTab('modules')">🧩 Módulos</button>
+            <button class="nav-tab" onclick="switchTab('settings')">⚙️ Configurações</button>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="content-section active">
+            <div class="card">
+                <h2 class="card-title">📈 Visão Geral</h2>
+                <p>Bem-vindo ao painel administrativo do Mente Blindada. Use o menu acima para navegar entre as seções.</p>
+                
+                <div style="margin-top: 30px;">
+                    <h3 style="margin-bottom: 15px; color: #1a237e;">Ações Rápidas</h3>
+                    <div class="btn-group">
+                        <button class="btn btn-primary" onclick="switchTab('feed')">➕ Criar Post</button>
+                        <button class="btn btn-warning" onclick="switchTab('community')">👁️ Moderar Mensagens</button>
+                        <button class="btn btn-success" onclick="switchTab('users')">📧 Adicionar Usuário</button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📊 Atividade Recente</h2>
+                <div id="recentActivity">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        <p>Carregando atividades...</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Feed Section -->
+        <div id="feed-section" class="content-section">
+            <div class="card">
+                <h2 class="card-title">➕ Criar/Editar Post</h2>
+                <form id="feedForm">
+                    <input type="hidden" id="postId">
+                    
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Título do Post</label>
+                            <input type="text" id="postTitle" placeholder="Digite o título..." required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Categoria</label>
+                            <select id="postCategory" required>
+                                <option value="">Selecione...</option>
+                                <option value="motivacao">💪 Motivação</option>
+                                <option value="meditacao">🧘 Meditação</option>
+                                <option value="exercicios">🏃 Exercícios</option>
+                                <option value="alimentacao">🥗 Alimentação</option>
+                                <option value="sono">😴 Sono</option>
+                                <option value="relacionamentos">❤️ Relacionamentos</option>
+                                <option value="produtividade">📈 Produtividade</option>
+                                <option value="autoconhecimento">🔍 Autoconhecimento</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group full-width">
+                            <label>Conteúdo</label>
+                            <textarea id="postContent" rows="6" placeholder="Escreva o conteúdo do post..." required></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>URL da Imagem (opcional)</label>
+                            <input type="url" id="postImage" placeholder="https://exemplo.com/imagem.jpg">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Tags (separadas por vírgula)</label>
+                            <input type="text" id="postTags" placeholder="saúde mental, bem-estar">
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="postActive" checked>
+                                <label for="postActive">Post Ativo</label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <input type="checkbox" id="postHighlight">
+                                <label for="postHighlight">⭐ Destacar Post</label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">💾 Salvar Post</button>
+                        <button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">📋 Posts Existentes</h2>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchPosts" placeholder="🔍 Buscar posts..." onkeyup="filterPosts()">
+                    <select class="search-input" id="filterCategory" onchange="loadFeedPosts()" style="max-width: 200px;">
+                        <option value="">Todas Categorias</option>
+                        <option value="motivacao">Motivação</option>
+                        <option value="meditacao">Meditação</option>
+                        <option value="exercicios">Exercícios</option>
+                        <option value="alimentacao">Alimentação</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Título</th>
+                                <th>Categoria</th>
+                                <th>Status</th>
+                                <th>Data</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="postsTable">
+                            <tr>
+                                <td colspan="5" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    Carregando posts...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Community Section -->
+        <div id="community-section" class="content-section">
+            <div class="card">
+                <h2 class="card-title">💬 Moderação de Mensagens</h2>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" placeholder="🔍 Buscar mensagens..." onkeyup="filterMessages()">
+                    <select class="search-input" id="filterMessageStatus" onchange="loadCommunityMessages()" style="max-width: 200px;">
+                        <option value="pending">Pendentes</option>
+                        <option value="approved">Aprovadas</option>
+                        <option value="rejected">Rejeitadas</option>
+                        <option value="all">Todas</option>
+                    </select>
+                </div>
+
+                <div id="messagesContainer" class="messages-container">
+                    <div class="loading">
+                        <div class="loading-spinner"></div>
+                        Carregando mensagens...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Section -->
+        <div id="users-section" class="content-section">
+            <div class="card">
+                <h2 class="card-title">➕ Adicionar Usuário Autorizado</h2>
+                <form id="userForm">
+                    <div class="form-grid">
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="userEmail" placeholder="email@exemplo.com" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Nome</label>
+                            <input type="text" id="userName" placeholder="Nome do usuário" required>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>ID da Compra (opcional)</label>
+                            <input type="text" id="purchaseId" placeholder="HOT_123456">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Data de Expiração (opcional)</label>
+                            <input type="date" id="expiresAt">
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">➕ Adicionar Usuário</button>
+                    </div>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">👥 Usuários Autorizados</h2>
+                
+                <div class="search-bar">
+                    <input type="text" class="search-input" id="searchUsers" placeholder="🔍 Buscar usuários..." onkeyup="filterUsers()">
+                    <select class="search-input" id="filterUserStatus" onchange="loadUsers()" style="max-width: 200px;">
+                        <option value="active">Ativos</option>
+                        <option value="suspended">Suspensos</option>
+                        <option value="expired">Expirados</option>
+                        <option value="all">Todos</option>
+                    </select>
+                </div>
+
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Email</th>
+                                <th>Nome</th>
+                                <th>Status</th>
+                                <th>Data Compra</th>
+                                <th>Expira em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="usersTable">
+                            <tr>
+                                <td colspan="6" class="loading">
+                                    <div class="loading-spinner"></div>
+                                    Carregando usuários...
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Content Section -->
+        <div id="content-section" class="content-section">
+            <div class="card">
+                <h2 class="card-title">📚 Gerenciar Conteúdo dos Módulos</h2>
+                <p>Área para gerenciar conteúdo dos módulos (Quiz, Exercícios, Biblioteca, Diário)</p>
+                <!-- Implementar conforme necessário -->
+            </div>
+        </div>
+
+        <!-- Modules Section -->
+        <div id="modules-section" class="content-section">
+            <div class="card">
+                <h2 class="card-title">🧩 Gerenciar Módulos</h2>
+                <p>Área para adicionar/editar módulos do app</p>
+                <!-- Implementar conforme necessário -->
+            </div>
+        </div>
+
+        <!-- Settings Section -->
+        <div id="settings-section" class="content-section">
+            <div class="card">
+                <h2 class="card-title">⚙️ Configurações do Sistema</h2>
+                
+                <form id="settingsForm">
+                    <div class="form-grid">
+                        <div class="form-group full-width">
+                            <label>Email de Suporte</label>
+                            <input type="email" id="supportEmail" value="suporte@menteblindada.com">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Webhook URL (Hotmart/Kiwify)</label>
+                            <input type="url" id="webhookUrl" placeholder="https://seu-site.com/webhook">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Webhook Secret</label>
+                            <input type="text" id="webhookSecret" placeholder="Token secreto">
+                        </div>
+                    </div>
+                    
+                    <div class="btn-group">
+                        <button type="submit" class="btn btn-primary">💾 Salvar Configurações</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ====== CONFIGURAÇÃO DO SUPABASE ======
+        const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
+
+        let supabase;
+        let currentUser;
+        let currentPosts = [];
+        let currentMessages = [];
+        let currentUsers = [];
+
+        // Inicializar Supabase
+        function initSupabase() {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase configurado');
+                return true;
+            } catch (e) {
+                console.error('Erro ao configurar Supabase:', e);
+                return false;
+            }
+        }
+
+        // Verificar autenticação de admin
+        async function checkAdminAuth() {
+            if (!supabase) return false;
+            
+            // Verificar se é admin pelo localStorage
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (!isAdmin) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'admin-login.html';
+                    return false;
+                }
+                
+                currentUser = session.user;
+                document.getElementById('adminName').textContent = session.user.email.split('@')[0];
+                return true;
+            } catch (error) {
+                console.error('Erro ao verificar auth:', error);
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+        }
+
+        // Logout
+        async function logout() {
+            if (confirm('Deseja realmente sair?')) {
+                localStorage.removeItem('isAdmin');
+                await supabase.auth.signOut();
+                window.location.href = 'admin-login.html';
+            }
+        }
+
+        // Switch tabs
+        function switchTab(tab) {
+            // Update nav tabs
+            document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Update sections
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.getElementById(`${tab}-section`).classList.add('active');
+            
+            // Load data for the tab
+            switch(tab) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'feed':
+                    loadFeedPosts();
+                    break;
+                case 'community':
+                    loadCommunityMessages();
+                    break;
+                case 'users':
+                    loadUsers();
+                    break;
+            }
+        }
+
+        // ====== DASHBOARD ======
+        async function loadDashboard() {
+            try {
+                // Carregar estatísticas
+                const { data: users } = await supabase.from('authorized_users').select('*', { count: 'exact' }).eq('status', 'active');
+                const { data: posts } = await supabase.from('feed_posts').select('*', { count: 'exact' }).eq('active', true);
+                const { data: messages } = await supabase.from('community_messages').select('*', { count: 'exact' }).eq('approved', false);
+                
+                document.getElementById('totalUsers').textContent = users?.length || 0;
+                document.getElementById('totalPosts').textContent = posts?.length || 0;
+                document.getElementById('totalMessages').textContent = messages?.length || 0;
+                
+                // Carregar atividade recente
+                loadRecentActivity();
+            } catch (error) {
+                console.error('Erro ao carregar dashboard:', error);
+            }
+        }
+
+        async function loadRecentActivity() {
+            const activityHtml = `
+                <div style="padding: 20px; background: #f5f7fa; border-radius: 10px;">
+                    <p style="color: #666;">Sistema funcionando normalmente</p>
+                </div>
+            `;
+            document.getElementById('recentActivity').innerHTML = activityHtml;
+        }
+
+        // ====== FEED ======
+        async function loadFeedPosts() {
+            try {
+                const { data, error } = await supabase
+                    .from('feed_posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                currentPosts = data || [];
+                displayPosts(currentPosts);
+            } catch (error) {
+                console.error('Erro ao carregar posts:', error);
+                document.getElementById('postsTable').innerHTML = '<tr><td colspan="5">Erro ao carregar posts</td></tr>';
+            }
+        }
+
+        function displayPosts(posts) {
+            const tbody = document.getElementById('postsTable');
+            
+            if (!posts || posts.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5">Nenhum post encontrado</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = posts.map(post => `
+                <tr>
+                    <td>
+                        ${post.highlight ? '⭐ ' : ''}${post.title}
+                    </td>
+                    <td>${formatCategory(post.category)}</td>
+                    <td>
+                        <span class="badge ${post.active ? 'badge-success' : 'badge-danger'}">
+                            ${post.active ? 'Ativo' : 'Inativo'}
+                        </span>
+                    </td>
+                    <td>${new Date(post.created_at).toLocaleDateString('pt-BR')}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon" onclick="editPost('${post.id}')" title="Editar">✏️</button>
+                            <button class="btn-icon" onclick="togglePostStatus('${post.id}', ${!post.active})" title="${post.active ? 'Desativar' : 'Ativar'}">
+                                ${post.active ? '🚫' : '✅'}
+                            </button>
+                            <button class="btn-icon" onclick="deletePost('${post.id}')" title="Excluir">🗑️</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function formatCategory(category) {
+            const categories = {
+                'motivacao': '💪 Motivação',
+                'meditacao': '🧘 Meditação',
+                'exercicios': '🏃 Exercícios',
+                'alimentacao': '🥗 Alimentação',
+                'sono': '😴 Sono',
+                'relacionamentos': '❤️ Relacionamentos',
+                'produtividade': '📈 Produtividade',
+                'autoconhecimento': '🔍 Autoconhecimento'
+            };
+            return categories[category] || category;
+        }
+
+        // Form do Feed
+        document.getElementById('feedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const postId = document.getElementById('postId').value;
+            const postData = {
+                title: document.getElementById('postTitle').value,
+                content: document.getElementById('postContent').value,
+                category: document.getElementById('postCategory').value,
+                image_url: document.getElementById('postImage').value || null,
+                tags: document.getElementById('postTags').value || null,
+                active: document.getElementById('postActive').checked,
+                highlight: document.getElementById('postHighlight').checked
+            };
+            
+            try {
+                if (postId) {
+                    // Update
+                    await supabase.from('feed_posts').update(postData).eq('id', postId);
+                    alert('Post atualizado com sucesso!');
+                } else {
+                    // Insert
+                    await supabase.from('feed_posts').insert([postData]);
+                    alert('Post criado com sucesso!');
+                }
+                
+                resetFeedForm();
+                loadFeedPosts();
+            } catch (error) {
+                console.error('Erro ao salvar post:', error);
+                alert('Erro ao salvar post');
+            }
+        });
+
+        function resetFeedForm() {
+            document.getElementById('feedForm').reset();
+            document.getElementById('postId').value = '';
+            document.getElementById('postActive').checked = true;
+            document.getElementById('postHighlight').checked = false;
+        }
+
+        async function editPost(id) {
+            const post = currentPosts.find(p => p.id === id);
+            if (!post) return;
+            
+            document.getElementById('postId').value = post.id;
+            document.getElementById('postTitle').value = post.title;
+            document.getElementById('postContent').value = post.content || '';
+            document.getElementById('postCategory').value = post.category || '';
+            document.getElementById('postImage').value = post.image_url || '';
+            document.getElementById('postTags').value = post.tags || '';
+            document.getElementById('postActive').checked = post.active;
+            document.getElementById('postHighlight').checked = post.highlight || false;
+            
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        async function togglePostStatus(id, newStatus) {
+            try {
+                await supabase.from('feed_posts').update({ active: newStatus }).eq('id', id);
+                alert(newStatus ? 'Post ativado!' : 'Post desativado!');
+                loadFeedPosts();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao alterar status');
+            }
+        }
+
+        async function deletePost(id) {
+            if (!confirm('Tem certeza que deseja excluir este post?')) return;
+            
+            try {
+                await supabase.from('feed_posts').delete().eq('id', id);
+                alert('Post excluído com sucesso!');
+                loadFeedPosts();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao excluir post');
+            }
+        }
+
+        function filterPosts() {
+            const search = document.getElementById('searchPosts').value.toLowerCase();
+            const filtered = currentPosts.filter(post => 
+                post.title.toLowerCase().includes(search) ||
+                (post.content && post.content.toLowerCase().includes(search))
+            );
+            displayPosts(filtered);
+        }
+
+        // ====== COMUNIDADE ======
+        async function loadCommunityMessages() {
+            try {
+                const filter = document.getElementById('filterMessageStatus')?.value || 'pending';
+                let query = supabase.from('community_messages').select(`
+                    *,
+                    profiles (name, email)
+                `).order('created_at', { ascending: false });
+                
+                if (filter === 'pending') {
+                    query = query.eq('approved', false);
+                } else if (filter === 'approved') {
+                    query = query.eq('approved', true);
+                } else if (filter === 'rejected') {
+                    // Adicione campo rejected se necessário
+                }
+                
+                const { data, error } = await query;
+                
+                if (error) throw error;
+                
+                currentMessages = data || [];
+                displayMessages(currentMessages);
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+                document.getElementById('messagesContainer').innerHTML = '<div class="error">Erro ao carregar mensagens</div>';
+            }
+        }
+
+        function displayMessages(messages) {
+            const container = document.getElementById('messagesContainer');
+            
+            if (!messages || messages.length === 0) {
+                container.innerHTML = '<div class="empty-state">Nenhuma mensagem encontrada</div>';
+                return;
+            }
+            
+            container.innerHTML = messages.map(msg => `
+                <div class="card" style="margin-bottom: 15px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                <strong>${msg.profiles?.name || 'Anônimo'}</strong>
+                                <span style="color: #666; font-size: 12px;">${msg.profiles?.email}</span>
+                                <span style="color: #999; font-size: 12px;">${new Date(msg.created_at).toLocaleString('pt-BR')}</span>
+                            </div>
+                            <p style="margin: 10px 0;">${msg.message}</p>
+                        </div>
+                        <div class="action-buttons">
+                            ${!msg.approved ? `
+                                <button class="btn btn-success" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                                <button class="btn btn-danger" onclick="rejectMessage('${msg.id}')">❌ Rejeitar</button>
+                            ` : `
+                                <span class="badge badge-success">Aprovada</span>
+                            `}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function approveMessage(id) {
+            try {
+                await supabase.from('community_messages').update({ approved: true }).eq('id', id);
+                alert('Mensagem aprovada!');
+                loadCommunityMessages();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao aprovar mensagem');
+            }
+        }
+
+        async function rejectMessage(id) {
+            if (!confirm('Tem certeza que deseja rejeitar esta mensagem?')) return;
+            
+            try {
+                await supabase.from('community_messages').delete().eq('id', id);
+                alert('Mensagem rejeitada e removida!');
+                loadCommunityMessages();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao rejeitar mensagem');
+            }
+        }
+
+        // ====== USUÁRIOS ======
+        async function loadUsers() {
+            try {
+                const filter = document.getElementById('filterUserStatus')?.value || 'active';
+                let query = supabase.from('authorized_users').select('*').order('created_at', { ascending: false });
+                
+                if (filter !== 'all') {
+                    query = query.eq('status', filter);
+                }
+                
+                const { data, error } = await query;
+                
+                if (error) throw error;
+                
+                currentUsers = data || [];
+                displayUsers(currentUsers);
+            } catch (error) {
+                console.error('Erro ao carregar usuários:', error);
+                document.getElementById('usersTable').innerHTML = '<tr><td colspan="6">Erro ao carregar usuários</td></tr>';
+            }
+        }
+
+        function displayUsers(users) {
+            const tbody = document.getElementById('usersTable');
+            
+            if (!users || users.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="6">Nenhum usuário encontrado</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = users.map(user => {
+                const statusBadge = {
+                    'active': 'badge-success',
+                    'suspended': 'badge-warning',
+                    'expired': 'badge-danger'
+                };
+                
+                return `
+                    <tr>
+                        <td>${user.email}</td>
+                        <td>${user.name || '-'}</td>
+                        <td>
+                            <span class="badge ${statusBadge[user.status]}">
+                                ${user.status === 'active' ? 'Ativo' : user.status === 'suspended' ? 'Suspenso' : 'Expirado'}
+                            </span>
+                        </td>
+                        <td>${user.purchase_date ? new Date(user.purchase_date).toLocaleDateString('pt-BR') : '-'}</td>
+                        <td>${user.expires_at ? new Date(user.expires_at).toLocaleDateString('pt-BR') : 'Sem limite'}</td>
+                        <td>
+                            <div class="action-buttons">
+                                ${user.status === 'active' ? 
+                                    `<button class="btn-icon" onclick="suspendUser('${user.id}')" title="Suspender">🚫</button>` :
+                                    `<button class="btn-icon" onclick="activateUser('${user.id}')" title="Ativar">✅</button>`
+                                }
+                                <button class="btn-icon" onclick="deleteUser('${user.id}')" title="Remover">🗑️</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Form de Usuário
+        document.getElementById('userForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const userData = {
+                email: document.getElementById('userEmail').value.toLowerCase(),
+                name: document.getElementById('userName').value,
+                purchase_id: document.getElementById('purchaseId').value || null,
+                expires_at: document.getElementById('expiresAt').value || null,
+                status: 'active'
+            };
+            
+            try {
+                await supabase.from('authorized_users').insert([userData]);
+                alert('Usuário adicionado com sucesso!');
+                document.getElementById('userForm').reset();
+                loadUsers();
+            } catch (error) {
+                console.error('Erro ao adicionar usuário:', error);
+                if (error.message.includes('duplicate')) {
+                    alert('Este email já está cadastrado!');
+                } else {
+                    alert('Erro ao adicionar usuário');
+                }
+            }
+        });
+
+        async function suspendUser(id) {
+            if (!confirm('Tem certeza que deseja suspender este usuário?')) return;
+            
+            try {
+                await supabase.from('authorized_users').update({ status: 'suspended' }).eq('id', id);
+                alert('Usuário suspenso!');
+                loadUsers();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao suspender usuário');
+            }
+        }
+
+        async function activateUser(id) {
+            try {
+                await supabase.from('authorized_users').update({ status: 'active' }).eq('id', id);
+                alert('Usuário ativado!');
+                loadUsers();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao ativar usuário');
+            }
+        }
+
+        async function deleteUser(id) {
+            if (!confirm('Tem certeza que deseja remover este usuário?')) return;
+            
+            try {
+                await supabase.from('authorized_users').delete().eq('id', id);
+                alert('Usuário removido!');
+                loadUsers();
+            } catch (error) {
+                console.error('Erro:', error);
+                alert('Erro ao remover usuário');
+            }
+        }
+
+        function filterUsers() {
+            const search = document.getElementById('searchUsers').value.toLowerCase();
+            const filtered = currentUsers.filter(user => 
+                user.email.toLowerCase().includes(search) ||
+                (user.name && user.name.toLowerCase().includes(search))
+            );
+            displayUsers(filtered);
+        }
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', async () => {
+            if (initSupabase()) {
+                const isAuth = await checkAdminAuth();
+                if (isAuth) {
+                    loadDashboard();
+                }
+            }
+        });
+    </script>
+</body>
+</html>

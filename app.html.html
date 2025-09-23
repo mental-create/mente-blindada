@@ -1,0 +1,1186 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mente Blindada 3-2-1</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow-x: hidden;
+        }
+
+        .container {
+            flex: 1;
+            width: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 40%);
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        /* Header Section */
+        .header {
+            padding: 20px;
+            color: white;
+            position: relative;
+        }
+
+        .time {
+            font-size: 72px;
+            font-weight: 300;
+            margin-bottom: 5px;
+            letter-spacing: -2px;
+        }
+
+        .date {
+            font-size: 20px;
+            font-weight: 300;
+            opacity: 0.95;
+            margin-bottom: 20px;
+            white-space: nowrap;
+        }
+
+        .app-icon {
+            position: absolute;
+            top: 30px;
+            right: 20px;
+            width: 80px;
+            height: 80px;
+            background: url('https://i.imgur.com/vKe7loB.png') no-repeat center;
+            background-size: contain;
+            border-radius: 20px;
+        }
+
+        .title-bar {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 20px;
+            border-radius: 20px;
+            margin: 0 20px;
+            backdrop-filter: blur(10px);
+        }
+
+        .title {
+            font-size: 24px;
+            font-weight: 800;
+            color: white;
+            text-align: center;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            text-transform: uppercase;
+            letter-spacing: -0.5px;
+            white-space: nowrap;
+        }
+
+        .greeting {
+            font-size: 26px;
+            text-align: center;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            background: #f0f4f8;
+            border-radius: 30px 30px 0 0;
+            margin-top: 20px;
+            padding: 30px 20px 100px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            align-content: start;
+            overflow-y: auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card:active {
+            transform: scale(0.98);
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+        }
+
+        .card-image {
+            width: 100%;
+            height: 140px;
+            background-size: contain;
+            background-position: center;
+            background-repeat: no-repeat;
+            border-radius: 12px;
+            margin-bottom: 12px;
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            text-align: center;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        /* Feed Styles */
+        .feed-container {
+            grid-column: 1/-1;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .feed-post {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .feed-post-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .feed-author-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 600;
+            font-size: 18px;
+        }
+
+        .feed-author-info {
+            flex: 1;
+        }
+
+        .feed-author-name {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .feed-post-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .feed-post-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .feed-post-content {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .feed-post-image {
+            width: 100%;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .feed-tags {
+            margin-top: 10px;
+            color: #666;
+            font-size: 12px;
+        }
+
+        /* Community Styles */
+        .community-container {
+            grid-column: 1/-1;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .community-input-box {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .community-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        .community-submit-btn {
+            margin-top: 10px;
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .community-submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .community-message {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        }
+
+        .community-message-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .community-avatar {
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            background: #e0e0e0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .community-author {
+            flex: 1;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .community-time {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .community-text {
+            color: #666;
+            line-height: 1.5;
+        }
+
+        /* Profile Styles */
+        .profile-container {
+            grid-column: 1/-1;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .profile-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            margin: 0 auto 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 48px;
+            color: white;
+            position: relative;
+            cursor: pointer;
+            overflow: hidden;
+        }
+
+        .profile-avatar img {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            position: absolute;
+            top: 0;
+            left: 0;
+        }
+
+        .profile-avatar-edit {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background: white;
+            border-radius: 50%;
+            width: 35px;
+            height: 35px;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .profile-avatar:hover .profile-avatar-edit {
+            display: flex;
+        }
+
+        .profile-name {
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .profile-email {
+            color: #666;
+            margin-bottom: 20px;
+        }
+
+        .profile-form {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .profile-input {
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .profile-save-btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn {
+            margin-top: 20px;
+            padding: 12px 30px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+        }
+
+        /* Navigation Bar */
+        .nav-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+            z-index: 1000;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 8px 20px;
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .nav-item.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            margin: 0 5px;
+        }
+
+        .nav-icon {
+            font-size: 24px;
+            margin-bottom: 4px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        /* Loading State */
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 40px;
+            color: #666;
+            grid-column: 1/-1;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        /* Empty State */
+        .empty-state {
+            grid-column: 1/-1;
+            text-align: center;
+            padding: 40px;
+            color: #999;
+        }
+
+        /* Adicionar suporte para toque em dispositivos móveis */
+        @media (max-width: 768px) {
+            .profile-avatar-edit {
+                display: flex;
+                background: rgba(255, 255, 255, 0.9);
+            }
+        }
+        @media (max-width: 380px) {
+            .time {
+                font-size: 60px;
+            }
+            
+            .date {
+                font-size: 18px;
+            }
+            
+            .title {
+                font-size: 20px;
+            }
+            
+            .greeting {
+                font-size: 22px;
+            }
+            
+            .app-icon {
+                width: 70px;
+                height: 70px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="time" id="time">09:40</div>
+            <div class="date" id="date">Segunda-Feira, 22 de Setembro</div>
+            <div class="app-icon"></div>
+        </div>
+        
+        <div class="title-bar">
+            <h1 class="title">MENTE BLINDADA 3-2-1</h1>
+            <div class="greeting" id="greeting">Bom Dia!</div>
+        </div>
+        
+        <div class="main-content" id="mainContent">
+            <!-- Conteúdo dinâmico será inserido aqui -->
+        </div>
+        
+        <nav class="nav-bar">
+            <div class="nav-item active" onclick="handleNavClick('home')" data-nav="home">
+                <span class="nav-icon">🏠</span>
+                <span class="nav-label">INÍCIO</span>
+            </div>
+            
+            <div class="nav-item" onclick="handleNavClick('feed')" data-nav="feed">
+                <span class="nav-icon">📋</span>
+                <span class="nav-label">Feed</span>
+            </div>
+            
+            <div class="nav-item" onclick="handleNavClick('community')" data-nav="community">
+                <span class="nav-icon">💬</span>
+                <span class="nav-label">Comunidade</span>
+            </div>
+            
+            <div class="nav-item" onclick="handleNavClick('profile')" data-nav="profile">
+                <span class="nav-icon">👤</span>
+                <span class="nav-label">Perfil</span>
+            </div>
+        </nav>
+    </div>
+
+    <!-- Supabase Integration -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ====== CONFIGURAÇÃO DO SUPABASE ======
+        // SUAS CREDENCIAIS DO SUPABASE
+        const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
+
+        let supabase;
+        let currentUser = null;
+        let currentView = 'home';
+        
+        function initSupabase() {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase configurado');
+                return true;
+            } catch (e) {
+                console.error('Erro ao configurar Supabase:', e);
+                return false;
+            }
+        }
+
+        // ====== AUTENTICAÇÃO ======
+        async function checkAuth() {
+            if (!supabase) return false;
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    currentUser = session.user;
+                    
+                    // Carregar ou criar perfil do usuário
+                    let { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('*')
+                        .eq('id', session.user.id)
+                        .single();
+                    
+                    // Se não existir perfil, criar um
+                    if (error || !profile) {
+                        const { data: newProfile } = await supabase
+                            .from('profiles')
+                            .insert([{
+                                id: session.user.id,
+                                email: session.user.email,
+                                name: session.user.email.split('@')[0]
+                            }])
+                            .select()
+                            .single();
+                        
+                        profile = newProfile;
+                    }
+                    
+                    if (profile) {
+                        currentUser.profile = profile;
+                    }
+                    
+                    updateGreeting();
+                    return true;
+                } else {
+                    window.location.href = 'login.html';
+                    return false;
+                }
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+                return currentUser !== null;
+            }
+        }
+
+        async function logout() {
+            if (!supabase) return;
+            
+            if (confirm('Deseja realmente sair?')) {
+                await supabase.auth.signOut();
+                window.location.href = 'login.html';
+            }
+        }
+
+        // ====== FUNÇÕES DE TEMPO ======
+        function updateTime() {
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            document.getElementById('time').textContent = `${hours}:${minutes}`;
+        }
+
+        function updateDate() {
+            const now = new Date();
+            const days = ['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'];
+            const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+            
+            const dayName = days[now.getDay()];
+            const day = now.getDate();
+            const month = months[now.getMonth()];
+            
+            document.getElementById('date').textContent = `${dayName}, ${day} de ${month}`;
+        }
+
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const greetingElement = document.getElementById('greeting');
+            
+            let greeting = '';
+            if (hour < 12) {
+                greeting = '🌅 Bom Dia';
+            } else if (hour < 18) {
+                greeting = '☀️ Boa Tarde';
+            } else {
+                greeting = '🌙 Boa Noite';
+            }
+            
+            if (currentUser && currentUser.profile && currentUser.profile.name) {
+                greeting += ', ' + currentUser.profile.name.split(' ')[0] + '!';
+            } else {
+                greeting += '!';
+            }
+            
+            greetingElement.innerHTML = greeting;
+        }
+
+        // ====== NAVEGAÇÃO ======
+        function handleNavClick(view) {
+            currentView = view;
+            
+            // Atualizar navegação ativa
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+                if (item.dataset.nav === view) {
+                    item.classList.add('active');
+                }
+            });
+            
+            // Carregar conteúdo baseado na view
+            switch(view) {
+                case 'home':
+                    loadHomeModules();
+                    break;
+                case 'feed':
+                    loadFeed();
+                    break;
+                case 'community':
+                    loadCommunity();
+                    break;
+                case 'profile':
+                    loadProfile();
+                    break;
+            }
+            
+            // Feedback háptico
+            if (navigator.vibrate) {
+                navigator.vibrate(30);
+            }
+        }
+
+        // ====== HOME - MÓDULOS ======
+        async function loadHomeModules() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading active">Carregando módulos...</div>';
+            
+            try {
+                // Módulos padrão
+                const modules = [
+                    { key: 'quiz', name: 'Quiz Interativo', image_url: 'https://i.imgur.com/mlrXyGH.png', bg_color: '#a8d5e2' },
+                    { key: 'exercises', name: 'Exercícios', image_url: 'https://i.imgur.com/L8g633e.png', bg_color: '#6b7db8' },
+                    { key: 'library', name: 'Biblioteca', image_url: 'https://i.imgur.com/jbRTk2Y.png', bg_color: '#5d7471' },
+                    { key: 'diary', name: 'Diário', image_url: 'https://i.imgur.com/zQG0nNP.png', bg_color: '#e8a87c' }
+                ];
+                
+                mainContent.innerHTML = '';
+                modules.forEach(mod => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color};"></div>
+                        <span class="card-title">${mod.name}</span>
+                    `;
+                    card.onclick = () => {
+                        alert(`Módulo ${mod.name} - Em desenvolvimento`);
+                    };
+                    mainContent.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar módulos:', error);
+                mainContent.innerHTML = '<div class="empty-state">Erro ao carregar módulos</div>';
+            }
+        }
+
+        // ====== FEED ======
+        function getCategoryIcon(category) {
+            const icons = {
+                'motivacao': '💪',
+                'meditacao': '🧘',
+                'exercicios': '🏃',
+                'alimentacao': '🥗',
+                'sono': '😴',
+                'relacionamentos': '❤️',
+                'produtividade': '📈',
+                'autoconhecimento': '🔍'
+            };
+            return icons[category] || '📝';
+        }
+
+        async function loadFeed() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading active">Carregando feed...</div>';
+            
+            try {
+                // Query simplificada sem join com profiles
+                const { data: posts, error } = await supabase
+                    .from('feed_posts')
+                    .select('*')
+                    .eq('active', true)
+                    .order('highlight', { ascending: false })
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (!posts || posts.length === 0) {
+                    mainContent.innerHTML = `
+                        <div class="empty-state">
+                            <h3>📋 Feed vazio</h3>
+                            <p>Nenhuma postagem ainda.</p>
+                            <p style="margin-top: 10px; font-size: 12px;">Os administradores podem postar através do painel.</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                mainContent.innerHTML = '<div class="feed-container"></div>';
+                const feedContainer = mainContent.querySelector('.feed-container');
+                
+                posts.forEach(post => {
+                    const postEl = createFeedPost(post);
+                    feedContainer.appendChild(postEl);
+                });
+                
+            } catch (error) {
+                console.error('Erro ao carregar feed:', error);
+                mainContent.innerHTML = `
+                    <div class="empty-state">
+                        <h3>📋 Feed</h3>
+                        <p>Erro ao carregar postagens.</p>
+                    </div>
+                `;
+            }
+        }
+
+        function createFeedPost(post) {
+            const div = document.createElement('div');
+            div.className = 'feed-post';
+            
+            const postDate = new Date(post.created_at).toLocaleDateString('pt-BR');
+            const categoryIcon = getCategoryIcon(post.category);
+            const categoryName = getCategoryName(post.category);
+            
+            div.innerHTML = `
+                <div class="feed-post-header">
+                    <div class="feed-author-avatar">${categoryIcon}</div>
+                    <div class="feed-author-info">
+                        <div class="feed-author-name">${categoryName}</div>
+                        <div class="feed-post-time">${postDate}</div>
+                    </div>
+                    ${post.highlight ? '<span style="color: gold; font-size: 20px;">⭐</span>' : ''}
+                </div>
+                ${post.title ? `<div class="feed-post-title">${post.title}</div>` : ''}
+                <div class="feed-post-content">${post.content}</div>
+                ${post.image_url ? `<img src="${post.image_url}" class="feed-post-image">` : ''}
+                ${post.tags ? `<div class="feed-tags">🏷️ ${post.tags}</div>` : ''}
+            `;
+            
+            return div;
+        }
+
+        function getCategoryName(category) {
+            const names = {
+                'motivacao': 'Motivação',
+                'meditacao': 'Meditação',
+                'exercicios': 'Exercícios',
+                'alimentacao': 'Alimentação',
+                'sono': 'Sono',
+                'relacionamentos': 'Relacionamentos',
+                'produtividade': 'Produtividade',
+                'autoconhecimento': 'Autoconhecimento'
+            };
+            return names[category] || 'Geral';
+        }
+
+        // ====== COMUNIDADE ======
+        async function loadCommunity() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
+            
+            try {
+                // Verificar se a tabela existe e tem as colunas corretas
+                const { data: messages, error } = await supabase
+                    .from('community_messages')
+                    .select(`
+                        *,
+                        profiles (
+                            name,
+                            email
+                        )
+                    `)
+                    .eq('approved', true)
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Erro detalhado:', error);
+                    // Se houver erro, mostrar interface básica sem mensagens
+                    mainContent.innerHTML = `
+                        <div class="community-container">
+                            <div class="community-input-box">
+                                <textarea class="community-input" id="communityMessage" 
+                                    placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                                <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                                    Enviar Mensagem
+                                </button>
+                                <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                                    * Mensagens serão revisadas antes de aparecer
+                                </p>
+                            </div>
+                            <div class="empty-state">
+                                <p>Seja o primeiro a compartilhar!</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                mainContent.innerHTML = `
+                    <div class="community-container">
+                        <div class="community-input-box">
+                            <textarea class="community-input" id="communityMessage" 
+                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                                Enviar Mensagem
+                            </button>
+                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                                * Mensagens serão revisadas antes de aparecer
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
+                const container = mainContent.querySelector('.community-container');
+                
+                if (messages && messages.length > 0) {
+                    messages.forEach(msg => {
+                        const msgEl = createCommunityMessage(msg);
+                        container.appendChild(msgEl);
+                    });
+                } else {
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.className = 'empty-state';
+                    emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
+                    container.appendChild(emptyMsg);
+                }
+                
+            } catch (error) {
+                console.error('Erro geral ao carregar comunidade:', error);
+                mainContent.innerHTML = `
+                    <div class="community-container">
+                        <div class="community-input-box">
+                            <textarea class="community-input" id="communityMessage" 
+                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                                Enviar Mensagem
+                            </button>
+                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                                * Mensagens serão revisadas antes de aparecer
+                            </p>
+                        </div>
+                        <div class="empty-state">
+                            <p>Área da comunidade</p>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function createCommunityMessage(msg) {
+            const div = document.createElement('div');
+            div.className = 'community-message';
+            
+            const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
+            const authorInitial = authorName.charAt(0).toUpperCase();
+            const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
+            
+            div.innerHTML = `
+                <div class="community-message-header">
+                    <div class="community-avatar">${authorInitial}</div>
+                    <div class="community-author">${authorName}</div>
+                    <div class="community-time">${msgDate}</div>
+                </div>
+                <div class="community-text">${msg.message}</div>
+            `;
+            
+            return div;
+        }
+
+        async function sendCommunityMessage() {
+            const messageInput = document.getElementById('communityMessage');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                alert('Por favor, escreva uma mensagem');
+                return;
+            }
+            
+            if (!supabase || !currentUser) {
+                alert('Você precisa estar logado');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('community_messages')
+                    .insert([{
+                        user_id: currentUser.id,
+                        message: message,
+                        approved: false // Mensagem precisa ser aprovada
+                    }]);
+                
+                if (error) {
+                    console.error('Erro ao enviar:', error);
+                    throw error;
+                }
+                
+                alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
+                messageInput.value = '';
+                
+            } catch (error) {
+                console.error('Erro ao enviar mensagem:', error);
+                alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
+            }
+        }
+
+        // ====== PERFIL ======
+        async function loadProfile() {
+            const mainContent = document.getElementById('mainContent');
+            
+            if (!currentUser) {
+                mainContent.innerHTML = `
+                    <div class="empty-state">
+                        <p>Faça login para ver seu perfil</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Recarregar dados do perfil para garantir que temos a versão mais recente
+            try {
+                const { data: profile } = await supabase
+                    .from('profiles')
+                    .select('*')
+                    .eq('id', currentUser.id)
+                    .single();
+                
+                if (profile) {
+                    currentUser.profile = profile;
+                }
+            } catch (error) {
+                console.error('Erro ao recarregar perfil:', error);
+            }
+            
+            const profile = currentUser.profile || {};
+            const initial = (profile.name || currentUser.email || 'U').charAt(0).toUpperCase();
+            
+            mainContent.innerHTML = `
+                <div class="profile-container">
+                    <div class="profile-header">
+                        <div class="profile-avatar" onclick="document.getElementById('avatarFile').click()">
+                            ${profile.avatar_url ? 
+                                `<img src="${profile.avatar_url}" alt="Avatar" onerror="this.style.display='none'">` : 
+                                ''
+                            }
+                            ${!profile.avatar_url ? initial : ''}
+                            <div class="profile-avatar-edit">📷</div>
+                            <input type="file" id="avatarFile" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
+                        </div>
+                        <div class="profile-name">${profile.name || 'Seu Nome'}</div>
+                        <div class="profile-email">${currentUser.email}</div>
+                    </div>
+                    
+                    <div class="profile-form">
+                        <input type="text" class="profile-input" id="profileName" 
+                            placeholder="Seu nome" value="${profile.name || ''}">
+                        <textarea class="profile-input" id="profileBio" 
+                            placeholder="Sobre você..." rows="3">${profile.bio || ''}</textarea>
+                        <button class="profile-save-btn" onclick="saveProfile()">
+                            Salvar Perfil
+                        </button>
+                    </div>
+                    
+                    <button class="logout-btn" onclick="logout()">
+                        Sair do App
+                    </button>
+                </div>
+            `;
+        }
+
+        async function saveProfile() {
+            if (!supabase || !currentUser) return;
+            
+            const name = document.getElementById('profileName').value.trim();
+            const bio = document.getElementById('profileBio').value.trim();
+            
+            if (!name) {
+                alert('Por favor, digite seu nome');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('profiles')
+                    .update({
+                        name: name,
+                        bio: bio,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentUser.id);
+                
+                if (error) throw error;
+                
+                // Atualizar perfil local
+                if (!currentUser.profile) {
+                    currentUser.profile = {};
+                }
+                currentUser.profile.name = name;
+                currentUser.profile.bio = bio;
+                
+                alert('✅ Perfil atualizado com sucesso!');
+                updateGreeting();
+                
+            } catch (error) {
+                console.error('Erro ao salvar perfil:', error);
+                alert('❌ Erro ao salvar perfil');
+            }
+        }
+
+        async function uploadAvatar(event) {
+            const file = event.target.files[0];
+            if (!file || !supabase || !currentUser) return;
+            
+            try {
+                // Criar nome único para o arquivo
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+                
+                // Upload para o storage
+                const { data, error } = await supabase.storage
+                    .from('avatars')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+                
+                if (error) throw error;
+                
+                // Obter URL pública
+                const { data: { publicUrl } } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(fileName);
+                
+                // Atualizar perfil com URL do avatar
+                const { error: updateError } = await supabase
+                    .from('profiles')
+                    .update({ 
+                        avatar_url: publicUrl,
+                        updated_at: new Date().toISOString()
+                    })
+                    .eq('id', currentUser.id);
+                
+                if (updateError) throw updateError;
+                
+                // Atualizar o perfil local
+                if (!currentUser.profile) {
+                    currentUser.profile = {};
+                }
+                currentUser.profile.avatar_url = publicUrl;
+                
+                alert('✅ Foto atualizada!');
+                
+                // Recarregar a página de perfil para mostrar a nova foto
+                setTimeout(() => {
+                    loadProfile();
+                }, 500);
+                
+            } catch (error) {
+                console.error('Erro ao fazer upload:', error);
+                alert('❌ Erro ao enviar foto\n\nTente novamente.');
+            }
+        }
+
+        // ====== INICIALIZAÇÃO ======
+        async function init() {
+            if (!initSupabase()) {
+                alert('Erro ao configurar o sistema');
+                return;
+            }
+            
+            const isAuthenticated = await checkAuth();
+            if (!isAuthenticated) {
+                return;
+            }
+            
+            updateTime();
+            updateDate();
+            updateGreeting();
+            loadHomeModules();
+            
+            // Atualizar relógio
+            setInterval(updateTime, 60000);
+            setInterval(updateGreeting, 3600000);
+        }
+
+        // Tornar a função global para o onclick funcionar
+        window.sendCommunityMessage = sendCommunityMessage;
+        window.uploadAvatar = uploadAvatar;
+        window.saveProfile = saveProfile;
+        window.logout = logout;
+        window.handleNavClick = handleNavClick;
+
+        // Inicializar app
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

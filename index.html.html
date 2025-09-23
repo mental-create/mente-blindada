@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mente Blindada - Acesso</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #4169E1 0%, #1E3A8A 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            border-radius: 40px;
+            padding: 60px 45px 50px;
+            max-width: 420px;
+            width: 100%;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.3);
+            animation: slideUp 0.6s ease;
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(40px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 45px;
+        }
+
+        .welcome {
+            color: #4169E1;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            letter-spacing: -0.5px;
+        }
+
+        h1 {
+            color: #1a237e;
+            font-size: 38px;
+            font-weight: 900;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: -1px;
+            line-height: 1;
+        }
+
+        .tagline {
+            color: #666;
+            font-size: 16px;
+            font-weight: 400;
+        }
+
+        .instructions-box {
+            background: #f0f5ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-bottom: 35px;
+            text-align: center;
+        }
+
+        .instructions-title {
+            color: #1a237e;
+            font-size: 15px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .instructions-text {
+            color: #555;
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        .instructions-text strong {
+            color: #1a237e;
+            font-weight: 700;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+            position: relative;
+        }
+
+        .input-wrapper {
+            position: relative;
+        }
+
+        .input-icon {
+            position: absolute;
+            left: 20px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+            font-size: 20px;
+        }
+
+        input[type="email"] {
+            width: 100%;
+            padding: 20px 20px 20px 55px;
+            border: 2px solid #e8e8e8;
+            border-radius: 16px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            font-family: 'Montserrat', sans-serif;
+            background: #fafafa;
+        }
+
+        input[type="email"]:focus {
+            outline: none;
+            border-color: #4169E1;
+            background: white;
+            box-shadow: 0 0 0 4px rgba(65, 105, 225, 0.1);
+        }
+
+        input[type="email"]::placeholder {
+            color: #aaa;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 20px;
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            font-size: 18px;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 10px 30px rgba(26, 35, 126, 0.3);
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(26, 35, 126, 0.4);
+        }
+
+        .btn:active {
+            transform: translateY(0);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .info-message {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+            padding: 18px;
+            border-radius: 12px;
+            margin-top: 25px;
+            display: none;
+            text-align: center;
+        }
+
+        .info-message.show {
+            display: block;
+            animation: slideUp 0.3s ease;
+        }
+
+        .info-message h3 {
+            font-size: 16px;
+            margin-bottom: 8px;
+            font-weight: 700;
+        }
+
+        .info-message p {
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        .error-message {
+            background: #ffebee;
+            border: 2px solid #f44336;
+            color: #c62828;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+        }
+
+        .success-message {
+            background: #e8f5e9;
+            border: 2px solid #4caf50;
+            color: #2e7d32;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            display: none;
+            text-align: center;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .loading-spinner {
+            border: 4px solid rgba(26, 35, 126, 0.1);
+            border-top: 4px solid #1a237e;
+            border-radius: 50%;
+            width: 45px;
+            height: 45px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .help-text {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 25px;
+            border-top: 1px solid #e8e8e8;
+        }
+
+        .help-text p {
+            color: #999;
+            font-size: 13px;
+            line-height: 1.6;
+        }
+
+        .help-text a {
+            color: #4169E1;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        .help-text a:hover {
+            text-decoration: underline;
+        }
+
+        /* Mobile adjustments */
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 45px 30px 40px;
+                border-radius: 30px;
+            }
+
+            h1 {
+                font-size: 32px;
+            }
+
+            .welcome {
+                font-size: 20px;
+            }
+
+            .tagline {
+                font-size: 15px;
+            }
+
+            input[type="email"] {
+                font-size: 16px;
+                padding: 18px 18px 18px 50px;
+            }
+
+            .btn {
+                font-size: 16px;
+                padding: 18px;
+            }
+
+            .instructions-box {
+                padding: 18px;
+            }
+        }
+
+        /* Animação para o formulário após envio */
+        .form-sent {
+            opacity: 0.5;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="header">
+            <div class="welcome">BEM-VINDO À</div>
+            <h1>MENTE BLINDADA</h1>
+            <p class="tagline">Transforme sua mente em 21 dias</p>
+        </div>
+
+        <div class="instructions-box">
+            <div class="instructions-title">INSTRUÇÕES AQUI</div>
+            <p class="instructions-text">
+                Para acessar o app, use o <strong>mesmo email cadastrado na compra</strong>. 
+                Enviaremos um link de acesso direto - sem necessidade de senha!
+            </p>
+        </div>
+
+        <div id="errorMessage" class="error-message"></div>
+        <div id="successMessage" class="success-message"></div>
+
+        <form id="loginForm">
+            <div class="form-group">
+                <div class="input-wrapper">
+                    <span class="input-icon">✉</span>
+                    <input 
+                        type="email" 
+                        id="email" 
+                        placeholder="Seu E-mail" 
+                        required
+                        autocomplete="email"
+                    >
+                </div>
+            </div>
+
+            <button type="submit" class="btn" id="loginBtn">
+                ENTRAR
+            </button>
+        </form>
+
+        <div class="info-message" id="emailSentInfo">
+            <h3>✅ Link Enviado!</h3>
+            <p>Verifique seu email e clique no link de acesso.</p>
+            <p style="margin-top: 8px; font-size: 12px;">
+                Caso não receba em 5 minutos, verifique a pasta de spam.
+            </p>
+        </div>
+
+        <div class="loading" id="loading">
+            <div class="loading-spinner"></div>
+            <p class="loading-text">Processando...</p>
+        </div>
+
+        <div class="help-text">
+            <p>
+                Problemas para acessar?<br>
+                Entre em contato: <a href="mailto:suporte@menteblindada.com">suporte@menteblindada.com</a>
+            </p>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <script>
+        // ====== CONFIGURAÇÃO DO SUPABASE ======
+        const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
+
+        let supabase = null;
+        
+        function initSupabase() {
+            try {
+                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                console.log('✅ Supabase configurado');
+                return true;
+            } catch (e) {
+                console.error('Erro ao configurar Supabase:', e);
+                showError('Erro ao configurar o sistema. Por favor, recarregue a página.');
+                return false;
+            }
+        }
+
+        // Verificar se já está logado
+        async function checkAuth() {
+            if (!supabase) return;
+            
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    // Já está logado, redirecionar para o app
+                    window.location.href = 'app.html';
+                }
+            } catch (error) {
+                console.error('Erro ao verificar autenticação:', error);
+            }
+        }
+
+        // Verificar se o email está autorizado (tem compra ativa)
+        async function checkPurchaseStatus(email) {
+            try {
+                // Verificar na tabela de clientes autorizados
+                const { data, error } = await supabase
+                    .from('authorized_users')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('status', 'active')
+                    .single();
+                
+                if (error || !data) {
+                    return false;
+                }
+                
+                // Verificar se ainda está no prazo de acesso (se aplicável)
+                if (data.expires_at) {
+                    const expiryDate = new Date(data.expires_at);
+                    if (expiryDate < new Date()) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('Erro ao verificar status da compra:', error);
+                return false;
+            }
+        }
+
+        // Magic Link Login
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            if (!supabase) {
+                showError('Sistema não configurado. Por favor, recarregue a página.');
+                return;
+            }
+
+            const email = document.getElementById('email').value.trim().toLowerCase();
+            
+            // Validação básica do email
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                showError('Por favor, digite um email válido');
+                return;
+            }
+            
+            showLoading(true);
+            hideMessages();
+
+            try {
+                // Primeiro, verificar se o email está autorizado
+                const isAuthorized = await checkPurchaseStatus(email);
+                
+                if (!isAuthorized) {
+                    showError('Email não encontrado. Use o mesmo email cadastrado na compra ou entre em contato com o suporte.');
+                    showLoading(false);
+                    return;
+                }
+
+                // Se autorizado, enviar o magic link
+                const { data, error } = await supabase.auth.signInWithOtp({
+                    email: email,
+                    options: {
+                        emailRedirectTo: `${window.location.origin}/app.html`,
+                        data: {
+                            authorized: true
+                        }
+                    }
+                });
+
+                if (error) throw error;
+
+                showSuccess('Link enviado com sucesso!');
+                document.getElementById('emailSentInfo').classList.add('show');
+                document.getElementById('loginForm').classList.add('form-sent');
+                
+                // Esconder mensagens de erro após sucesso
+                hideMessages();
+                
+            } catch (error) {
+                console.error('Erro no login:', error);
+                if (error.message.includes('rate limit')) {
+                    showError('Muitas tentativas. Por favor, aguarde 5 minutos e tente novamente.');
+                } else if (error.message.includes('invalid')) {
+                    showError('Email inválido. Por favor, verifique e tente novamente.');
+                } else {
+                    showError('Erro ao enviar o link. Por favor, tente novamente.');
+                }
+            } finally {
+                showLoading(false);
+            }
+        });
+
+        // Funções auxiliares
+        function showError(message) {
+            const errorEl = document.getElementById('errorMessage');
+            errorEl.textContent = message;
+            errorEl.style.display = 'block';
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+            }, 10000);
+        }
+
+        function showSuccess(message) {
+            const successEl = document.getElementById('successMessage');
+            successEl.textContent = message;
+            successEl.style.display = 'block';
+        }
+
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
+        function showLoading(show) {
+            const loading = document.getElementById('loading');
+            const button = document.getElementById('loginBtn');
+            const form = document.getElementById('loginForm');
+            
+            if (show) {
+                loading.classList.add('active');
+                button.disabled = true;
+                button.textContent = 'VERIFICANDO...';
+            } else {
+                loading.classList.remove('active');
+                button.disabled = false;
+                button.textContent = 'ENTRAR';
+            }
+        }
+
+        // Inicialização
+        window.addEventListener('DOMContentLoaded', () => {
+            if (initSupabase()) {
+                checkAuth();
+                
+                // Listener para mudanças de autenticação
+                supabase.auth.onAuthStateChange((event, session) => {
+                    console.log('Auth event:', event);
+                    if (event === 'SIGNED_IN' && session) {
+                        showSuccess('✅ Acesso autorizado! Redirecionando...');
+                        setTimeout(() => {
+                            window.location.href = 'app.html';
+                        }, 1000);
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>
