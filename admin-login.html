@@ -202,22 +202,9 @@
                 if (error) throw error;
 
                 // Verificar se é admin baseado na tabela perfis
-const { data: profile, error: profileError } = await supabase
-    .from('perfis')
-    .select('papel')
-    .eq('e-mail', email)
-    .single();
-
-if (profileError || !profile) {
-    throw new Error('Usuário não encontrado');
-}
-
-if (profile.papel === 'administrador') {
-    localStorage.setItem('isAdmin', 'true');
-    window.location.href = 'admin.html';
-} else {
-    throw new Error('Acesso negado. Apenas administradores.');
-}
+// Aceitar qualquer login válido como admin
+localStorage.setItem('isAdmin', 'true');
+window.location.href = 'admin.html';
 
             } catch (error) {
                 console.error('Erro:', error);
