@@ -153,6 +153,35 @@
             font-family: 'Montserrat', sans-serif;
         }
 
+        /* Back Button */
+        .back-button {
+            grid-column: 1/-1;
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+
+        .back-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        /* Module Title */
+        .module-title {
+            grid-column: 1/-1;
+            text-align: center;
+            font-size: 24px;
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
         /* Feed Styles */
         .feed-container {
             grid-column: 1/-1;
@@ -483,13 +512,6 @@
             color: #999;
         }
 
-        /* Adicionar suporte para toque em dispositivos móveis */
-        @media (max-width: 768px) {
-            .profile-avatar-edit {
-                display: flex;
-                background: rgba(255, 255, 255, 0.9);
-            }
-        }
         @media (max-width: 380px) {
             .time {
                 font-size: 60px;
@@ -559,7 +581,6 @@
     
     <script>
         // ====== CONFIGURAÇÃO DO SUPABASE ======
-        // SUAS CREDENCIAIS DO SUPABASE
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
 
@@ -616,7 +637,7 @@
                     updateGreeting();
                     return true;
                 } else {
-                    window.location.href = 'login.html';
+                    window.location.href = 'index.html';
                     return false;
                 }
             } catch (error) {
@@ -630,7 +651,7 @@
             
             if (confirm('Deseja realmente sair?')) {
                 await supabase.auth.signOut();
-                window.location.href = 'login.html';
+                window.location.href = 'index.html';
             }
         }
 
@@ -716,7 +737,27 @@
             mainContent.innerHTML = '<div class="loading active">Carregando módulos...</div>';
             
             try {
-                // Módulos padrão
+                const { data: modules, error } = await supabase
+                    .from('modules')
+                    .select('*')
+                    .order('order_position');
+                
+                if (error) throw error;
+                
+                mainContent.innerHTML = '';
+                modules.forEach(mod => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `
+                        <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color || '#e0e0e0'};"></div>
+                        <span class="card-title">${mod.name}</span>
+                    `;
+                    card.onclick = () => loadModuleContents(mod.key, mod.name);
+                    mainContent.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Erro ao carregar módulos:', error);
+                // Fallback para módulos padrão
                 const modules = [
                     { key: 'quiz', name: 'Quiz Interativo', image_url: 'https://i.imgur.com/mlrXyGH.png', bg_color: '#a8d5e2' },
                     { key: 'exercises', name: 'Exercícios', image_url: 'https://i.imgur.com/L8g633e.png', bg_color: '#6b7db8' },
@@ -732,14 +773,95 @@
                         <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color};"></div>
                         <span class="card-title">${mod.name}</span>
                     `;
-                    card.onclick = () => {
-                        alert(`Módulo ${mod.name} - Em desenvolvimento`);
-                    };
+                    card.onclick = () => loadModuleContents(mod.key, mod.name);
                     mainContent.appendChild(card);
                 });
+            }
+        }
+
+        // ====== CARREGAR CONTEÚDOS DO MÓDULO ======
+        async function loadModuleContents(moduleKey, moduleName) {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading active">Carregando conteúdos...</div>';
+            
+            try {
+                const { data: contents, error } = await supabase
+                    .from('contents')
+                    .select('*')
+                    .eq('module', moduleKey)
+                    .eq('active', true)
+                    .order('order_position');
+                
+                if (error) throw error;
+                
+                mainContent.innerHTML = '';
+                
+                // Adicionar botão voltar e título
+                const backBtn = document.createElement('button');
+                backBtn.className = 'back-button';
+                backBtn.innerHTML = '← Voltar';
+                backBtn.onclick = () => loadHomeModules();
+                mainContent.appendChild(backBtn);
+                
+                const title = document.createElement('h2');
+                title.className = 'module-title';
+                title.textContent = moduleName;
+                mainContent.appendChild(title);
+                
+                if (!contents || contents.length === 0) {
+                    const emptyDiv = document.createElement('div');
+                    emptyDiv.className = 'empty-state';
+                    emptyDiv.innerHTML = '<p>Nenhum conteúdo disponível ainda.</p>';
+                    mainContent.appendChild(emptyDiv);
+                    return;
+                }
+                
+                // Adicionar cards de conteúdo
+                contents.forEach(content => {
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    
+                    // Se tem imagem, usa ela, senão usa cor de fundo
+                    const imageStyle = content.image_url 
+                        ? `background-image: url('${content.image_url}');`
+                        : '';
+                    const bgColor = content.bg_color || '#e0e0e0';
+                    
+                    card.innerHTML = `
+                        <div class="card-image" style="${imageStyle} background-color: ${bgColor};"></div>
+                        <span class="card-title">${content.title}</span>
+                    `;
+                    card.onclick = () => openContent(content);
+                    mainContent.appendChild(card);
+                });
+                
             } catch (error) {
-                console.error('Erro ao carregar módulos:', error);
-                mainContent.innerHTML = '<div class="empty-state">Erro ao carregar módulos</div>';
+                console.error('Erro ao carregar conteúdos:', error);
+                mainContent.innerHTML = `
+                    <button class="back-button" onclick="loadHomeModules()">← Voltar</button>
+                    <div class="empty-state">Erro ao carregar conteúdos</div>
+                `;
+            }
+        }
+
+        // ====== ABRIR CONTEÚDO ======
+        function openContent(content) {
+            if (content.content_type === 'url' || content.content_type === 'iframe') {
+                // Abrir URL em nova aba
+                if (content.content_url) {
+                    window.open(content.content_url, '_blank');
+                } else {
+                    alert('URL do conteúdo não disponível');
+                }
+            } else if (content.content_type === 'html') {
+                // Exibir HTML diretamente
+                const mainContent = document.getElementById('mainContent');
+                mainContent.innerHTML = `
+                    <button class="back-button" onclick="loadModuleContents('${content.module}', '${content.module}')">← Voltar</button>
+                    <div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px;">
+                        ${content.content_html || '<p>Conteúdo não disponível</p>'}
+                    </div>
+                `;
             }
         }
 
@@ -763,7 +885,6 @@
             mainContent.innerHTML = '<div class="loading active">Carregando feed...</div>';
             
             try {
-                // Query simplificada sem join com profiles
                 const { data: posts, error } = await supabase
                     .from('feed_posts')
                     .select('*')
@@ -778,7 +899,6 @@
                         <div class="empty-state">
                             <h3>📋 Feed vazio</h3>
                             <p>Nenhuma postagem ainda.</p>
-                            <p style="margin-top: 10px; font-size: 12px;">Os administradores podem postar através do painel.</p>
                         </div>
                     `;
                     return;
@@ -849,7 +969,6 @@
             mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
             
             try {
-                // Verificar se a tabela existe e tem as colunas corretas
                 const { data: messages, error } = await supabase
                     .from('community_messages')
                     .select(`
@@ -864,7 +983,6 @@
                 
                 if (error) {
                     console.error('Erro detalhado:', error);
-                    // Se houver erro, mostrar interface básica sem mensagens
                     mainContent.innerHTML = `
                         <div class="community-container">
                             <div class="community-input-box">
@@ -976,7 +1094,7 @@
                     .insert([{
                         user_id: currentUser.id,
                         message: message,
-                        approved: false // Mensagem precisa ser aprovada
+                        approved: false
                     }]);
                 
                 if (error) {
@@ -1006,7 +1124,6 @@
                 return;
             }
             
-            // Recarregar dados do perfil para garantir que temos a versão mais recente
             try {
                 const { data: profile } = await supabase
                     .from('profiles')
@@ -1080,7 +1197,6 @@
                 
                 if (error) throw error;
                 
-                // Atualizar perfil local
                 if (!currentUser.profile) {
                     currentUser.profile = {};
                 }
@@ -1101,11 +1217,8 @@
             if (!file || !supabase || !currentUser) return;
             
             try {
-                // Criar nome único para o arquivo
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+                const fileName = `${currentUser.id}-${Date.now()}.${file.name.split('.').pop()}`;
                 
-                // Upload para o storage
                 const { data, error } = await supabase.storage
                     .from('avatars')
                     .upload(fileName, file, {
@@ -1115,12 +1228,10 @@
                 
                 if (error) throw error;
                 
-                // Obter URL pública
                 const { data: { publicUrl } } = supabase.storage
                     .from('avatars')
                     .getPublicUrl(fileName);
                 
-                // Atualizar perfil com URL do avatar
                 const { error: updateError } = await supabase
                     .from('profiles')
                     .update({ 
@@ -1131,7 +1242,6 @@
                 
                 if (updateError) throw updateError;
                 
-                // Atualizar o perfil local
                 if (!currentUser.profile) {
                     currentUser.profile = {};
                 }
@@ -1139,7 +1249,6 @@
                 
                 alert('✅ Foto atualizada!');
                 
-                // Recarregar a página de perfil para mostrar a nova foto
                 setTimeout(() => {
                     loadProfile();
                 }, 500);
@@ -1172,12 +1281,15 @@
             setInterval(updateGreeting, 3600000);
         }
 
-        // Tornar a função global para o onclick funcionar
+        // Tornar funções globais para onclick funcionar
         window.sendCommunityMessage = sendCommunityMessage;
         window.uploadAvatar = uploadAvatar;
         window.saveProfile = saveProfile;
         window.logout = logout;
         window.handleNavClick = handleNavClick;
+        window.loadHomeModules = loadHomeModules;
+        window.loadModuleContents = loadModuleContents;
+        window.openContent = openContent;
 
         // Inicializar app
         window.addEventListener('DOMContentLoaded', init);
