@@ -316,10 +316,6 @@
                     <label for="module">Módulo</label>
                     <select id="module" required>
                         <option value="">Selecione o módulo</option>
-                        <option value="quiz">Quiz Interativo</option>
-                        <option value="exercises">Exercícios</option>
-                        <option value="library">Biblioteca</option>
-                        <option value="diary">Diário</option>
                     </select>
                 </div>
 
@@ -387,10 +383,6 @@
                 <label for="filterModule">Filtrar por Módulo</label>
                 <select id="filterModule" onchange="loadContents()">
                     <option value="">Todos os Módulos</option>
-                    <option value="quiz">Quiz Interativo</option>
-                    <option value="exercises">Exercícios</option>
-                    <option value="library">Biblioteca</option>
-                    <option value="diary">Diário</option>
                 </select>
             </div>
 
@@ -539,26 +531,38 @@
         
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Verificar autenticação
-        async function checkAuth() {
-            const isAdmin = localStorage.getItem('isAdmin');
-            if (!isAdmin) {
+        // Verificar autenticação e permissão de admin
+        async function checkAuthAndAdmin() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    window.location.href = 'admin-login.html';
+                    return false;
+                }
+                
+                const { data: profile, error } = await supabase
+                    .from('profiles')
+                    .select('is_admin')
+                    .eq('id', session.user.id)
+                    .single();
+                
+                if (error || !profile || !profile.is_admin) {
+                    await supabase.auth.signOut();
+                    window.location.href = 'admin-login.html';
+                    return false;
+                }
+                
+                return true;
+            } catch (e) {
+                console.error('Erro na verificação de admin:', e);
+                await supabase.auth.signOut();
                 window.location.href = 'admin-login.html';
                 return false;
             }
-            
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'admin-login.html';
-                return false;
-            }
-            
-            return true;
         }
 
         // Logout
         async function logout() {
-            localStorage.removeItem('isAdmin');
             await supabase.auth.signOut();
             window.location.href = 'admin-login.html';
         }
@@ -568,7 +572,10 @@
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             
-            event.target.classList.add('active');
+            const targetTab = document.querySelector(`.tab[onclick="switchTab('${tab}')"]`);
+            if (targetTab) {
+                targetTab.classList.add('active');
+            }
             document.getElementById(`${tab}-section`).classList.add('active');
             
             if (tab === 'list') {
@@ -733,10 +740,7 @@
                 }
                 
                 if (data) {
-                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-                    document.querySelector('.tab').classList.add('active');
-                    document.getElementById('add-section').classList.add('active');
+                    switchTab('add');
                     
                     document.getElementById('module').value = data.module;
                     document.getElementById('title').value = data.title;
@@ -785,6 +789,7 @@
 
         // Excluir conteúdo
         async function deleteContent(id) {
+            // NOTE: Replace `confirm` with a custom modal UI in production.
             if (!confirm('Tem certeza que deseja excluir este conteúdo?')) return;
             
             try {
@@ -910,6 +915,7 @@
 
         // Excluir módulo
         async function deleteModule(key) {
+            // NOTE: Replace `confirm` with a custom modal UI in production.
             if (!confirm('Tem certeza? Todos os conteúdos deste módulo não serão mais exibidos.')) return;
             
             try {
@@ -937,6 +943,7 @@
         function updateModuleSelects(modules) {
             const selects = document.querySelectorAll('#module, #filterModule');
             selects.forEach(select => {
+                const currentSelection = select.value;
                 const defaultOptions = Array.from(select.options).filter(opt => opt.value === '');
                 select.innerHTML = '';
                 defaultOptions.forEach(opt => select.appendChild(opt));
@@ -947,6 +954,7 @@
                     option.text = mod.name;
                     select.appendChild(option);
                 });
+                select.value = currentSelection;
             });
         }
 
@@ -1072,6 +1080,7 @@
         }
 
         async function deleteFeedPost(id) {
+            // NOTE: Replace `confirm` with a custom modal UI in production.
             if (!confirm('Tem certeza que deseja excluir este post?')) return;
             
             try {
@@ -1101,7 +1110,7 @@
             
             try {
                 let query = supabase
-                    .from('community_posts')
+                    .from('community_messages') // Corrigido para a tabela correta
                     .select(`
                         *,
                         profiles (
@@ -1172,7 +1181,7 @@
                                 <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
                             </div>
                             <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                                ${msg.content}
+                                ${msg.message}
                             </div>
                         </div>
                         <div class="content-actions">
@@ -1195,7 +1204,7 @@
         async function approveMessage(id) {
             try {
                 const { error } = await supabase
-                    .from('community_posts')
+                    .from('community_messages')
                     .update({ 
                         status: 'approved',
                         updated_at: new Date().toISOString()
@@ -1216,7 +1225,7 @@
         async function rejectMessage(id) {
             try {
                 const { error } = await supabase
-                    .from('community_posts')
+                    .from('community_messages')
                     .update({ 
                         status: 'rejected',
                         updated_at: new Date().toISOString()
@@ -1235,11 +1244,12 @@
         }
 
         async function deleteMessage(id) {
+            // NOTE: Replace `confirm` with a custom modal UI in production.
             if (!confirm('Tem certeza que deseja excluir esta mensagem permanentemente?')) return;
             
             try {
                 const { error } = await supabase
-                    .from('community_posts')
+                    .from('community_messages')
                     .delete()
                     .eq('id', id);
                 
@@ -1256,12 +1266,35 @@
 
         // Inicializar
         async function init() {
-            const isAuth = await checkAuth();
-            if (isAuth) {
+            const isAuthAndAdmin = await checkAuthAndAdmin();
+            if (isAuthAndAdmin) {
                 loadModules();
             }
         }
 
+        // Tornar funções globais para onclick funcionar
+        window.switchTab = switchTab;
+        window.toggleContentInput = toggleContentInput;
+        window.resetForm = resetForm;
+        window.editContent = editContent;
+        window.deleteContent = deleteContent;
+        window.toggleStatus = toggleStatus;
+        window.cancelEdit = cancelEdit;
+        window.logout = logout;
+        window.loadContents = loadContents;
+        window.editModule = editModule;
+        window.deleteModule = deleteModule;
+        window.resetModuleForm = resetModuleForm;
+        window.loadModules = loadModules;
+        window.loadFeedPosts = loadFeedPosts;
+        window.editFeedPost = editFeedPost;
+        window.deleteFeedPost = deleteFeedPost;
+        window.resetFeedForm = resetFeedForm;
+        window.loadCommunityMessages = loadCommunityMessages;
+        window.approveMessage = approveMessage;
+        window.rejectMessage = rejectMessage;
+        window.deleteMessage = deleteMessage;
+        
         init();
     </script>
 </body>
