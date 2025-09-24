@@ -1334,7 +1334,7 @@
                     
                     // Upload direto do blob
                     const { data: uploadData, error: uploadError } = await supabase.storage
-                        .from('avatars')
+                        .from('avatar-images')
                         .upload(fileName, blob, {
                             contentType: 'image/jpeg',
                             cacheControl: '3600'
@@ -1350,7 +1350,7 @@
                     
                     // Obter URL pública
                     const { data: { publicUrl } } = supabase.storage
-                        .from('avatars')
+                        .from('avatar-images')
                         .getPublicUrl(fileName);
                     
                     console.log('URL gerada:', publicUrl);
@@ -1366,7 +1366,7 @@
                     if (updateError) {
                         console.error('Erro ao atualizar perfil:', updateError);
                         // Deletar imagem se falhar
-                        await supabase.storage.from('avatars').remove([fileName]);
+                        await supabase.storage.from('avatar-images').remove([fileName]);
                         alert('Erro ao atualizar perfil');
                         return;
                     }
