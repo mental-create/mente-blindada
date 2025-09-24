@@ -4,122 +4,967 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Painel Admin - Mente Blindada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; }
-        h1 { text-align: center; color: #333; margin-bottom: 30px; }
-        .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #ddd; }
-        .tab { padding: 10px 20px; background: none; border: none; cursor: pointer; font-size: 16px; }
-        .tab.active { color: #4169E1; border-bottom: 3px solid #4169E1; }
-        .section { display: none; }
-        .section.active { display: block; }
-        .btn { padding: 10px 20px; background: #4169E1; color: white; border: none; border-radius: 5px; cursor: pointer; margin: 5px; }
-        .btn:hover { background: #3051b8; }
-        .btn-danger { background: #e74c3c; }
-        .btn-success { background: #27ae60; }
-        .message-item { background: #f9f9f9; padding: 15px; margin: 10px 0; border-radius: 5px; }
-        .message-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
-        .message-content { padding: 10px; background: white; border-radius: 5px; }
-        .status-badge { padding: 5px 10px; border-radius: 3px; font-size: 12px; }
-        .status-pending { background: #f39c12; color: white; }
-        .status-approved { background: #27ae60; color: white; }
-        .status-rejected { background: #e74c3c; color: white; }
-        select, input, textarea { width: 100%; padding: 10px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        .loading { text-align: center; padding: 20px; }
-        .logout-btn { position: absolute; top: 20px; right: 20px; background: #e74c3c; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+        }
+
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
+            color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #4169E1;
+            border-bottom-color: #4169E1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4169E1;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: #4169E1;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background: #3051b8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .content-list {
+            margin-top: 30px;
+        }
+
+        .content-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .content-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .content-info {
+            flex: 1;
+        }
+
+        .content-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .content-module {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-active {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .upload-area {
+            border: 2px dashed #4169E1;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: #f0f4f8;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            margin-top: 15px;
+            border-radius: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .module-item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .module-item-info {
+            flex: 1;
+        }
+
+        .module-item-title {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
+        }
     </style>
 </head>
 <body>
-    <button class="logout-btn" onclick="logout()">Sair</button>
-    
-    <div class="container">
+    <div class="admin-container">
+        <button class="logout-btn" onclick="logout()">Sair</button>
         <h1>🔧 PAINEL ADMINISTRATIVO</h1>
         
+        <div id="messageArea"></div>
+
         <div class="tabs">
-            <button class="tab active" onclick="switchTab('feed', this)">Gerenciar Feed</button>
-            <button class="tab" onclick="switchTab('community', this)">Moderar Comunidade</button>
+            <button class="tab active" onclick="switchTab('add')">Adicionar Conteúdo</button>
+            <button class="tab" onclick="switchTab('list')">Listar Conteúdos</button>
+            <button class="tab" onclick="switchTab('modules')">Gerenciar Módulos</button>
+            <button class="tab" onclick="switchTab('feed')">Gerenciar Feed</button>
+            <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
 
-        <!-- Feed Section -->
-        <div id="feed-section" class="section active">
-            <h2>Adicionar Post ao Feed</h2>
-            <form id="feedForm" onsubmit="saveFeedPost(event)">
-                <input type="text" id="feedTitle" placeholder="Título do Post" required>
-                <select id="feedCategory" required>
-                    <option value="">Selecione uma categoria</option>
-                    <option value="motivacao">Motivação</option>
-                    <option value="exercicios">Exercícios</option>
-                    <option value="meditacao">Meditação</option>
-                    <option value="autoconhecimento">Autoconhecimento</option>
+        <!-- Adicionar Conteúdo -->
+        <div id="add-section" class="content-section active">
+            <form id="contentForm">
+                <div class="form-group">
+                    <label for="module">Módulo</label>
+                    <select id="module" required>
+                        <option value="">Selecione o módulo</option>
+                        <option value="quiz">Quiz Interativo</option>
+                        <option value="exercises">Exercícios</option>
+                        <option value="library">Biblioteca</option>
+                        <option value="diary">Diário</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Título do Conteúdo</label>
+                    <input type="text" id="title" placeholder="Ex: Técnicas de Respiração" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrição (opcional)</label>
+                    <textarea id="description" placeholder="Breve descrição do conteúdo..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageUrl">URL da Imagem</label>
+                    <input type="url" id="imageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="contentType">Tipo de Conteúdo</label>
+                    <select id="contentType" onchange="toggleContentInput()">
+                        <option value="url">URL Externa (Gamma, etc.)</option>
+                        <option value="iframe">iFrame</option>
+                        <option value="html">Código HTML</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="urlInput">
+                    <label for="contentUrl">URL do Conteúdo</label>
+                    <input type="url" id="contentUrl" placeholder="https://gamma.app/public/seu-conteudo">
+                </div>
+
+                <div class="form-group" id="htmlInput" style="display: none;">
+                    <label for="contentHtml">Código HTML</label>
+                    <textarea id="contentHtml" placeholder="Cole o código HTML aqui..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="bgColor">Cor de Fundo (opcional)</label>
+                    <input type="text" id="bgColor" placeholder="#a8d5e2">
+                </div>
+
+                <div class="form-group">
+                    <label for="orderPosition">Ordem de Exibição</label>
+                    <input type="number" id="orderPosition" value="1" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" checked>
+                        Conteúdo Ativo
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn">💾 Salvar Conteúdo</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpar</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Listar Conteúdo -->
+        <div id="list-section" class="content-section">
+            <div class="form-group">
+                <label for="filterModule">Filtrar por Módulo</label>
+                <select id="filterModule" onchange="loadContents()">
+                    <option value="">Todos os Módulos</option>
+                    <option value="quiz">Quiz Interativo</option>
+                    <option value="exercises">Exercícios</option>
+                    <option value="library">Biblioteca</option>
+                    <option value="diary">Diário</option>
                 </select>
-                <textarea id="feedContent" rows="5" placeholder="Conteúdo do post..." required></textarea>
-                <label>
-                    <input type="checkbox" id="feedActive" checked> Post Ativo
-                </label>
-                <button type="submit" class="btn">Publicar Post</button>
+            </div>
+
+            <div class="content-list" id="contentList">
+                <div class="loading">Carregando conteúdos...</div>
+            </div>
+        </div>
+
+        <!-- Gerenciar Módulos -->
+        <div id="modules-section" class="content-section">
+            <h2>Gerenciar Módulos</h2>
+            <p>Adicione ou edite os módulos do seu app.</p>
+            
+            <form id="moduleForm" style="margin-top: 20px;">
+                <input type="hidden" id="editModuleKey">
+                <div class="form-group">
+                    <label for="newModuleKey">Chave do Módulo (sem espaços)</label>
+                    <input type="text" id="newModuleKey" placeholder="Ex: meditacao" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleName">Nome do Módulo</label>
+                    <input type="text" id="newModuleName" placeholder="Ex: Meditação Guiada" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleImage">URL da Imagem</label>
+                    <input type="url" id="newModuleImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleColor">Cor de Fundo</label>
+                    <input type="text" id="newModuleColor" placeholder="#a8d5e2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleOrder">Ordem de Exibição</label>
+                    <input type="number" id="newModuleOrder" value="1" min="1" required>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button>
+                </div>
+            </form>
+
+            <div style="margin-top: 30px;">
+                <h3>Módulos Atuais</h3>
+                <div id="moduleList">
+                    <div class="loading">Carregando módulos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gerenciar Feed -->
+        <div id="feed-section" class="content-section">
+            <h2>Gerenciar Feed</h2>
+            
+            <form id="feedForm" style="margin-bottom: 30px;">
+                <input type="hidden" id="editFeedId">
+                <div class="form-group">
+                    <label for="feedTitle">Título do Post</label>
+                    <input type="text" id="feedTitle" placeholder="Título do post" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedCategory">Categoria</label>
+                    <select id="feedCategory" required>
+                        <option value="">Selecione...</option>
+                        <option value="motivacao">💪 Motivação</option>
+                        <option value="meditacao">🧘 Meditação</option>
+                        <option value="exercicios">🏃 Exercícios</option>
+                        <option value="alimentacao">🥗 Alimentação</option>
+                        <option value="sono">😴 Sono</option>
+                        <option value="relacionamentos">❤️ Relacionamentos</option>
+                        <option value="produtividade">📈 Produtividade</option>
+                        <option value="autoconhecimento">🔍 Autoconhecimento</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedContent">Conteúdo</label>
+                    <textarea id="feedContent" rows="5" placeholder="Conteúdo do post..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedImage">URL da Imagem (opcional)</label>
+                    <input type="url" id="feedImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedTags">Tags (separadas por vírgula)</label>
+                    <input type="text" id="feedTags" placeholder="saúde mental, bem-estar">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedActive" checked> Post Ativo
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedHighlight"> ⭐ Destacar Post
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button>
+                </div>
             </form>
             
-            <h3 style="margin-top: 30px;">Posts Publicados</h3>
+            <h3>Posts Publicados</h3>
             <div id="feedList">
                 <div class="loading">Carregando posts...</div>
             </div>
         </div>
 
-        <!-- Community Section -->
-        <div id="community-section" class="section">
+        <!-- Moderar Comunidade -->
+        <div id="community-section" class="content-section">
             <h2>Moderar Comunidade</h2>
             
-            <select id="filterStatus" onchange="loadCommunityMessages()">
-                <option value="pending">Pendentes</option>
-                <option value="approved">Aprovadas</option>
-                <option value="rejected">Rejeitadas</option>
-                <option value="all">Todas</option>
-            </select>
+            <div class="form-group">
+                <label for="filterStatus">Filtrar por Status</label>
+                <select id="filterStatus" onchange="loadCommunityMessages()">
+                    <option value="pending">Pendentes de Aprovação</option>
+                    <option value="approved">Aprovadas</option>
+                    <option value="rejected">Rejeitadas</option>
+                    <option value="all">Todas</option>
+                </select>
+            </div>
             
-            <div id="communityList">
+            <div id="communityList" style="margin-top: 20px;">
                 <div class="loading">Carregando mensagens...</div>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // Configuração
+        // Configuração do Supabase
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjA5MDMsImV4cCI6MjA0Nzk5NjkwM30.Vdj6Dc83R0Fy7IO0d_hQXCL45hDtXEaaMVBf_ZIpOWE';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Verificar auth
+        // Verificar autenticação
         async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = 'index.html';
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (!isAdmin) {
+                window.location.href = 'admin-login.html';
                 return false;
             }
+            
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            
             return true;
         }
 
         // Logout
         async function logout() {
+            localStorage.removeItem('isAdmin');
             await supabase.auth.signOut();
-            window.location.href = 'index.html';
+            window.location.href = 'admin-login.html';
         }
 
-        // Switch tabs
-        function switchTab(tab, element) {
+        // Alternar abas
+        function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             
-            element.classList.add('active');
-            document.getElementById(tab + '-section').classList.add('active');
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-section`).classList.add('active');
             
-            if (tab === 'feed') loadFeedPosts();
-            if (tab === 'community') loadCommunityMessages();
+            if (tab === 'list') {
+                loadContents();
+            } else if (tab === 'modules') {
+                loadModules();
+            } else if (tab === 'feed') {
+                loadFeedPosts();
+            } else if (tab === 'community') {
+                loadCommunityMessages();
+            }
         }
 
-        // ===== FEED =====
+        // Alternar tipo de conteúdo
+        function toggleContentInput() {
+            const type = document.getElementById('contentType').value;
+            document.getElementById('urlInput').style.display = type === 'url' || type === 'iframe' ? 'block' : 'none';
+            document.getElementById('htmlInput').style.display = type === 'html' ? 'block' : 'none';
+        }
+
+        // Salvar conteúdo
+        document.getElementById('contentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const editId = document.getElementById('contentForm').dataset.editId;
+            const isEditing = !!editId;
+
+            const formData = {
+                module: document.getElementById('module').value,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                image_url: document.getElementById('imageUrl').value || null,
+                content_type: document.getElementById('contentType').value,
+                content_url: document.getElementById('contentUrl').value || null,
+                content_html: document.getElementById('contentHtml').value || null,
+                bg_color: document.getElementById('bgColor').value || null,
+                order_position: parseInt(document.getElementById('orderPosition').value),
+                active: document.getElementById('isActive').checked
+            };
+
+            try {
+                let result;
+                
+                if (isEditing) {
+                    result = await supabase.from('contents').update(formData).eq('id', editId);
+                } else {
+                    result = await supabase.from('contents').insert([formData]);
+                }
+
+                const { error } = result;
+
+                if (!error) {
+                    showMessage('Conteúdo salvo com sucesso!', 'success');
+                    if (isEditing) {
+                        cancelEdit();
+                    } else {
+                        resetForm();
+                    }
+                    if (document.getElementById('list-section').classList.contains('active')) {
+                        loadContents();
+                    }
+                } else {
+                    showMessage('Erro ao salvar: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar conteúdo', 'error');
+            }
+        });
+
+        // Carregar conteúdos
+        async function loadContents() {
+            const filterModule = document.getElementById('filterModule').value;
+            let query = supabase.from('contents').select('*');
+            
+            if (filterModule) {
+                query = query.eq('module', filterModule);
+            }
+            
+            query = query.order('order_position');
+
+            try {
+                const { data, error } = await query;
+                
+                if (!error && data) {
+                    displayContents(data);
+                } else {
+                    document.getElementById('contentList').innerHTML = '<p>Erro ao carregar conteúdos</p>';
+                }
+            } catch (error) {
+                document.getElementById('contentList').innerHTML = '<p>Erro ao carregar conteúdos</p>';
+            }
+        }
+
+        // Exibir conteúdos
+        function displayContents(contents) {
+            if (contents.length === 0) {
+                document.getElementById('contentList').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Nenhum conteúdo encontrado</p>';
+                return;
+            }
+
+            const moduleNames = {
+                'quiz': 'Quiz Interativo',
+                'exercises': 'Exercícios',
+                'library': 'Biblioteca',
+                'diary': 'Diário'
+            };
+
+            let html = '';
+            contents.forEach(content => {
+                html += `
+                    <div class="content-item">
+                        <div class="content-image" style="background-image: url('${content.image_url || ''}'); background-color: ${content.bg_color || '#e0e0e0'}"></div>
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${content.title}
+                                <span class="status-badge ${content.active ? 'status-active' : 'status-inactive'}">
+                                    ${content.active ? '✔ Ativo' : '✗ Inativo'}
+                                </span>
+                            </div>
+                            <div class="content-module">
+                                <strong>Módulo:</strong> ${moduleNames[content.module] || content.module} | 
+                                <strong>Ordem:</strong> ${content.order_position} |
+                                <strong>Tipo:</strong> ${content.content_type.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editContent('${content.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteContent('${content.id}')">🗑️ Excluir</button>
+                            <button class="btn btn-small btn-secondary" onclick="toggleStatus('${content.id}', ${content.active})">
+                                ${content.active ? '🔒 Desativar' : '🔓 Ativar'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('contentList').innerHTML = html;
+        }
+
+        // Alternar status
+        async function toggleStatus(id, currentStatus) {
+            try {
+                const { error } = await supabase.from('contents').update({ active: !currentStatus }).eq('id', id);
+                if (!error) {
+                    showMessage(`Conteúdo ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+                    loadContents();
+                } else {
+                    showMessage('Erro ao alterar status: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao alterar status', 'error');
+            }
+        }
+
+        // Editar conteúdo
+        async function editContent(id) {
+            try {
+                const { data, error } = await supabase.from('contents').select('*').eq('id', id).single();
+                if (error) {
+                    showMessage('Erro ao carregar conteúdo: ' + error.message, 'error');
+                    return;
+                }
+                
+                if (data) {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                    document.querySelector('.tab').classList.add('active');
+                    document.getElementById('add-section').classList.add('active');
+                    
+                    document.getElementById('module').value = data.module;
+                    document.getElementById('title').value = data.title;
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('imageUrl').value = data.image_url || '';
+                    document.getElementById('bgColor').value = data.bg_color || '';
+                    document.getElementById('orderPosition').value = data.order_position;
+                    document.getElementById('isActive').checked = data.active;
+                    document.getElementById('contentType').value = data.content_type;
+                    
+                    toggleContentInput();
+                    if (data.content_type === 'url' || data.content_type === 'iframe') {
+                        document.getElementById('contentUrl').value = data.content_url || '';
+                    } else if (data.content_type === 'html') {
+                        document.getElementById('contentHtml').value = data.content_html || '';
+                    }
+
+                    document.getElementById('contentForm').dataset.editId = id;
+                    document.querySelector('#contentForm button[type="submit"]').innerHTML = '💾 Atualizar Conteúdo';
+                    
+                    if (!document.getElementById('cancelEdit')) {
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.id = 'cancelEdit';
+                        cancelBtn.type = 'button';
+                        cancelBtn.className = 'btn btn-secondary';
+                        cancelBtn.innerHTML = 'Cancelar Edição';
+                        cancelBtn.onclick = cancelEdit;
+                        document.querySelector('#contentForm .button-group').appendChild(cancelBtn);
+                    }
+                    
+                    showMessage('Conteúdo carregado para edição', 'success');
+                }
+            } catch (error) {
+                showMessage('Erro ao editar conteúdo', 'error');
+            }
+        }
+
+        // Cancelar edição
+        function cancelEdit() {
+            delete document.getElementById('contentForm').dataset.editId;
+            document.querySelector('#contentForm button[type="submit"]').innerHTML = '💾 Salvar Conteúdo';
+            const cancelBtn = document.getElementById('cancelEdit');
+            if (cancelBtn) cancelBtn.remove();
+            resetForm();
+        }
+
+        // Excluir conteúdo
+        async function deleteContent(id) {
+            if (!confirm('Tem certeza que deseja excluir este conteúdo?')) return;
+            
+            try {
+                const { error } = await supabase.from('contents').delete().eq('id', id);
+                if (!error) {
+                    showMessage('Conteúdo excluído com sucesso!', 'success');
+                    loadContents();
+                } else {
+                    showMessage('Erro ao excluir: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir conteúdo', 'error');
+            }
+        }
+
+        // Gerenciar Módulos
+        async function loadModules() {
+            try {
+                const { data, error } = await supabase.from('modules').select('*').order('order_position');
+                if (!error && data) {
+                    displayModules(data);
+                    updateModuleSelects(data);
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar módulos', 'error');
+            }
+        }
+
+        function displayModules(modules) {
+            const list = document.getElementById('moduleList');
+            if (modules.length === 0) {
+                list.innerHTML = '<p>Nenhum módulo encontrado</p>';
+                return;
+            }
+            
+            let html = '';
+            modules.forEach(mod => {
+                html += `
+                    <div class="module-item">
+                        <div class="module-item-image" style="background-image: url('${mod.image_url || ''}'); background-color: ${mod.bg_color || '#e0e0e0'}"></div>
+                        <div class="module-item-info">
+                            <div class="module-item-title">${mod.name}</div>
+                            <small>Chave: ${mod.key} | Ordem: ${mod.order_position}</small>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editModule('${mod.key}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        // Salvar módulo
+        document.getElementById('moduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const key = document.getElementById('newModuleKey').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const name = document.getElementById('newModuleName').value;
+            const imageUrl = document.getElementById('newModuleImage').value || null;
+            const bgColor = document.getElementById('newModuleColor').value || null;
+            const orderPosition = parseInt(document.getElementById('newModuleOrder').value);
+            const editKey = document.getElementById('editModuleKey').value;
+
+            try {
+                let result;
+                if (editKey) {
+                    result = await supabase.from('modules').update({ 
+                        name, 
+                        image_url: imageUrl, 
+                        bg_color: bgColor,
+                        order_position: orderPosition 
+                    }).eq('key', editKey);
+                } else {
+                    result = await supabase.from('modules').insert([{ 
+                        key, 
+                        name, 
+                        image_url: imageUrl, 
+                        bg_color: bgColor,
+                        order_position: orderPosition 
+                    }]);
+                }
+                
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Módulo ${editKey ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+                    resetModuleForm();
+                    loadModules();
+                } else {
+                    showMessage(`Erro ao salvar módulo: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar módulo', 'error');
+            }
+        });
+
+        // Editar módulo
+        async function editModule(key) {
+            try {
+                const { data, error } = await supabase.from('modules').select('*').eq('key', key).single();
+                if (error) {
+                    showMessage('Erro ao carregar módulo: ' + error.message, 'error');
+                    return;
+                }
+                
+                if (data) {
+                    document.getElementById('newModuleKey').value = data.key;
+                    document.getElementById('newModuleKey').disabled = true;
+                    document.getElementById('newModuleName').value = data.name;
+                    document.getElementById('newModuleImage').value = data.image_url || '';
+                    document.getElementById('newModuleColor').value = data.bg_color || '';
+                    document.getElementById('newModuleOrder').value = data.order_position;
+                    document.getElementById('editModuleKey').value = data.key;
+                    document.getElementById('saveModuleBtn').innerHTML = '💾 Atualizar Módulo';
+                    
+                    showMessage('Módulo carregado para edição', 'success');
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar módulo', 'error');
+            }
+        }
+
+        // Excluir módulo
+        async function deleteModule(key) {
+            if (!confirm('Tem certeza? Todos os conteúdos deste módulo não serão mais exibidos.')) return;
+            
+            try {
+                const { error } = await supabase.from('modules').delete().eq('key', key);
+                if (!error) {
+                    showMessage('Módulo excluído com sucesso!', 'success');
+                    loadModules();
+                } else {
+                    showMessage('Erro ao excluir módulo: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir módulo', 'error');
+            }
+        }
+
+        // Reset formulário módulo
+        function resetModuleForm() {
+            document.getElementById('moduleForm').reset();
+            document.getElementById('editModuleKey').value = '';
+            document.getElementById('newModuleKey').disabled = false;
+            document.getElementById('saveModuleBtn').innerHTML = 'Adicionar Módulo';
+        }
+
+        // Atualizar selects de módulos
+        function updateModuleSelects(modules) {
+            const selects = document.querySelectorAll('#module, #filterModule');
+            selects.forEach(select => {
+                const defaultOptions = Array.from(select.options).filter(opt => opt.value === '');
+                select.innerHTML = '';
+                defaultOptions.forEach(opt => select.appendChild(opt));
+
+                modules.forEach(mod => {
+                    const option = document.createElement('option');
+                    option.value = mod.key;
+                    option.text = mod.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Reset formulário
+        function resetForm() {
+            document.getElementById('contentForm').reset();
+        }
+
+        // Mostrar mensagem
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // ====== FUNÇÕES DO FEED ======
         async function loadFeedPosts() {
             try {
                 const { data, error } = await supabase
@@ -127,139 +972,244 @@
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
-                
-                const list = document.getElementById('feedList');
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p>Nenhum post encontrado</p>';
-                    return;
+                if (!error && data) {
+                    displayFeedPosts(data);
                 }
-                
-                list.innerHTML = data.map(post => `
-                    <div class="message-item">
-                        <div class="message-header">
-                            <strong>${post.title}</strong>
-                            <span class="status-badge ${post.active ? 'status-approved' : 'status-rejected'}">
-                                ${post.active ? 'Ativo' : 'Inativo'}
-                            </span>
-                        </div>
-                        <div class="message-content">${post.content}</div>
-                        <button class="btn btn-danger" onclick="deleteFeedPost('${post.id}')">Excluir</button>
-                    </div>
-                `).join('');
             } catch (error) {
-                console.error('Erro:', error);
-                document.getElementById('feedList').innerHTML = '<p>Erro ao carregar posts</p>';
+                console.error('Erro ao carregar posts:', error);
             }
         }
 
-        async function saveFeedPost(event) {
-            event.preventDefault();
+        function displayFeedPosts(posts) {
+            const list = document.getElementById('feedList');
+            if (posts.length === 0) {
+                list.innerHTML = '<p>Nenhum post encontrado</p>';
+                return;
+            }
             
-            const data = {
+            let html = '';
+            posts.forEach(post => {
+                const statusBadge = post.active ? 
+                    '<span class="status-badge status-active">✔ Ativo</span>' : 
+                    '<span class="status-badge status-inactive">✗ Inativo</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${post.highlight ? '⭐ ' : ''}${post.title}
+                                ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Categoria:</strong> ${post.category} | 
+                                <strong>Data:</strong> ${new Date(post.created_at).toLocaleDateString('pt-BR')}
+                            </div>
+                            <div style="color: #666; margin-top: 5px;">${post.content.substring(0, 100)}...</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editFeedPost('${post.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteFeedPost('${post.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        // Salvar post do feed
+        document.getElementById('feedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const editId = document.getElementById('editFeedId').value;
+            const formData = {
                 title: document.getElementById('feedTitle').value,
                 category: document.getElementById('feedCategory').value,
                 content: document.getElementById('feedContent').value,
-                active: document.getElementById('feedActive').checked
+                image_url: document.getElementById('feedImage').value || null,
+                tags: document.getElementById('feedTags').value || null,
+                active: document.getElementById('feedActive').checked,
+                highlight: document.getElementById('feedHighlight').checked
             };
             
             try {
-                const { error } = await supabase.from('feed_posts').insert([data]);
-                if (error) throw error;
+                let result;
+                if (editId) {
+                    result = await supabase.from('feed_posts').update(formData).eq('id', editId);
+                } else {
+                    result = await supabase.from('feed_posts').insert([formData]);
+                }
                 
-                alert('Post publicado com sucesso!');
-                document.getElementById('feedForm').reset();
-                loadFeedPosts();
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success');
+                    resetFeedForm();
+                    loadFeedPosts();
+                } else {
+                    showMessage('Erro ao salvar post: ' + error.message, 'error');
+                }
             } catch (error) {
-                alert('Erro ao publicar: ' + error.message);
+                showMessage('Erro ao salvar post', 'error');
+            }
+        });
+
+        async function editFeedPost(id) {
+            try {
+                const { data, error } = await supabase.from('feed_posts').select('*').eq('id', id).single();
+                if (!error && data) {
+                    document.getElementById('editFeedId').value = data.id;
+                    document.getElementById('feedTitle').value = data.title;
+                    document.getElementById('feedCategory').value = data.category;
+                    document.getElementById('feedContent').value = data.content;
+                    document.getElementById('feedImage').value = data.image_url || '';
+                    document.getElementById('feedTags').value = data.tags || '';
+                    document.getElementById('feedActive').checked = data.active;
+                    document.getElementById('feedHighlight').checked = data.highlight;
+                    document.getElementById('saveFeedBtn').innerHTML = '💾 Atualizar Post';
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar post', 'error');
             }
         }
 
         async function deleteFeedPost(id) {
-            if (!confirm('Excluir este post?')) return;
+            if (!confirm('Tem certeza que deseja excluir este post?')) return;
             
             try {
                 const { error } = await supabase.from('feed_posts').delete().eq('id', id);
-                if (error) throw error;
-                loadFeedPosts();
+                if (!error) {
+                    showMessage('Post excluído com sucesso!', 'success');
+                    loadFeedPosts();
+                }
             } catch (error) {
-                alert('Erro ao excluir: ' + error.message);
+                showMessage('Erro ao excluir post', 'error');
             }
         }
 
-        // ===== COMUNIDADE =====
+        function resetFeedForm() {
+            document.getElementById('feedForm').reset();
+            document.getElementById('editFeedId').value = '';
+            document.getElementById('feedActive').checked = true;
+            document.getElementById('feedHighlight').checked = false;
+            document.getElementById('saveFeedBtn').innerHTML = '💾 Publicar Post';
+        }
+
+        // ====== FUNÇÕES DA COMUNIDADE ======
         async function loadCommunityMessages() {
-            const filter = document.getElementById('filterStatus').value;
+            const filter = document.getElementById('filterStatus')?.value || 'pending';
+            
+            console.log('Carregando mensagens com filtro:', filter);
             
             try {
                 let query = supabase
                     .from('community_posts')
                     .select(`
                         *,
-                        profiles (name, email)
+                        profiles (
+                            name,
+                            email
+                        )
                     `)
                     .order('created_at', { ascending: false });
                 
-                if (filter !== 'all') {
-                    query = query.eq('status', filter);
+                // Filtrar por status
+                if (filter === 'pending') {
+                    query = query.eq('status', 'pending');
+                } else if (filter === 'approved') {
+                    query = query.eq('status', 'approved');
+                } else if (filter === 'rejected') {
+                    query = query.eq('status', 'rejected');
                 }
                 
-                const { data, error } = await query;
-                if (error) throw error;
+                const { data: messages, error } = await query;
                 
-                const list = document.getElementById('communityList');
-                if (!data || data.length === 0) {
-                    list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
+                if (error) {
+                    console.error('Erro ao carregar mensagens:', error);
+                    document.getElementById('communityList').innerHTML = `
+                        <p style="color: red;">Erro: ${error.message}</p>
+                    `;
                     return;
                 }
                 
-                list.innerHTML = data.map(msg => {
-                    const author = msg.profiles?.name || msg.profiles?.email || 'Anônimo';
-                    let statusClass = 'status-pending';
-                    let statusText = 'Pendente';
-                    
-                    if (msg.status === 'approved') {
-                        statusClass = 'status-approved';
-                        statusText = 'Aprovada';
-                    } else if (msg.status === 'rejected') {
-                        statusClass = 'status-rejected';
-                        statusText = 'Rejeitada';
-                    }
-                    
-                    return `
-                        <div class="message-item">
-                            <div class="message-header">
-                                <strong>${author}</strong>
-                                <span class="status-badge ${statusClass}">${statusText}</span>
+                console.log('Mensagens carregadas:', messages);
+                displayCommunityMessages(messages || []);
+                
+            } catch (error) {
+                console.error('Erro geral:', error);
+                document.getElementById('communityList').innerHTML = `
+                    <p style="color: red;">Erro: ${error.message}</p>
+                `;
+            }
+        }
+
+        function displayCommunityMessages(messages) {
+            const list = document.getElementById('communityList');
+            
+            if (messages.length === 0) {
+                list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
+                return;
+            }
+            
+            let html = '';
+            messages.forEach(msg => {
+                const author = msg.profiles ? msg.profiles.name || msg.profiles.email : 'Anônimo';
+                
+                let statusBadge = '';
+                if (msg.status === 'approved') {
+                    statusBadge = '<span class="status-badge status-active">Aprovada</span>';
+                } else if (msg.status === 'pending') {
+                    statusBadge = '<span class="status-badge status-inactive">Pendente</span>';
+                } else if (msg.status === 'rejected') {
+                    statusBadge = '<span class="status-badge" style="background: #e74c3c; color: white;">Rejeitada</span>';
+                }
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${author} ${statusBadge}
                             </div>
-                            <div class="message-content">${msg.content}</div>
-                            <div style="margin-top: 10px;">
-                                ${msg.status === 'pending' ? `
-                                    <button class="btn btn-success" onclick="approveMessage('${msg.id}')">Aprovar</button>
-                                    <button class="btn btn-danger" onclick="rejectMessage('${msg.id}')">Rejeitar</button>
-                                ` : ''}
-                                <button class="btn btn-danger" onclick="deleteMessage('${msg.id}')">Excluir</button>
+                            <div class="content-module">
+                                <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
+                            </div>
+                            <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                ${msg.content}
                             </div>
                         </div>
-                    `;
-                }).join('');
-            } catch (error) {
-                console.error('Erro:', error);
-                document.getElementById('communityList').innerHTML = '<p>Erro ao carregar mensagens</p>';
-            }
+                        <div class="content-actions">
+                            ${msg.status === 'pending' ? `
+                                <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                                <button class="btn btn-small btn-danger" onclick="rejectMessage('${msg.id}')">❌ Rejeitar</button>
+                            ` : msg.status === 'approved' ? `
+                                <button class="btn btn-small btn-danger" onclick="rejectMessage('${msg.id}')">❌ Rejeitar</button>
+                            ` : `
+                                <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                            `}
+                            <button class="btn btn-small btn-danger" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
         }
 
         async function approveMessage(id) {
             try {
                 const { error } = await supabase
                     .from('community_posts')
-                    .update({ status: 'approved' })
+                    .update({ 
+                        status: 'approved',
+                        updated_at: new Date().toISOString()
+                    })
                     .eq('id', id);
                 
-                if (error) throw error;
-                loadCommunityMessages();
+                if (!error) {
+                    showMessage('Mensagem aprovada!', 'success');
+                    loadCommunityMessages();
+                } else {
+                    showMessage('Erro ao aprovar: ' + error.message, 'error');
+                }
             } catch (error) {
-                alert('Erro ao aprovar: ' + error.message);
+                showMessage('Erro ao aprovar mensagem', 'error');
             }
         }
 
@@ -267,18 +1217,25 @@
             try {
                 const { error } = await supabase
                     .from('community_posts')
-                    .update({ status: 'rejected' })
+                    .update({ 
+                        status: 'rejected',
+                        updated_at: new Date().toISOString()
+                    })
                     .eq('id', id);
                 
-                if (error) throw error;
-                loadCommunityMessages();
+                if (!error) {
+                    showMessage('Mensagem rejeitada!', 'success');
+                    loadCommunityMessages();
+                } else {
+                    showMessage('Erro ao rejeitar: ' + error.message, 'error');
+                }
             } catch (error) {
-                alert('Erro ao rejeitar: ' + error.message);
+                showMessage('Erro ao rejeitar mensagem', 'error');
             }
         }
 
         async function deleteMessage(id) {
-            if (!confirm('Excluir esta mensagem?')) return;
+            if (!confirm('Tem certeza que deseja excluir esta mensagem permanentemente?')) return;
             
             try {
                 const { error } = await supabase
@@ -286,10 +1243,14 @@
                     .delete()
                     .eq('id', id);
                 
-                if (error) throw error;
-                loadCommunityMessages();
+                if (!error) {
+                    showMessage('Mensagem excluída!', 'success');
+                    loadCommunityMessages();
+                } else {
+                    showMessage('Erro ao excluir: ' + error.message, 'error');
+                }
             } catch (error) {
-                alert('Erro ao excluir: ' + error.message);
+                showMessage('Erro ao excluir mensagem', 'error');
             }
         }
 
@@ -297,7 +1258,7 @@
         async function init() {
             const isAuth = await checkAuth();
             if (isAuth) {
-                loadFeedPosts();
+                loadModules();
             }
         }
 
