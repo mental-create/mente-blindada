@@ -436,6 +436,11 @@
             transition: all 0.3s ease;
         }
 
+        .profile-save-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 0 4px rgba(65, 105, 225, 0.1);
+        }
+
         .logout-btn {
             margin-top: 20px;
             padding: 12px 30px;
@@ -677,6 +682,7 @@
         async function logout() {
             if (!supabase) return;
             
+            // NOTE: Replace `confirm` with a custom modal UI in production.
             if (confirm('Deseja realmente sair?')) {
                 await supabase.auth.signOut();
                 window.location.href = 'index.html';
@@ -916,6 +922,7 @@
                         </div>
                     `;
                 } else {
+                    // NOTE: Replace `alert` with a custom modal UI in production.
                     alert('URL do conteúdo não disponível');
                 }
             } else if (content.content_type === 'html') {
@@ -1046,153 +1053,155 @@
 
         // ====== COMUNIDADE ======
         async function loadCommunity() {
-    const mainContent = document.getElementById('mainContent');
-    mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
-    
-    try {
-        // MUDANÇA: Usando community_posts com campo status
-        const { data: messages, error } = await supabase
-            .from('community_posts')
-            .select(`
-                *,
-                profiles (
-                    name,
-                    email
-                )
-            `)
-            .eq('status', 'approved') // MUDANÇA: campo status ao invés de approved
-            .order('created_at', { ascending: false });
-        
-        if (error) {
-            console.error('Erro detalhado:', error);
-            mainContent.innerHTML = `
-                <div class="community-container">
-                    <div class="community-input-box">
-                        <textarea class="community-input" id="communityMessage" 
-                            placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                        <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                            Enviar Mensagem
-                        </button>
-                        <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                            * Mensagens serão revisadas antes de aparecer
-                        </p>
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
+            
+            try {
+                const { data: messages, error } = await supabase
+                    .from('postagens_da_comunidade')
+                    .select(`
+                        *,
+                        profiles (
+                            name,
+                            email
+                        )
+                    `)
+                    .eq('status', 'approved')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Erro detalhado:', error);
+                    mainContent.innerHTML = `
+                        <div class="community-container">
+                            <div class="community-input-box">
+                                <textarea class="community-input" id="communityMessage" 
+                                    placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                                <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                                    Enviar Mensagem
+                                </button>
+                                <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                                    * Mensagens serão revisadas antes de aparecer
+                                </p>
+                            </div>
+                            <div class="empty-state">
+                                <p>Seja o primeiro a compartilhar!</p>
+                            </div>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                mainContent.innerHTML = `
+                    <div class="community-container">
+                        <div class="community-input-box">
+                            <textarea class="community-input" id="communityMessage" 
+                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                                Enviar Mensagem
+                            </button>
+                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                                * Mensagens serão revisadas antes de aparecer
+                            </p>
+                        </div>
                     </div>
-                    <div class="empty-state">
-                        <p>Seja o primeiro a compartilhar!</p>
+                `;
+                
+                const container = mainContent.querySelector('.community-container');
+                
+                if (messages && messages.length > 0) {
+                    messages.forEach(msg => {
+                        const msgEl = createCommunityMessage(msg);
+                        container.appendChild(msgEl);
+                    });
+                } else {
+                    const emptyMsg = document.createElement('div');
+                    emptyMsg.className = 'empty-state';
+                    emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
+                    container.appendChild(emptyMsg);
+                }
+                
+            } catch (error) {
+                console.error('Erro geral ao carregar comunidade:', error);
+                mainContent.innerHTML = `
+                    <div class="community-container">
+                        <div class="community-input-box">
+                            <textarea class="community-input" id="communityMessage" 
+                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                                Enviar Mensagem
+                            </button>
+                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                                * Mensagens serão revisadas antes de aparecer
+                            </p>
+                        </div>
+                        <div class="empty-state">
+                            <p>Área da comunidade</p>
+                        </div>
                     </div>
+                `;
+            }
+        }
+
+        function createCommunityMessage(msg) {
+            const div = document.createElement('div');
+            div.className = 'community-message';
+            
+            const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
+            const authorInitial = authorName.charAt(0).toUpperCase();
+            const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
+            
+            div.innerHTML = `
+                <div class="community-message-header">
+                    <div class="community-avatar">${authorInitial}</div>
+                    <div class="community-author">${authorName}</div>
+                    <div class="community-time">${msgDate}</div>
                 </div>
+                <div class="community-text">${msg.message}</div>
             `;
-            return;
+            
+            return div;
         }
-        
-        mainContent.innerHTML = `
-            <div class="community-container">
-                <div class="community-input-box">
-                    <textarea class="community-input" id="communityMessage" 
-                        placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                    <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                        Enviar Mensagem
-                    </button>
-                    <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                        * Mensagens serão revisadas antes de aparecer
-                    </p>
-                </div>
-            </div>
-        `;
-        
-        const container = mainContent.querySelector('.community-container');
-        
-        if (messages && messages.length > 0) {
-            messages.forEach(msg => {
-                const msgEl = createCommunityMessage(msg);
-                container.appendChild(msgEl);
-            });
-        } else {
-            const emptyMsg = document.createElement('div');
-            emptyMsg.className = 'empty-state';
-            emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
-            container.appendChild(emptyMsg);
-        }
-        
-    } catch (error) {
-        console.error('Erro geral ao carregar comunidade:', error);
-        mainContent.innerHTML = `
-            <div class="community-container">
-                <div class="community-input-box">
-                    <textarea class="community-input" id="communityMessage" 
-                        placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                    <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                        Enviar Mensagem
-                    </button>
-                    <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                        * Mensagens serão revisadas antes de aparecer
-                    </p>
-                </div>
-                <div class="empty-state">
-                    <p>Área da comunidade</p>
-                </div>
-            </div>
-        `;
-    }
-}
 
-function createCommunityMessage(msg) {
-    const div = document.createElement('div');
-    div.className = 'community-message';
-    
-    const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
-    const authorInitial = authorName.charAt(0).toUpperCase();
-    const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
-    
-    div.innerHTML = `
-        <div class="community-message-header">
-            <div class="community-avatar">${authorInitial}</div>
-            <div class="community-author">${authorName}</div>
-            <div class="community-time">${msgDate}</div>
-        </div>
-        <div class="community-text">${msg.content}</div>
-    `;
-    
-    return div;
-}
-
-async function sendCommunityMessage() {
-    const messageInput = document.getElementById('communityMessage');
-    const message = messageInput.value.trim();
-    
-    if (!message) {
-        alert('Por favor, escreva uma mensagem');
-        return;
-    }
-    
-    if (!supabase || !currentUser) {
-        alert('Você precisa estar logado');
-        return;
-    }
-    
-    try {
-        // MUDANÇA: Usando community_posts com campo content e status
-        const { error } = await supabase
-            .from('community_posts')
-            .insert([{
-                user_id: currentUser.id,
-                content: message, // MUDANÇA: campo content ao invés de message
-                status: 'pending' // MUDANÇA: campo status ao invés de approved
-            }]);
-        
-        if (error) {
-            console.error('Erro ao enviar:', error);
-            throw error;
+        async function sendCommunityMessage() {
+            const messageInput = document.getElementById('communityMessage');
+            const message = messageInput.value.trim();
+            
+            if (!message) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
+                alert('Por favor, escreva uma mensagem');
+                return;
+            }
+            
+            if (!supabase || !currentUser) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
+                alert('Você precisa estar logado');
+                return;
+            }
+            
+            try {
+                const { error } = await supabase
+                    .from('postagens_da_comunidade')
+                    .insert([{
+                        user_id: currentUser.id,
+                        message: message,
+                        status: 'pending'
+                    }]);
+                
+                if (error) {
+                    console.error('Erro ao enviar:', error);
+                    throw error;
+                }
+                
+                // NOTE: Replace `alert` with a custom modal UI in production.
+                alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
+                messageInput.value = '';
+                
+            } catch (error) {
+                console.error('Erro ao enviar mensagem:', error);
+                // NOTE: Replace `alert` with a custom modal UI in production.
+                alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
+            }
         }
-        
-        alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
-        messageInput.value = '';
-        
-    } catch (error) {
-        console.error('Erro ao enviar mensagem:', error);
-        alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
-    }
-}
 
         // ====== PERFIL ======
         async function loadProfile() {
@@ -1266,6 +1275,7 @@ async function sendCommunityMessage() {
             const bio = document.getElementById('profileBio').value.trim();
             
             if (!name) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('Por favor, digite seu nome');
                 return;
             }
@@ -1288,11 +1298,13 @@ async function sendCommunityMessage() {
                 currentUser.profile.name = name;
                 currentUser.profile.bio = bio;
                 
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('✅ Perfil atualizado com sucesso!');
                 updateGreeting();
                 
             } catch (error) {
                 console.error('Erro ao salvar perfil:', error);
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('❌ Erro ao salvar perfil');
             }
         }
@@ -1300,18 +1312,21 @@ async function sendCommunityMessage() {
         async function uploadAvatar(event) {
             const file = event.target.files[0];
             if (!file || !supabase || !currentUser) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('Erro: arquivo ou usuário não encontrado');
                 return;
             }
             
             // Verificar se o arquivo é uma imagem
             if (!file.type.startsWith('image/')) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('Por favor, selecione uma imagem');
                 return;
             }
             
             // Limitar tamanho do arquivo (2MB)
             if (file.size > 2 * 1024 * 1024) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('Imagem muito grande. Máximo 2MB');
                 return;
             }
@@ -1332,6 +1347,7 @@ async function sendCommunityMessage() {
                     const fileName = `avatar-${currentUser.id}-${Date.now()}.jpg`;
                     
                     console.log('Iniciando upload:', fileName);
+                    // NOTE: Replace `alert` with a custom modal UI in production.
                     alert('Enviando foto...');
                     
                     // Upload direto do blob
@@ -1344,7 +1360,8 @@ async function sendCommunityMessage() {
                     
                     if (uploadError) {
                         console.error('Erro no upload:', uploadError);
-                        alert(`Erro no upload: ${uploadError.content}`);
+                        // NOTE: Replace `alert` with a custom modal UI in production.
+                        alert(`Erro no upload: ${uploadError.message}`);
                         return;
                     }
                     
@@ -1369,6 +1386,7 @@ async function sendCommunityMessage() {
                         console.error('Erro ao atualizar perfil:', updateError);
                         // Deletar imagem se falhar
                         await supabase.storage.from('avatars').remove([fileName]);
+                        // NOTE: Replace `alert` with a custom modal UI in production.
                         alert('Erro ao atualizar perfil');
                         return;
                     }
@@ -1379,23 +1397,27 @@ async function sendCommunityMessage() {
                     }
                     currentUser.profile.avatar_url = publicUrl;
                     
+                    // NOTE: Replace `alert` with a custom modal UI in production.
                     alert('✅ Foto atualizada!');
                     loadProfile();
                 };
                 
                 reader.onerror = () => {
+                    // NOTE: Replace `alert` with a custom modal UI in production.
                     alert('Erro ao ler arquivo');
                 };
                 
             } catch (error) {
                 console.error('Erro:', error);
-                alert(`Erro: ${error.content}`);
+                // NOTE: Replace `alert` with a custom modal UI in production.
+                alert(`Erro: ${error.message}`);
             }
         }
 
         // ====== INICIALIZAÇÃO ======
         async function init() {
             if (!initSupabase()) {
+                // NOTE: Replace `alert` with a custom modal UI in production.
                 alert('Erro ao configurar o sistema');
                 return;
             }
@@ -1408,7 +1430,7 @@ async function sendCommunityMessage() {
             updateTime();
             updateDate();
             updateGreeting();
-            loadHomeModules();
+            handleNavClick('home'); // Começa na tela inicial
             
             // Atualizar relógio
             setInterval(updateTime, 60000);
