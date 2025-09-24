@@ -897,6 +897,8 @@
                 }
                 
                 if (data) {
+                    switchTab('add');
+                    
                     document.getElementById('newModuleKey').value = data.key;
                     document.getElementById('newModuleKey').disabled = true;
                     document.getElementById('newModuleName').value = data.name;
@@ -1110,7 +1112,7 @@
             
             try {
                 let query = supabase
-                    .from('community_messages') // Corrigido para a tabela correta
+                    .from('postagens_da_comunidade')
                     .select(`
                         *,
                         profiles (
@@ -1204,7 +1206,7 @@
         async function approveMessage(id) {
             try {
                 const { error } = await supabase
-                    .from('community_messages')
+                    .from('postagens_da_comunidade')
                     .update({ 
                         status: 'approved',
                         updated_at: new Date().toISOString()
@@ -1225,7 +1227,7 @@
         async function rejectMessage(id) {
             try {
                 const { error } = await supabase
-                    .from('community_messages')
+                    .from('postagens_da_comunidade')
                     .update({ 
                         status: 'rejected',
                         updated_at: new Date().toISOString()
@@ -1249,7 +1251,7 @@
             
             try {
                 const { error } = await supabase
-                    .from('community_messages')
+                    .from('postagens_da_comunidade')
                     .delete()
                     .eq('id', id);
                 
