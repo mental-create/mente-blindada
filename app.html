@@ -1344,7 +1344,7 @@ async function sendCommunityMessage() {
                     
                     if (uploadError) {
                         console.error('Erro no upload:', uploadError);
-                        alert(`Erro no upload: ${uploadError.message}`);
+                        alert(`Erro no upload: ${uploadError.content}`);
                         return;
                     }
                     
@@ -1389,7 +1389,7 @@ async function sendCommunityMessage() {
                 
             } catch (error) {
                 console.error('Erro:', error);
-                alert(`Erro: ${error.message}`);
+                alert(`Erro: ${error.content}`);
             }
         }
 
