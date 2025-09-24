@@ -1094,7 +1094,10 @@
 
         // ====== FUNÇÕES DA COMUNIDADE ======
         async function loadCommunityMessages() {
-            const filter = document.getElementById('filterStatus').value;
+            const filter = document.getElementById('filterStatus')?.value || 'pending';
+            
+            console.log('Carregando mensagens com filtro:', filter);
+            
             let query = supabase
                 .from('community_messages')
                 .select(`
@@ -1111,11 +1114,28 @@
             
             try {
                 const { data, error } = await query;
-                if (!error && data) {
+                
+                console.log('Mensagens carregadas:', data);
+                console.log('Erro (se houver):', error);
+                
+                if (error) {
+                    console.error('Erro ao carregar mensagens:', error);
+                    document.getElementById('communityList').innerHTML = `
+                        <p style="color: red;">Erro ao carregar mensagens: ${error.message}</p>
+                    `;
+                    return;
+                }
+                
+                if (data) {
                     displayCommunityMessages(data);
+                } else {
+                    document.getElementById('communityList').innerHTML = '<p>Nenhuma mensagem encontrada</p>';
                 }
             } catch (error) {
                 console.error('Erro ao carregar mensagens:', error);
+                document.getElementById('communityList').innerHTML = `
+                    <p style="color: red;">Erro: ${error.message}</p>
+                `;
             }
         }
 
