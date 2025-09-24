@@ -2,11 +2,12 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mente Blindada 3-2-1</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MentalHealth+ | Bem-estar Mental</title>
+    
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
+    
     <style>
         * {
             margin: 0;
@@ -15,1196 +16,535 @@
         }
 
         body {
-            font-family: 'Montserrat', sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
-        }
-
-        .container {
-            flex: 1;
-            width: 100%;
-            max-width: 480px;
-            margin: 0 auto;
-            background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 40%);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Header Section */
-        .header {
-            padding: 20px;
-            color: white;
-            position: relative;
-        }
-
-        .time {
-            font-size: 72px;
-            font-weight: 300;
-            margin-bottom: 5px;
-            letter-spacing: -2px;
-        }
-
-        .date {
-            font-size: 20px;
-            font-weight: 300;
-            opacity: 0.95;
-            margin-bottom: 20px;
-            white-space: nowrap;
-        }
-
-        .app-icon {
-            position: absolute;
-            top: 30px;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            background: url('https://i.imgur.com/vKe7loB.png') no-repeat center;
-            background-size: contain;
-            border-radius: 20px;
-        }
-
-        .title-bar {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 20px;
-            border-radius: 20px;
-            margin: 0 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: 800;
-            color: white;
-            text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            white-space: nowrap;
-        }
-
-        .greeting {
-            font-size: 26px;
-            text-align: center;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            background: #f0f4f8;
-            border-radius: 30px 30px 0 0;
-            margin-top: 20px;
-            padding: 30px 20px 100px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            align-content: start;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            min-height: 200px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card:active {
-            transform: scale(0.98);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .card-image {
-            width: 100%;
-            height: 140px;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c3e50;
-            text-align: center;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* Back Button */
-        .back-button {
-            grid-column: 1/-1;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        /* Module Title */
-        .module-title {
-            grid-column: 1/-1;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 700;
             color: #333;
-            margin-bottom: 20px;
         }
 
-        /* Feed Styles */
-        .feed-container {
-            grid-column: 1/-1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .feed-post {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
+        .header {
+            background: rgba(255, 255, 255, 0.98);
+            padding: 1rem 2rem;
             box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
         }
 
-        .feed-post-header {
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #667eea;
             display: flex;
             align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 0.5rem;
         }
 
-        .feed-author-avatar {
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .user-avatar {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 600;
-            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            overflow: hidden;
         }
 
-        .feed-author-info {
-            flex: 1;
+        .user-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
         }
 
-        .feed-author-name {
-            font-weight: 700;
+        .nav-menu {
+            background: white;
+            padding: 1rem 0;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+        }
+
+        .nav-items {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            gap: 1rem;
+            padding: 0 2rem;
+            overflow-x: auto;
+        }
+
+        .nav-item {
+            padding: 0.75rem 1.5rem;
+            background: #f5f5f5;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            border: none;
+            font-size: 1rem;
+        }
+
+        .nav-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .nav-item.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+        }
+
+        .content-card {
+            background: white;
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .module-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .module-icon {
+            font-size: 2rem;
+        }
+
+        .module-title {
+            font-size: 1.5rem;
             color: #333;
         }
 
-        .feed-post-time {
-            font-size: 12px;
-            color: #999;
+        /* Feed Styles */
+        .feed-posts {
+            display: grid;
+            gap: 1.5rem;
         }
 
-        .feed-post-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
+        .feed-post {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 10px;
+            transition: transform 0.3s;
         }
 
-        .feed-post-content {
+        .feed-post:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .post-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #667eea;
+        }
+
+        .post-content {
             color: #666;
             line-height: 1.6;
-            margin-bottom: 15px;
         }
 
-        .feed-post-image {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .feed-tags {
-            margin-top: 10px;
-            color: #666;
-            font-size: 12px;
+        .post-meta {
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9rem;
+            color: #999;
         }
 
         /* Community Styles */
-        .community-container {
-            grid-column: 1/-1;
+        .community-form {
+            margin-bottom: 2rem;
+        }
+
+        .message-input-group {
             display: flex;
-            flex-direction: column;
-            gap: 15px;
+            gap: 1rem;
+            margin-bottom: 1rem;
         }
 
-        .community-input-box {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .community-input {
-            width: 100%;
-            padding: 15px;
+        .message-input {
+            flex: 1;
+            padding: 1rem;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
-            font-family: 'Montserrat', sans-serif;
-            resize: vertical;
-            min-height: 80px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
-        .community-submit-btn {
-            margin-top: 10px;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .message-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-send {
+            padding: 1rem 2rem;
+            background: #667eea;
             color: white;
             border: none;
             border-radius: 10px;
-            font-weight: 600;
+            font-size: 1rem;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: background 0.3s;
         }
 
-        .community-submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
+        .btn-send:hover {
+            background: #764ba2;
         }
 
-        .community-message {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+        .info-text {
+            color: #666;
+            font-size: 0.9rem;
+            font-style: italic;
         }
 
-        .community-message-header {
+        .community-messages {
+            display: grid;
+            gap: 1rem;
+        }
+
+        .message-card {
+            background: #f9f9f9;
+            padding: 1.5rem;
+            border-radius: 10px;
             display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
+            gap: 1rem;
         }
 
-        .community-avatar {
-            width: 35px;
-            height: 35px;
+        .message-avatar {
+            width: 50px;
+            height: 50px;
             border-radius: 50%;
-            background: #e0e0e0;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
+            color: white;
+            font-weight: bold;
+            flex-shrink: 0;
         }
 
-        .community-author {
+        .message-content {
             flex: 1;
-            font-weight: 600;
-            color: #333;
         }
 
-        .community-time {
-            font-size: 12px;
-            color: #999;
+        .message-author {
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+            color: #667eea;
         }
 
-        .community-text {
+        .message-text {
             color: #666;
             line-height: 1.5;
         }
 
+        .message-time {
+            font-size: 0.8rem;
+            color: #999;
+            margin-top: 0.5rem;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 0.25rem 0.75rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            margin-left: 1rem;
+        }
+
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+
         /* Profile Styles */
         .profile-container {
-            grid-column: 1/-1;
-            background: white;
-            border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: grid;
+            gap: 2rem;
         }
 
-        .profile-header {
-            text-align: center;
-            margin-bottom: 30px;
+        .profile-header-section {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
         }
 
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
+        .profile-avatar-large {
+            width: 150px;
+            height: 150px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0 auto 20px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 48px;
             color: white;
-            position: relative;
+            font-size: 3rem;
             cursor: pointer;
+            position: relative;
             overflow: hidden;
         }
 
-        .profile-avatar img {
+        .profile-avatar-large img {
             width: 100%;
             height: 100%;
-            border-radius: 50%;
             object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
         }
 
-        .profile-avatar-edit {
+        .profile-avatar-large:hover::after {
+            content: '📷';
             position: absolute;
-            bottom: 0;
-            right: 0;
-            background: white;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: none;
+            inset: 0;
+            background: rgba(0,0,0,0.5);
+            display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            cursor: pointer;
-            z-index: 10;
+            font-size: 2rem;
         }
 
-        .profile-avatar:hover .profile-avatar-edit {
-            display: flex;
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .profile-email {
-            color: #666;
-            margin-bottom: 20px;
-        }
-
-        .profile-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .profile-input {
-            padding: 12px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        .profile-save-btn {
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .logout-btn {
-            margin-top: 20px;
-            padding: 12px 30px;
-            background: #e74c3c;
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            width: 100%;
-        }
-
-        /* Navigation Bar */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 20px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
+        .profile-info {
             flex: 1;
         }
 
-        .nav-item.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            margin: 0 5px;
+        .profile-form {
+            display: grid;
+            gap: 1rem;
         }
 
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
+        .form-group {
+            display: grid;
+            gap: 0.5rem;
         }
 
-        .nav-label {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        /* Loading State */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
+        .form-label {
+            font-weight: 600;
             color: #666;
-            grid-column: 1/-1;
         }
 
-        .loading.active {
-            display: block;
+        .form-input {
+            padding: 0.75rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
         }
 
-        /* Empty State */
-        .empty-state {
-            grid-column: 1/-1;
+        .form-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn-save {
+            padding: 1rem 2rem;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+        }
+
+        .btn-save:hover {
+            background: #764ba2;
+        }
+
+        .btn-logout {
+            padding: 0.5rem 1rem;
+            background: #dc3545;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .btn-logout:hover {
+            background: #c82333;
+        }
+
+        .loading {
             text-align: center;
-            padding: 40px;
+            padding: 2rem;
+            color: #666;
+        }
+
+        .error-message {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .success-message {
+            background: #d4edda;
+            color: #155724;
+            padding: 1rem;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
             color: #999;
         }
 
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
+        /* Hidden file input */
+        input[type="file"] {
+            display: none;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-            min-height: 40px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Para iframe específico */
-        .iframe-container {
-            position: relative;
-            overflow: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        @media (max-width: 380px) {
-            .time {
-                font-size: 60px;
+        /* Responsive */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 1rem;
             }
             
-            .date {
-                font-size: 18px;
+            .container {
+                padding: 0 1rem;
             }
             
-            .title {
-                font-size: 20px;
+            .nav-items {
+                padding: 0 1rem;
             }
             
-            .greeting {
-                font-size: 22px;
-            }
-            
-            .app-icon {
-                width: 70px;
-                height: 70px;
+            .profile-header-section {
+                flex-direction: column;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header" id="mainHeader">
-            <div class="time" id="time">09:40</div>
-            <div class="date" id="date">Segunda-Feira, 22 de Setembro</div>
-            <div class="app-icon"></div>
+    <!-- Header -->
+    <div class="header">
+        <div class="header-content">
+            <div class="logo">
+                <span>🧠</span>
+                <span>MentalHealth+</span>
+            </div>
+            <div class="user-info">
+                <span id="userName">Carregando...</span>
+                <div class="user-avatar" id="headerAvatar" onclick="showModule('profile')">
+                    <span id="avatarInitial">?</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">Sair</button>
+            </div>
         </div>
-        
-        <div class="title-bar" id="titleBar">
-            <h1 class="title">MENTE BLINDADA 3-2-1</h1>
-            <div class="greeting" id="greeting">Bom Dia!</div>
-        </div>
-        
-        <div class="main-content" id="mainContent">
-            <!-- Conteúdo dinâmico será inserido aqui -->
-        </div>
-        
-        <nav class="nav-bar">
-            <div class="nav-item active" onclick="handleNavClick('home')" data-nav="home">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">INÍCIO</span>
-            </div>
-            
-            <div class="nav-item" onclick="handleNavClick('feed')" data-nav="feed">
-                <span class="nav-icon">📋</span>
-                <span class="nav-label">Feed</span>
-            </div>
-            
-            <div class="nav-item" onclick="handleNavClick('community')" data-nav="community">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Comunidade</span>
-            </div>
-            
-            <div class="nav-item" onclick="handleNavClick('profile')" data-nav="profile">
-                <span class="nav-icon">👤</span>
-                <span class="nav-label">Perfil</span>
-            </div>
-        </nav>
     </div>
 
-    <!-- Supabase Integration -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
+    <!-- Navigation -->
+    <div class="nav-menu">
+        <div class="nav-items">
+            <button class="nav-item active" onclick="showModule('feed')">
+                📰 Feed
+            </button>
+            <button class="nav-item" onclick="showModule('modules')">
+                📚 Módulos
+            </button>
+            <button class="nav-item" onclick="showModule('diary')">
+                📔 Diário
+            </button>
+            <button class="nav-item" onclick="showModule('meditation')">
+                🧘 Meditação
+            </button>
+            <button class="nav-item" onclick="showModule('breathing')">
+                💨 Respiração
+            </button>
+            <button class="nav-item" onclick="showModule('community')">
+                💬 Comunidade
+            </button>
+            <button class="nav-item" onclick="showModule('profile')">
+                👤 Perfil
+            </button>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="container">
+        <div class="content-card">
+            <div id="mainContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Hidden file input for avatar -->
+    <input type="file" id="avatarFile" accept="image/*" onchange="uploadAvatar(event)">
+
     <script>
-        // ====== CONFIGURAÇÃO DO SUPABASE ======
+        // ====== CONFIGURAÇÃO SUPABASE ======
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjA5MDMsImV4cCI6MjA0Nzk5NjkwM30.Vdj6Dc83R0Fy7IO0d_hQXCL45hDtXEaaMVBf_ZIpOWE';
+        
+        const { createClient } = window.supabase;
+        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let supabase;
         let currentUser = null;
-        let currentView = 'home';
-        
-        function initSupabase() {
-            try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('✅ Supabase configurado');
-                return true;
-            } catch (e) {
-                console.error('Erro ao configurar Supabase:', e);
-                return false;
-            }
-        }
+        let currentModule = 'feed';
 
-        // ====== AUTENTICAÇÃO ======
-        async function checkAuth() {
-            if (!supabase) return false;
+        // ====== INICIALIZAÇÃO ======
+        async function init() {
+            const { data: { session } } = await supabase.auth.getSession();
             
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    currentUser = session.user;
-                    
-                    // Carregar ou criar perfil do usuário
-                    let { data: profile, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', session.user.id)
-                        .single();
-                    
-                    // Se não existir perfil, criar um
-                    if (error || !profile) {
-                        const { data: newProfile } = await supabase
-                            .from('profiles')
-                            .insert([{
-                                id: session.user.id,
-                                email: session.user.email,
-                                name: session.user.email.split('@')[0]
-                            }])
-                            .select()
-                            .single();
-                        
-                        profile = newProfile;
-                    }
-                    
-                    if (profile) {
-                        currentUser.profile = profile;
-                    }
-                    
-                    updateGreeting();
-                    return true;
-                } else {
-                    window.location.href = 'index.html';
-                    return false;
-                }
-            } catch (error) {
-                console.error('Erro ao verificar autenticação:', error);
-                return currentUser !== null;
-            }
-        }
-
-        async function logout() {
-            if (!supabase) return;
-            
-            if (confirm('Deseja realmente sair?')) {
-                await supabase.auth.signOut();
-                window.location.href = 'index.html';
-            }
-        }
-
-        // ====== FUNÇÕES DE TEMPO ======
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('time').textContent = `${hours}:${minutes}`;
-        }
-
-        function updateDate() {
-            const now = new Date();
-            const days = ['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'];
-            const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
-            
-            const dayName = days[now.getDay()];
-            const day = now.getDate();
-            const month = months[now.getMonth()];
-            
-            document.getElementById('date').textContent = `${dayName}, ${day} de ${month}`;
-        }
-
-        function updateGreeting() {
-            const hour = new Date().getHours();
-            const greetingElement = document.getElementById('greeting');
-            
-            let greeting = '';
-            if (hour < 12) {
-                greeting = '🌅 Bom Dia';
-            } else if (hour < 18) {
-                greeting = '☀️ Boa Tarde';
-            } else {
-                greeting = '🌙 Boa Noite';
-            }
-            
-            if (currentUser && currentUser.profile && currentUser.profile.name) {
-                greeting += ', ' + currentUser.profile.name.split(' ')[0] + '!';
-            } else {
-                greeting += '!';
-            }
-            
-            greetingElement.innerHTML = greeting;
-        }
-
-        // ====== NAVEGAÇÃO ======
-        function handleNavClick(view) {
-            currentView = view;
-            
-            // Atualizar navegação ativa
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.nav === view) {
-                    item.classList.add('active');
-                }
-            });
-            
-            // Mostrar/esconder header baseado na view
-            const header = document.getElementById('mainHeader');
-            const titleBar = document.getElementById('titleBar');
-            if (view === 'home') {
-                header.style.display = 'block';
-                titleBar.style.display = 'block';
-            } else {
-                header.style.display = 'none';
-                titleBar.style.display = 'none';
-            }
-            
-            // Carregar conteúdo baseado na view
-            switch(view) {
-                case 'home':
-                    loadHomeModules();
-                    break;
-                case 'feed':
-                    loadFeed();
-                    break;
-                case 'community':
-                    loadCommunity();
-                    break;
-                case 'profile':
-                    loadProfile();
-                    break;
-            }
-            
-            // Feedback háptico
-            if (navigator.vibrate) {
-                navigator.vibrate(30);
-            }
-        }
-
-        // ====== HOME - MÓDULOS ======
-        async function loadHomeModules() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando módulos...</div>';
-            
-            try {
-                const { data: modules, error } = await supabase
-                    .from('modules')
-                    .select('*')
-                    .order('order_position');
-                
-                if (error) throw error;
-                
-                mainContent.innerHTML = '';
-                modules.forEach(mod => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color || '#e0e0e0'};"></div>
-                        <span class="card-title">${mod.name}</span>
-                    `;
-                    card.onclick = () => loadModuleContents(mod.key, mod.name);
-                    mainContent.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar módulos:', error);
-                // Fallback para módulos padrão
-                const modules = [
-                    { key: 'quiz', name: 'Quiz Interativo', image_url: 'https://i.imgur.com/mlrXyGH.png', bg_color: '#a8d5e2' },
-                    { key: 'exercises', name: 'Exercícios', image_url: 'https://i.imgur.com/L8g633e.png', bg_color: '#6b7db8' },
-                    { key: 'library', name: 'Biblioteca', image_url: 'https://i.imgur.com/jbRTk2Y.png', bg_color: '#5d7471' },
-                    { key: 'diary', name: 'Diário', image_url: 'https://i.imgur.com/zQG0nNP.png', bg_color: '#e8a87c' }
-                ];
-                
-                mainContent.innerHTML = '';
-                modules.forEach(mod => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color};"></div>
-                        <span class="card-title">${mod.name}</span>
-                    `;
-                    card.onclick = () => loadModuleContents(mod.key, mod.name);
-                    mainContent.appendChild(card);
-                });
-            }
-        }
-
-        // ====== CARREGAR CONTEÚDOS DO MÓDULO ======
-        async function loadModuleContents(moduleKey, moduleName) {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando conteúdos...</div>';
-            
-            // Esconder header quando navegar para módulo
-            document.getElementById('mainHeader').style.display = 'none';
-            document.getElementById('titleBar').style.display = 'none';
-            
-            try {
-                const { data: contents, error } = await supabase
-                    .from('contents')
-                    .select('*')
-                    .eq('module', moduleKey)
-                    .eq('active', true)
-                    .order('order_position');
-                
-                if (error) throw error;
-                
-                mainContent.innerHTML = '';
-                
-                // Adicionar botão voltar e título
-                const backBtn = document.createElement('button');
-                backBtn.className = 'back-button';
-                backBtn.innerHTML = '← Voltar';
-                backBtn.onclick = () => {
-                    // Mostrar header quando voltar ao home
-                    document.getElementById('mainHeader').style.display = 'block';
-                    document.getElementById('titleBar').style.display = 'block';
-                    loadHomeModules();
-                };
-                mainContent.appendChild(backBtn);
-                
-                const title = document.createElement('h2');
-                title.className = 'module-title';
-                title.textContent = moduleName;
-                mainContent.appendChild(title);
-                
-                if (!contents || contents.length === 0) {
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.className = 'empty-state';
-                    emptyDiv.innerHTML = '<p>Nenhum conteúdo disponível ainda.</p>';
-                    mainContent.appendChild(emptyDiv);
-                    return;
-                }
-                
-                // Adicionar cards de conteúdo
-                contents.forEach(content => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    
-                    // Se tem imagem, usa ela, senão usa cor de fundo
-                    const imageStyle = content.image_url 
-                        ? `background-image: url('${content.image_url}');`
-                        : '';
-                    const bgColor = content.bg_color || '#e0e0e0';
-                    
-                    card.innerHTML = `
-                        <div class="card-image" style="${imageStyle} background-color: ${bgColor};"></div>
-                        <span class="card-title">${content.title}</span>
-                    `;
-                    card.onclick = () => openContent(content);
-                    mainContent.appendChild(card);
-                });
-                
-            } catch (error) {
-                console.error('Erro ao carregar conteúdos:', error);
-                mainContent.innerHTML = `
-                    <button class="back-button" onclick="loadHomeModules()">← Voltar</button>
-                    <div class="empty-state">Erro ao carregar conteúdos</div>
-                `;
-            }
-        }
-
-        // ====== ABRIR CONTEÚDO ======
-        function openContent(content) {
-            const mainContent = document.getElementById('mainContent');
-            
-            // Esconder header quando abrir conteúdo
-            document.getElementById('mainHeader').style.display = 'none';
-            document.getElementById('titleBar').style.display = 'none';
-            
-            if (content.content_type === 'url' || content.content_type === 'iframe') {
-                // Incorporar URL em iframe com scroll visível
-                if (content.content_url) {
-                    mainContent.innerHTML = `
-                        <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
-                        <h2 class="module-title">${content.title}</h2>
-                        <div class="iframe-container" style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 250px); min-height: 500px; overflow: auto; position: relative;">
-                            <iframe src="${content.content_url}" 
-                                style="width: 100%; height: 100%; border: none; border-radius: 10px; display: block;"
-                                frameborder="0"
-                                allowfullscreen>
-                            </iframe>
-                            <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 8px; height: 100px; background: #ccc; border-radius: 10px; pointer-events: none;"></div>
-                        </div>
-                    `;
-                } else {
-                    alert('URL do conteúdo não disponível');
-                }
-            } else if (content.content_type === 'html') {
-                // Exibir HTML diretamente
-                mainContent.innerHTML = `
-                    <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
-                    <h2 class="module-title">${content.title}</h2>
-                    <div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px; overflow: auto; max-height: calc(100vh - 250px);">
-                        ${content.content_html || '<p>Conteúdo não disponível</p>'}
-                    </div>
-                `;
-            }
-        }
-        
-        // Função para voltar ao módulo (sem mostrar header)
-        function backToModule(moduleKey, moduleName) {
-            loadModuleContents(moduleKey, moduleName);
-        }
-        
-        // Função auxiliar para obter nome do módulo
-        function getModuleName(moduleKey) {
-            const moduleNames = {
-                'quiz': 'Quiz Interativo',
-                'exercises': 'Exercícios',
-                'library': 'Biblioteca',
-                'diary': 'Diário'
-            };
-            return moduleNames[moduleKey] || moduleKey;
-        }
-
-        // ====== FEED ======
-        function getCategoryIcon(category) {
-            const icons = {
-                'motivacao': '💪',
-                'meditacao': '🧘',
-                'exercicios': '🏃',
-                'alimentacao': '🥗',
-                'sono': '😴',
-                'relacionamentos': '❤️',
-                'produtividade': '📈',
-                'autoconhecimento': '🔍'
-            };
-            return icons[category] || '📝';
-        }
-
-        async function loadFeed() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando feed...</div>';
-            
-            try {
-                const { data: posts, error } = await supabase
-                    .from('feed_posts')
-                    .select('*')
-                    .eq('active', true)
-                    .order('highlight', { ascending: false })
-                    .order('created_at', { ascending: false });
-                
-                if (error) throw error;
-                
-                if (!posts || posts.length === 0) {
-                    mainContent.innerHTML = `
-                        <div class="empty-state">
-                            <h3>📋 Feed vazio</h3>
-                            <p>Nenhuma postagem ainda.</p>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                mainContent.innerHTML = '<div class="feed-container"></div>';
-                const feedContainer = mainContent.querySelector('.feed-container');
-                
-                posts.forEach(post => {
-                    const postEl = createFeedPost(post);
-                    feedContainer.appendChild(postEl);
-                });
-                
-            } catch (error) {
-                console.error('Erro ao carregar feed:', error);
-                mainContent.innerHTML = `
-                    <div class="empty-state">
-                        <h3>📋 Feed</h3>
-                        <p>Erro ao carregar postagens.</p>
-                    </div>
-                `;
-            }
-        }
-
-        function createFeedPost(post) {
-            const div = document.createElement('div');
-            div.className = 'feed-post';
-            
-            const postDate = new Date(post.created_at).toLocaleDateString('pt-BR');
-            const categoryIcon = getCategoryIcon(post.category);
-            const categoryName = getCategoryName(post.category);
-            
-            div.innerHTML = `
-                <div class="feed-post-header">
-                    <div class="feed-author-avatar">${categoryIcon}</div>
-                    <div class="feed-author-info">
-                        <div class="feed-author-name">${categoryName}</div>
-                        <div class="feed-post-time">${postDate}</div>
-                    </div>
-                    ${post.highlight ? '<span style="color: gold; font-size: 20px;">⭐</span>' : ''}
-                </div>
-                ${post.title ? `<div class="feed-post-title">${post.title}</div>` : ''}
-                <div class="feed-post-content">${post.content}</div>
-                ${post.image_url ? `<img src="${post.image_url}" class="feed-post-image">` : ''}
-                ${post.tags ? `<div class="feed-tags">🏷️ ${post.tags}</div>` : ''}
-            `;
-            
-            return div;
-        }
-
-        function getCategoryName(category) {
-            const names = {
-                'motivacao': 'Motivação',
-                'meditacao': 'Meditação',
-                'exercicios': 'Exercícios',
-                'alimentacao': 'Alimentação',
-                'sono': 'Sono',
-                'relacionamentos': 'Relacionamentos',
-                'produtividade': 'Produtividade',
-                'autoconhecimento': 'Autoconhecimento'
-            };
-            return names[category] || 'Geral';
-        }
-
-        // ====== COMUNIDADE ======
-        async function loadCommunity() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
-            
-            try {
-                const { data: messages, error } = await supabase
-                    .from('community_messages')
-                    .select(`
-                        *,
-                        profiles (
-                            name,
-                            email
-                        )
-                    `)
-                    .eq('approved', true)
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('Erro detalhado:', error);
-                    mainContent.innerHTML = `
-                        <div class="community-container">
-                            <div class="community-input-box">
-                                <textarea class="community-input" id="communityMessage" 
-                                    placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                                <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                    Enviar Mensagem
-                                </button>
-                                <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                    * Mensagens serão revisadas antes de aparecer
-                                </p>
-                            </div>
-                            <div class="empty-state">
-                                <p>Seja o primeiro a compartilhar!</p>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                mainContent.innerHTML = `
-                    <div class="community-container">
-                        <div class="community-input-box">
-                            <textarea class="community-input" id="communityMessage" 
-                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                Enviar Mensagem
-                            </button>
-                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                * Mensagens serão revisadas antes de aparecer
-                            </p>
-                        </div>
-                    </div>
-                `;
-                
-                const container = mainContent.querySelector('.community-container');
-                
-                if (messages && messages.length > 0) {
-                    messages.forEach(msg => {
-                        const msgEl = createCommunityMessage(msg);
-                        container.appendChild(msgEl);
-                    });
-                } else {
-                    const emptyMsg = document.createElement('div');
-                    emptyMsg.className = 'empty-state';
-                    emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
-                    container.appendChild(emptyMsg);
-                }
-                
-            } catch (error) {
-                console.error('Erro geral ao carregar comunidade:', error);
-                mainContent.innerHTML = `
-                    <div class="community-container">
-                        <div class="community-input-box">
-                            <textarea class="community-input" id="communityMessage" 
-                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                Enviar Mensagem
-                            </button>
-                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                * Mensagens serão revisadas antes de aparecer
-                            </p>
-                        </div>
-                        <div class="empty-state">
-                            <p>Área da comunidade</p>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
-        function createCommunityMessage(msg) {
-            const div = document.createElement('div');
-            div.className = 'community-message';
-            
-            const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
-            const authorInitial = authorName.charAt(0).toUpperCase();
-            const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
-            
-            div.innerHTML = `
-                <div class="community-message-header">
-                    <div class="community-avatar">${authorInitial}</div>
-                    <div class="community-author">${authorName}</div>
-                    <div class="community-time">${msgDate}</div>
-                </div>
-                <div class="community-text">${msg.message}</div>
-            `;
-            
-            return div;
-        }
-
-        async function sendCommunityMessage() {
-            const messageInput = document.getElementById('communityMessage');
-            const message = messageInput.value.trim();
-            
-            if (!message) {
-                alert('Por favor, escreva uma mensagem');
+            if (!session) {
+                window.location.href = 'login_simplificado.html';
                 return;
             }
             
-            if (!supabase || !currentUser) {
-                alert('Você precisa estar logado');
-                return;
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('community_messages')
-                    .insert([{
-                        user_id: currentUser.id,
-                        message: message,
-                        approved: false
-                    }]);
-                
-                if (error) {
-                    console.error('Erro ao enviar:', error);
-                    throw error;
-                }
-                
-                alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
-                messageInput.value = '';
-                
-            } catch (error) {
-                console.error('Erro ao enviar mensagem:', error);
-                alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
-            }
+            currentUser = session.user;
+            await loadUserProfile();
+            updateHeader();
+            showModule('feed');
         }
 
-        // ====== PERFIL ======
-        async function loadProfile() {
-            const mainContent = document.getElementById('mainContent');
-            
-            if (!currentUser) {
-                mainContent.innerHTML = `
-                    <div class="empty-state">
-                        <p>Faça login para ver seu perfil</p>
-                    </div>
-                `;
-                return;
-            }
-            
+        // ====== CARREGAR PERFIL ======
+        async function loadUserProfile() {
             try {
                 const { data: profile } = await supabase
                     .from('profiles')
@@ -1216,216 +556,470 @@
                     currentUser.profile = profile;
                 }
             } catch (error) {
-                console.error('Erro ao recarregar perfil:', error);
+                console.error('Erro ao carregar perfil:', error);
             }
-            
-            const profile = currentUser.profile || {};
-            const initial = (profile.name || currentUser.email || 'U').charAt(0).toUpperCase();
-            
-            // Verificar se tem avatar_url e se a imagem existe
-            let avatarContent = initial;
-            if (profile.avatar_url) {
-                avatarContent = `<img src="${profile.avatar_url}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-            }
-            
-            mainContent.innerHTML = `
-                <div class="profile-container">
-                    <div class="profile-header">
-                        <div class="profile-avatar" onclick="document.getElementById('avatarFile').click()">
-                            ${avatarContent}
-                            <div class="profile-avatar-edit">📷</div>
-                            <input type="file" id="avatarFile" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
-                        </div>
-                        <div class="profile-name">${profile.name || 'Seu Nome'}</div>
-                        <div class="profile-email">${currentUser.email}</div>
-                    </div>
-                    
-                    <div class="profile-form">
-                        <input type="text" class="profile-input" id="profileName" 
-                            placeholder="Seu nome" value="${profile.name || ''}">
-                        <textarea class="profile-input" id="profileBio" 
-                            placeholder="Sobre você..." rows="3">${profile.bio || ''}</textarea>
-                        <button class="profile-save-btn" onclick="saveProfile()">
-                            Salvar Perfil
-                        </button>
-                    </div>
-                    
-                    <button class="logout-btn" onclick="logout()">
-                        Sair do App
-                    </button>
-                </div>
-            `;
         }
 
-        async function saveProfile() {
-            if (!supabase || !currentUser) return;
+        // ====== ATUALIZAR HEADER ======
+        function updateHeader() {
+            const profile = currentUser.profile || {};
+            const name = profile.name || currentUser.email?.split('@')[0] || 'Usuário';
+            const initial = name.charAt(0).toUpperCase();
             
-            const name = document.getElementById('profileName').value.trim();
-            const bio = document.getElementById('profileBio').value.trim();
+            document.getElementById('userName').textContent = name;
+            document.getElementById('avatarInitial').textContent = initial;
             
-            if (!name) {
-                alert('Por favor, digite seu nome');
+            if (profile.avatar_url) {
+                document.getElementById('headerAvatar').innerHTML = 
+                    `<img src="${profile.avatar_url}" alt="Avatar">`;
+            }
+        }
+
+        // ====== NAVEGAÇÃO ======
+        function showModule(module) {
+            currentModule = module;
+            
+            // Update active nav
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            event?.target?.classList.add('active');
+            
+            // Load module content
+            switch(module) {
+                case 'feed':
+                    loadFeed();
+                    break;
+                case 'community':
+                    loadCommunity();
+                    break;
+                case 'profile':
+                    loadProfile();
+                    break;
+                case 'modules':
+                    loadModules();
+                    break;
+                case 'diary':
+                    loadDiary();
+                    break;
+                case 'meditation':
+                    loadMeditation();
+                    break;
+                case 'breathing':
+                    loadBreathing();
+                    break;
+            }
+        }
+
+        // ====== FEED ======
+        async function loadFeed() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">📰</span>
+                    <h2 class="module-title">Feed de Conteúdo</h2>
+                </div>
+                <div class="loading">Carregando posts...</div>
+            `;
+            
+            try {
+                const { data: posts, error } = await supabase
+                    .from('feed_posts')
+                    .select('*')
+                    .eq('active', true)
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                if (posts && posts.length > 0) {
+                    let html = `
+                        <div class="module-header">
+                            <span class="module-icon">📰</span>
+                            <h2 class="module-title">Feed de Conteúdo</h2>
+                        </div>
+                        <div class="feed-posts">
+                    `;
+                    
+                    posts.forEach(post => {
+                        const date = new Date(post.created_at).toLocaleDateString('pt-BR');
+                        html += `
+                            <div class="feed-post">
+                                <h3 class="post-title">${post.title}</h3>
+                                <p class="post-content">${post.content}</p>
+                                <div class="post-meta">
+                                    <span>${post.category || 'Geral'}</span>
+                                    <span>${date}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    
+                    html += '</div>';
+                    mainContent.innerHTML = html;
+                } else {
+                    mainContent.innerHTML = `
+                        <div class="module-header">
+                            <span class="module-icon">📰</span>
+                            <h2 class="module-title">Feed de Conteúdo</h2>
+                        </div>
+                        <div class="empty-state">
+                            <div class="empty-state-icon">📰</div>
+                            <p>Nenhum conteúdo disponível no momento</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar feed:', error);
+                mainContent.innerHTML = `
+                    <div class="error-message">
+                        Erro ao carregar o feed. Tente novamente.
+                    </div>
+                `;
+            }
+        }
+
+        // ====== COMUNIDADE ======
+        async function loadCommunity() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">💬</span>
+                    <h2 class="module-title">Comunidade</h2>
+                </div>
+                <div class="community-form">
+                    <div class="message-input-group">
+                        <input type="text" class="message-input" id="messageInput" 
+                               placeholder="Compartilhe algo positivo com a comunidade...">
+                        <button class="btn-send" onclick="sendMessage()">Enviar</button>
+                    </div>
+                    <p class="info-text">Sua mensagem será revisada antes de ser publicada</p>
+                </div>
+                <div id="communityMessages" class="community-messages">
+                    <div class="loading">Carregando mensagens...</div>
+                </div>
+            `;
+            
+            await loadCommunityMessages();
+        }
+
+        async function loadCommunityMessages() {
+            try {
+                // Buscar apenas mensagens aprovadas
+                const { data: posts, error } = await supabase
+                    .from('community_posts')
+                    .select(`
+                        *,
+                        profiles:user_id (
+                            name,
+                            avatar_url
+                        )
+                    `)
+                    .eq('status', 'approved')
+                    .order('created_at', { ascending: false });
+                
+                if (error) throw error;
+                
+                const messagesDiv = document.getElementById('communityMessages');
+                
+                if (posts && posts.length > 0) {
+                    let html = '';
+                    posts.forEach(post => {
+                        const author = post.profiles?.name || 'Usuário';
+                        const initial = author.charAt(0).toUpperCase();
+                        const time = new Date(post.created_at).toLocaleDateString('pt-BR');
+                        
+                        html += `
+                            <div class="message-card">
+                                <div class="message-avatar">
+                                    ${post.profiles?.avatar_url ? 
+                                        `<img src="${post.profiles.avatar_url}" alt="${author}" style="width:100%;height:100%;border-radius:50%;object-fit:cover;">` :
+                                        initial
+                                    }
+                                </div>
+                                <div class="message-content">
+                                    <div class="message-author">${author}</div>
+                                    <div class="message-text">${post.content}</div>
+                                    <div class="message-time">${time}</div>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    messagesDiv.innerHTML = html;
+                } else {
+                    messagesDiv.innerHTML = `
+                        <div class="empty-state">
+                            <div class="empty-state-icon">💬</div>
+                            <p>Seja o primeiro a compartilhar algo com a comunidade!</p>
+                        </div>
+                    `;
+                }
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+                document.getElementById('communityMessages').innerHTML = `
+                    <div class="error-message">
+                        Erro ao carregar mensagens. Tente novamente.
+                    </div>
+                `;
+            }
+        }
+
+        async function sendMessage() {
+            const input = document.getElementById('messageInput');
+            const message = input.value.trim();
+            
+            if (!message) {
+                alert('Por favor, escreva uma mensagem');
                 return;
             }
             
             try {
                 const { error } = await supabase
-                    .from('profiles')
-                    .update({
-                        name: name,
-                        bio: bio,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', currentUser.id);
+                    .from('community_posts')
+                    .insert([{
+                        user_id: currentUser.id,
+                        content: message,
+                        status: 'pending'
+                    }]);
                 
                 if (error) throw error;
                 
-                if (!currentUser.profile) {
-                    currentUser.profile = {};
-                }
-                currentUser.profile.name = name;
-                currentUser.profile.bio = bio;
-                
-                alert('✅ Perfil atualizado com sucesso!');
-                updateGreeting();
+                input.value = '';
+                alert('✅ Mensagem enviada para aprovação!\n\nSua mensagem será revisada e aparecerá em breve.');
                 
             } catch (error) {
-                console.error('Erro ao salvar perfil:', error);
-                alert('❌ Erro ao salvar perfil');
+                console.error('Erro ao enviar mensagem:', error);
+                alert('❌ Erro ao enviar mensagem. Tente novamente.');
             }
         }
 
+        // ====== PERFIL ======
+        async function loadProfile() {
+            const profile = currentUser.profile || {};
+            const initial = (profile.name || currentUser.email || 'U').charAt(0).toUpperCase();
+            
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">👤</span>
+                    <h2 class="module-title">Meu Perfil</h2>
+                </div>
+                <div class="profile-container">
+                    <div class="profile-header-section">
+                        <div class="profile-avatar-large" onclick="document.getElementById('avatarFile').click()">
+                            ${profile.avatar_url ? 
+                                `<img src="${profile.avatar_url}" alt="Avatar">` :
+                                initial
+                            }
+                        </div>
+                        <div class="profile-info">
+                            <h3>${profile.name || 'Configurar nome'}</h3>
+                            <p>${currentUser.email}</p>
+                        </div>
+                    </div>
+                    
+                    <div class="profile-form">
+                        <div class="form-group">
+                            <label class="form-label">Nome</label>
+                            <input type="text" class="form-input" id="profileName" 
+                                   value="${profile.name || ''}" placeholder="Seu nome">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Sobre mim</label>
+                            <textarea class="form-input" id="profileBio" rows="4" 
+                                      placeholder="Conte um pouco sobre você...">${profile.bio || ''}</textarea>
+                        </div>
+                        <button class="btn-save" onclick="saveProfile()">Salvar Alterações</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function saveProfile() {
+            const name = document.getElementById('profileName').value;
+            const bio = document.getElementById('profileBio').value;
+            
+            try {
+                const { error } = await supabase
+                    .from('profiles')
+                    .upsert({
+                        id: currentUser.id,
+                        email: currentUser.email,
+                        name: name,
+                        bio: bio,
+                        updated_at: new Date().toISOString()
+                    });
+                
+                if (error) throw error;
+                
+                currentUser.profile = { ...currentUser.profile, name, bio };
+                updateHeader();
+                alert('✅ Perfil atualizado com sucesso!');
+                
+            } catch (error) {
+                console.error('Erro ao salvar perfil:', error);
+                alert('❌ Erro ao salvar perfil. Tente novamente.');
+            }
+        }
+
+        // ====== UPLOAD DE AVATAR ======
         async function uploadAvatar(event) {
             const file = event.target.files[0];
-            if (!file || !supabase || !currentUser) {
-                alert('Erro: arquivo ou usuário não encontrado');
-                return;
-            }
+            if (!file) return;
             
-            // Verificar se o arquivo é uma imagem
+            // Validações
             if (!file.type.startsWith('image/')) {
                 alert('Por favor, selecione uma imagem');
                 return;
             }
             
-            // Limitar tamanho do arquivo (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Imagem muito grande. Máximo 2MB');
+            if (file.size > 5 * 1024 * 1024) {
+                alert('A imagem deve ter no máximo 5MB');
                 return;
             }
             
             try {
-                // Converter para base64 primeiro
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
+                // Nome único para o arquivo
+                const fileName = `${currentUser.id}/${Date.now()}-${file.name}`;
                 
-                reader.onload = async () => {
-                    const base64 = reader.result;
-                    
-                    // Criar um blob a partir do base64
-                    const base64Response = await fetch(base64);
-                    const blob = await base64Response.blob();
-                    
-                    // Nome único para o arquivo
-                    const fileName = `avatar-${currentUser.id}-${Date.now()}.jpg`;
-                    
-                    console.log('Iniciando upload:', fileName);
-                    alert('Enviando foto...');
-                    
-                    // Upload direto do blob
-                    const { data: uploadData, error: uploadError } = await supabase.storage
-                        .from('avatar-images')
-                        .upload(fileName, blob, {
-                            contentType: 'image/jpeg',
-                            cacheControl: '3600'
-                        });
-                    
-                    if (uploadError) {
-                        console.error('Erro no upload:', uploadError);
-                        alert(`Erro no upload: ${uploadError.message}`);
-                        return;
-                    }
-                    
-                    console.log('Upload concluído:', uploadData);
-                    
-                    // Obter URL pública
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('avatar-images')
-                        .getPublicUrl(fileName);
-                    
-                    console.log('URL gerada:', publicUrl);
-                    
-                    // Atualizar perfil
-                    const { error: updateError } = await supabase
-                        .from('profiles')
-                        .update({ 
-                            avatar_url: publicUrl
-                        })
-                        .eq('id', currentUser.id);
-                    
-                    if (updateError) {
-                        console.error('Erro ao atualizar perfil:', updateError);
-                        // Deletar imagem se falhar
-                        await supabase.storage.from('avatar-images').remove([fileName]);
-                        alert('Erro ao atualizar perfil');
-                        return;
-                    }
-                    
-                    // Atualizar local
-                    if (!currentUser.profile) {
-                        currentUser.profile = {};
-                    }
-                    currentUser.profile.avatar_url = publicUrl;
-                    
-                    alert('✅ Foto atualizada!');
+                // Upload para o bucket 'avatars'
+                const { data, error: uploadError } = await supabase.storage
+                    .from('avatars')
+                    .upload(fileName, file, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+                
+                if (uploadError) throw uploadError;
+                
+                // Obter URL pública
+                const { data: { publicUrl } } = supabase.storage
+                    .from('avatars')
+                    .getPublicUrl(fileName);
+                
+                // Atualizar perfil
+                const { error: profileError } = await supabase
+                    .from('profiles')
+                    .update({ avatar_url: publicUrl })
+                    .eq('id', currentUser.id);
+                
+                if (profileError) throw profileError;
+                
+                // Atualizar interface
+                currentUser.profile = { ...currentUser.profile, avatar_url: publicUrl };
+                updateHeader();
+                
+                // Se estiver no perfil, recarregar
+                if (currentModule === 'profile') {
                     loadProfile();
-                };
+                }
                 
-                reader.onerror = () => {
-                    alert('Erro ao ler arquivo');
-                };
+                alert('✅ Avatar atualizado com sucesso!');
                 
             } catch (error) {
-                console.error('Erro:', error);
-                alert(`Erro: ${error.message}`);
+                console.error('Erro ao fazer upload:', error);
+                alert('❌ Erro ao enviar imagem. Tente novamente.');
             }
         }
 
-        // ====== INICIALIZAÇÃO ======
-        async function init() {
-            if (!initSupabase()) {
-                alert('Erro ao configurar o sistema');
-                return;
-            }
-            
-            const isAuthenticated = await checkAuth();
-            if (!isAuthenticated) {
-                return;
-            }
-            
-            updateTime();
-            updateDate();
-            updateGreeting();
-            loadHomeModules();
-            
-            // Atualizar relógio
-            setInterval(updateTime, 60000);
-            setInterval(updateGreeting, 3600000);
+        // ====== OUTROS MÓDULOS ======
+        function loadModules() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">📚</span>
+                    <h2 class="module-title">Módulos de Bem-estar</h2>
+                </div>
+                <div class="feed-posts">
+                    <div class="feed-post" onclick="showModule('diary')">
+                        <h3 class="post-title">📔 Diário de Gratidão</h3>
+                        <p class="post-content">Registre suas reflexões e momentos de gratidão diários</p>
+                    </div>
+                    <div class="feed-post" onclick="showModule('meditation')">
+                        <h3 class="post-title">🧘 Meditações Guiadas</h3>
+                        <p class="post-content">Pratique mindfulness com nossas meditações</p>
+                    </div>
+                    <div class="feed-post" onclick="showModule('breathing')">
+                        <h3 class="post-title">💨 Exercícios de Respiração</h3>
+                        <p class="post-content">Técnicas de respiração para reduzir ansiedade</p>
+                    </div>
+                </div>
+            `;
         }
 
-        // Tornar funções globais para onclick funcionar
-        window.sendCommunityMessage = sendCommunityMessage;
-        window.uploadAvatar = uploadAvatar;
-        window.saveProfile = saveProfile;
-        window.logout = logout;
-        window.handleNavClick = handleNavClick;
-        window.loadHomeModules = loadHomeModules;
-        window.loadModuleContents = loadModuleContents;
-        window.openContent = openContent;
-        window.backToModule = backToModule;
+        function loadDiary() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">📔</span>
+                    <h2 class="module-title">Diário de Gratidão</h2>
+                </div>
+                <div class="profile-form">
+                    <div class="form-group">
+                        <label class="form-label">Pelo que você é grato hoje?</label>
+                        <textarea class="form-input" rows="6" placeholder="Escreva aqui suas reflexões..."></textarea>
+                    </div>
+                    <button class="btn-save">Salvar Entrada</button>
+                </div>
+                <div class="empty-state" style="margin-top: 2rem;">
+                    <p>Suas entradas anteriores aparecerão aqui</p>
+                </div>
+            `;
+        }
 
-        // Inicializar app
-        window.addEventListener('DOMContentLoaded', init);
+        function loadMeditation() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">🧘</span>
+                    <h2 class="module-title">Meditações Guiadas</h2>
+                </div>
+                <div class="feed-posts">
+                    <div class="feed-post">
+                        <h3 class="post-title">Meditação para Ansiedade</h3>
+                        <p class="post-content">5 minutos de prática para acalmar a mente</p>
+                        <button class="btn-save" style="margin-top: 1rem;">▶️ Iniciar</button>
+                    </div>
+                    <div class="feed-post">
+                        <h3 class="post-title">Body Scan</h3>
+                        <p class="post-content">10 minutos de relaxamento progressivo</p>
+                        <button class="btn-save" style="margin-top: 1rem;">▶️ Iniciar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function loadBreathing() {
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `
+                <div class="module-header">
+                    <span class="module-icon">💨</span>
+                    <h2 class="module-title">Exercícios de Respiração</h2>
+                </div>
+                <div class="feed-posts">
+                    <div class="feed-post">
+                        <h3 class="post-title">Respiração 4-7-8</h3>
+                        <p class="post-content">Técnica para reduzir ansiedade rapidamente</p>
+                        <button class="btn-save" style="margin-top: 1rem;">🫁 Começar</button>
+                    </div>
+                    <div class="feed-post">
+                        <h3 class="post-title">Respiração Quadrada</h3>
+                        <p class="post-content">Equilibre seu sistema nervoso</p>
+                        <button class="btn-save" style="margin-top: 1rem;">🫁 Começar</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ====== LOGOUT ======
+        async function logout() {
+            if (confirm('Deseja realmente sair?')) {
+                await supabase.auth.signOut();
+                window.location.href = 'login_simplificado.html';
+            }
+        }
+
+        // ====== START ======
+        init();
     </script>
 </body>
 </html>
