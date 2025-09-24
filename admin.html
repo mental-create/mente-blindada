@@ -3,11 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Administrativo - MentalHealth+</title>
-    
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.3/dist/umd/supabase.min.js"></script>
-    
+    <title>Painel Admin - Mente Blindada</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
             margin: 0;
@@ -16,595 +13,1223 @@
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f5f5f5;
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
+            padding: 20px;
         }
 
-        .header {
-            background: #2c3e50;
-            color: white;
-            padding: 1.5rem 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-
-        .header-content {
-            max-width: 1400px;
+        .admin-container {
+            max-width: 1200px;
             margin: 0 auto;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
 
-        .logo {
-            font-size: 1.5rem;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
         }
 
         .tabs {
-            background: white;
-            padding: 0;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.05);
-            position: sticky;
-            top: 70px;
-            z-index: 99;
-        }
-
-        .tabs-container {
-            max-width: 1400px;
-            margin: 0 auto;
             display: flex;
-            overflow-x: auto;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
         }
 
         .tab {
-            padding: 1rem 2rem;
+            padding: 15px 25px;
             background: none;
             border: none;
+            color: #666;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 1rem;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
             border-bottom: 3px solid transparent;
-            white-space: nowrap;
-        }
-
-        .tab:hover {
-            background: #f8f9fa;
+            margin-bottom: -2px;
         }
 
         .tab.active {
-            color: #3498db;
-            border-bottom-color: #3498db;
-            background: #f8f9fa;
+            color: #4169E1;
+            border-bottom-color: #4169E1;
         }
 
-        .container {
-            max-width: 1400px;
-            margin: 2rem auto;
-            padding: 0 2rem;
+        .content-section {
+            display: none;
         }
 
-        .section {
-            background: white;
+        .content-section.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        input[type="text"],
+        input[type="url"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
             border-radius: 10px;
-            padding: 2rem;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-            margin-bottom: 2rem;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
         }
 
-        .section-header {
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4169E1;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .button-group {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 2rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f0f0f0;
-        }
-
-        .section-title {
-            font-size: 1.5rem;
-            color: #2c3e50;
+            gap: 10px;
+            margin-top: 20px;
         }
 
         .btn {
-            padding: 0.5rem 1rem;
+            padding: 12px 30px;
+            background: #4169E1;
+            color: white;
             border: none;
-            border-radius: 5px;
+            border-radius: 10px;
+            font-weight: 600;
             cursor: pointer;
-            font-size: 0.9rem;
-            transition: all 0.3s;
+            transition: all 0.3s ease;
         }
 
-        .btn-primary {
-            background: #3498db;
-            color: white;
+        .btn:hover {
+            background: #3051b8;
+            transform: translateY(-2px);
         }
 
-        .btn-primary:hover {
-            background: #2980b9;
-        }
-
-        .btn-success {
-            background: #27ae60;
-            color: white;
-        }
-
-        .btn-success:hover {
-            background: #229954;
+        .btn-secondary {
+            background: #666;
         }
 
         .btn-danger {
             background: #e74c3c;
-            color: white;
         }
 
-        .btn-danger:hover {
-            background: #c0392b;
+        .content-list {
+            margin-top: 30px;
         }
 
-        .btn-logout {
-            background: #e74c3c;
-        }
-
-        /* Community Moderation */
-        .filter-bar {
+        .content-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
             display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .content-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .content-info {
+            flex: 1;
+        }
+
+        .content-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .content-module {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 5px;
             flex-wrap: wrap;
         }
 
-        .filter-select {
-            padding: 0.5rem 1rem;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 1rem;
-        }
-
-        .message-list {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .message-item {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            border-left: 4px solid #ddd;
-        }
-
-        .message-item.pending {
-            border-left-color: #f39c12;
-        }
-
-        .message-item.approved {
-            border-left-color: #27ae60;
-        }
-
-        .message-item.rejected {
-            border-left-color: #e74c3c;
-        }
-
-        .message-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: start;
-            margin-bottom: 1rem;
-        }
-
-        .message-author {
-            font-weight: bold;
-            color: #2c3e50;
-        }
-
-        .message-date {
-            font-size: 0.9rem;
-            color: #666;
-        }
-
-        .message-content {
-            color: #333;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .message-actions {
-            display: flex;
-            gap: 0.5rem;
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            white-space: nowrap;
         }
 
         .status-badge {
             display: inline-block;
-            padding: 0.25rem 0.75rem;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            font-weight: bold;
-        }
-
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-
-        .status-approved {
-            background: #d4edda;
-            color: #155724;
-        }
-
-        .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Feed Management */
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-            width: 100%;
-            padding: 0.75rem;
-            border: 1px solid #ddd;
+            padding: 4px 10px;
             border-radius: 5px;
-            font-size: 1rem;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
         }
 
-        .form-textarea {
-            resize: vertical;
-            min-height: 120px;
+        .status-active {
+            background: #27ae60;
+            color: white;
         }
 
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-            outline: none;
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+        .status-inactive {
+            background: #e74c3c;
+            color: white;
         }
 
-        .posts-grid {
-            display: grid;
-            gap: 1rem;
-        }
-
-        .post-card {
-            background: #f8f9fa;
-            padding: 1.5rem;
-            border-radius: 8px;
-            transition: transform 0.3s;
-        }
-
-        .post-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-
-        .post-title {
-            font-size: 1.2rem;
-            font-weight: bold;
-            margin-bottom: 0.5rem;
-            color: #2c3e50;
-        }
-
-        .post-content {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 1rem;
-        }
-
-        .post-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding-top: 1rem;
-            border-top: 1px solid #e0e0e0;
-        }
-
-        .empty-state {
+        .upload-area {
+            border: 2px dashed #4169E1;
+            border-radius: 10px;
+            padding: 30px;
             text-align: center;
-            padding: 3rem;
-            color: #999;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: #f0f4f8;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            margin-top: 15px;
+            border-radius: 10px;
         }
 
         .loading {
             text-align: center;
-            padding: 2rem;
+            padding: 40px;
             color: #666;
         }
 
-        .error-message {
-            background: #f8d7da;
-            color: #721c24;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
         }
 
-        .success-message {
+        .message.success {
             background: #d4edda;
             color: #155724;
-            padding: 1rem;
-            border-radius: 5px;
-            margin-bottom: 1rem;
+            border: 1px solid #c3e6cb;
         }
 
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                padding: 0 1rem;
-            }
-            
-            .section {
-                padding: 1rem;
-            }
-            
-            .message-header {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .filter-bar {
-                flex-direction: column;
-            }
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .module-item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .module-item-info {
+            flex: 1;
+        }
+
+        .module-item-title {
+            font-weight: 700;
+            color: #333;
+        }
+
+        .logout-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        .logout-btn:hover {
+            background: #c0392b;
         }
     </style>
 </head>
 <body>
-    <!-- Header -->
-    <div class="header">
-        <div class="header-content">
-            <div class="logo">
-                <span>🛡️</span>
-                <span>PAINEL ADMINISTRATIVO</span>
-            </div>
-            <div>
-                <span id="adminEmail">Admin</span>
-                <button class="btn btn-logout" onclick="logout()" style="margin-left: 1rem;">
-                    Sair
-                </button>
-            </div>
-        </div>
-    </div>
+    <div class="admin-container">
+        <button class="logout-btn" onclick="logout()">Sair</button>
+        <h1>🔧 PAINEL ADMINISTRATIVO</h1>
+        
+        <div id="messageArea"></div>
 
-    <!-- Tabs -->
-    <div class="tabs">
-        <div class="tabs-container">
-            <button class="tab active" onclick="showSection('content')">
-                Adicionar Conteúdo
-            </button>
-            <button class="tab" onclick="showSection('list')">
-                Listar Conteúdos
-            </button>
-            <button class="tab" onclick="showSection('modules')">
-                Gerenciar Módulos
-            </button>
-            <button class="tab" onclick="showSection('feed')">
-                Gerenciar Feed
-            </button>
-            <button class="tab" onclick="showSection('community')">
-                Moderar Comunidade
-            </button>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('add')">Adicionar Conteúdo</button>
+            <button class="tab" onclick="switchTab('list')">Listar Conteúdos</button>
+            <button class="tab" onclick="switchTab('modules')">Gerenciar Módulos</button>
+            <button class="tab" onclick="switchTab('feed')">Gerenciar Feed</button>
+            <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
-    </div>
 
-    <!-- Main Container -->
-    <div class="container">
-        <!-- Content Section -->
-        <div id="contentSection" class="section">
-            <div class="section-header">
-                <h2 class="section-title">Adicionar Novo Conteúdo</h2>
-            </div>
-            
+        <!-- Adicionar Conteúdo -->
+        <div id="add-section" class="content-section active">
             <form id="contentForm">
                 <div class="form-group">
-                    <label class="form-label">Título</label>
-                    <input type="text" class="form-input" id="postTitle" required>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Conteúdo</label>
-                    <textarea class="form-textarea" id="postContent" required></textarea>
-                </div>
-                
-                <div class="form-group">
-                    <label class="form-label">Categoria</label>
-                    <select class="form-select" id="postCategory">
-                        <option value="bem-estar">Bem-estar</option>
-                        <option value="mindfulness">Mindfulness</option>
-                        <option value="ansiedade">Ansiedade</option>
-                        <option value="autoestima">Autoestima</option>
-                        <option value="relacionamentos">Relacionamentos</option>
+                    <label for="module">Módulo</label>
+                    <select id="module" required>
+                        <option value="">Selecione o módulo</option>
+                        <option value="quiz">Quiz Interativo</option>
+                        <option value="exercises">Exercícios</option>
+                        <option value="library">Biblioteca</option>
+                        <option value="diary">Diário</option>
                     </select>
                 </div>
-                
-                <button type="submit" class="btn btn-primary">
-                    Publicar Conteúdo
-                </button>
+
+                <div class="form-group">
+                    <label for="title">Título do Conteúdo</label>
+                    <input type="text" id="title" placeholder="Ex: Técnicas de Respiração" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrição (opcional)</label>
+                    <textarea id="description" placeholder="Breve descrição do conteúdo..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageUrl">URL da Imagem</label>
+                    <input type="url" id="imageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="contentType">Tipo de Conteúdo</label>
+                    <select id="contentType" onchange="toggleContentInput()">
+                        <option value="url">URL Externa (Gamma, etc.)</option>
+                        <option value="iframe">iFrame</option>
+                        <option value="html">Código HTML</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="urlInput">
+                    <label for="contentUrl">URL do Conteúdo</label>
+                    <input type="url" id="contentUrl" placeholder="https://gamma.app/public/seu-conteudo">
+                </div>
+
+                <div class="form-group" id="htmlInput" style="display: none;">
+                    <label for="contentHtml">Código HTML</label>
+                    <textarea id="contentHtml" placeholder="Cole o código HTML aqui..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="bgColor">Cor de Fundo (opcional)</label>
+                    <input type="text" id="bgColor" placeholder="#a8d5e2">
+                </div>
+
+                <div class="form-group">
+                    <label for="orderPosition">Ordem de Exibição</label>
+                    <input type="number" id="orderPosition" value="1" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" checked>
+                        Conteúdo Ativo
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn">💾 Salvar Conteúdo</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpar</button>
+                </div>
             </form>
         </div>
 
-        <!-- List Section -->
-        <div id="listSection" class="section" style="display: none;">
-            <div class="section-header">
-                <h2 class="section-title">Conteúdos Publicados</h2>
+        <!-- Listar Conteúdo -->
+        <div id="list-section" class="content-section">
+            <div class="form-group">
+                <label for="filterModule">Filtrar por Módulo</label>
+                <select id="filterModule" onchange="loadContents()">
+                    <option value="">Todos os Módulos</option>
+                    <option value="quiz">Quiz Interativo</option>
+                    <option value="exercises">Exercícios</option>
+                    <option value="library">Biblioteca</option>
+                    <option value="diary">Diário</option>
+                </select>
             </div>
-            
-            <div id="postsList" class="posts-grid">
+
+            <div class="content-list" id="contentList">
                 <div class="loading">Carregando conteúdos...</div>
             </div>
         </div>
 
-        <!-- Community Section -->
-        <div id="communitySection" class="section" style="display: none;">
-            <div class="section-header">
-                <h2 class="section-title">Moderar Comunidade</h2>
-            </div>
+        <!-- Gerenciar Módulos -->
+        <div id="modules-section" class="content-section">
+            <h2>Gerenciar Módulos</h2>
+            <p>Adicione ou edite os módulos do seu app.</p>
             
-            <div class="filter-bar">
-                <select class="filter-select" id="filterStatus" onchange="loadCommunityMessages()">
+            <form id="moduleForm" style="margin-top: 20px;">
+                <input type="hidden" id="editModuleKey">
+                <div class="form-group">
+                    <label for="newModuleKey">Chave do Módulo (sem espaços)</label>
+                    <input type="text" id="newModuleKey" placeholder="Ex: meditacao" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleName">Nome do Módulo</label>
+                    <input type="text" id="newModuleName" placeholder="Ex: Meditação Guiada" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleImage">URL da Imagem</label>
+                    <input type="url" id="newModuleImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleColor">Cor de Fundo</label>
+                    <input type="text" id="newModuleColor" placeholder="#a8d5e2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleOrder">Ordem de Exibição</label>
+                    <input type="number" id="newModuleOrder" value="1" min="1" required>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button>
+                </div>
+            </form>
+
+            <div style="margin-top: 30px;">
+                <h3>Módulos Atuais</h3>
+                <div id="moduleList">
+                    <div class="loading">Carregando módulos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gerenciar Feed -->
+        <div id="feed-section" class="content-section">
+            <h2>Gerenciar Feed</h2>
+            
+            <form id="feedForm" style="margin-bottom: 30px;">
+                <input type="hidden" id="editFeedId">
+                <div class="form-group">
+                    <label for="feedTitle">Título do Post</label>
+                    <input type="text" id="feedTitle" placeholder="Título do post" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedCategory">Categoria</label>
+                    <select id="feedCategory" required>
+                        <option value="">Selecione...</option>
+                        <option value="motivacao">💪 Motivação</option>
+                        <option value="meditacao">🧘 Meditação</option>
+                        <option value="exercicios">🏃 Exercícios</option>
+                        <option value="alimentacao">🥗 Alimentação</option>
+                        <option value="sono">😴 Sono</option>
+                        <option value="relacionamentos">❤️ Relacionamentos</option>
+                        <option value="produtividade">📈 Produtividade</option>
+                        <option value="autoconhecimento">🔍 Autoconhecimento</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedContent">Conteúdo</label>
+                    <textarea id="feedContent" rows="5" placeholder="Conteúdo do post..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedImage">URL da Imagem (opcional)</label>
+                    <input type="url" id="feedImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedTags">Tags (separadas por vírgula)</label>
+                    <input type="text" id="feedTags" placeholder="saúde mental, bem-estar">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedActive" checked> Post Ativo
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedHighlight"> ⭐ Destacar Post
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button>
+                </div>
+            </form>
+            
+            <h3>Posts Publicados</h3>
+            <div id="feedList">
+                <div class="loading">Carregando posts...</div>
+            </div>
+        </div>
+
+        <!-- Moderar Comunidade -->
+        <div id="community-section" class="content-section">
+            <h2>Moderar Comunidade</h2>
+            
+            <div class="form-group">
+                <label for="filterStatus">Filtrar por Status</label>
+                <select id="filterStatus" onchange="loadCommunityMessages()">
                     <option value="pending">Pendentes de Aprovação</option>
                     <option value="approved">Aprovadas</option>
-                    <option value="rejected">Rejeitadas</option>
                     <option value="all">Todas</option>
                 </select>
             </div>
             
-            <div id="communityList" class="message-list">
+            <div id="communityList" style="margin-top: 20px;">
                 <div class="loading">Carregando mensagens...</div>
-            </div>
-        </div>
-
-        <!-- Other sections -->
-        <div id="modulesSection" class="section" style="display: none;">
-            <div class="section-header">
-                <h2 class="section-title">Gerenciar Módulos</h2>
-            </div>
-            <div class="empty-state">
-                <p>Funcionalidade em desenvolvimento</p>
-            </div>
-        </div>
-
-        <div id="feedSection" class="section" style="display: none;">
-            <div class="section-header">
-                <h2 class="section-title">Gerenciar Feed</h2>
-            </div>
-            <div class="empty-state">
-                <p>Use "Adicionar Conteúdo" para criar novos posts</p>
             </div>
         </div>
     </div>
 
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
-        // ====== CONFIGURAÇÃO SUPABASE ======
+        // Configuração do Supabase
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI0MjA5MDMsImV4cCI6MjA0Nzk5NjkwM30.Vdj6Dc83R0Fy7IO0d_hQXCL45hDtXEaaMVBf_ZIpOWE';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         
-        const { createClient } = window.supabase;
-        const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentUser = null;
-
-        // ====== INICIALIZAÇÃO ======
-        async function init() {
+        // Verificar autenticação
+        async function checkAuth() {
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (!isAdmin) {
+                window.location.href = 'admin-login.html';
+                return false;
+            }
+            
             const { data: { session } } = await supabase.auth.getSession();
-            
             if (!session) {
-                window.location.href = 'login_simplificado.html';
-                return;
+                window.location.href = 'admin-login.html';
+                return false;
             }
             
-            currentUser = session.user;
-            document.getElementById('adminEmail').textContent = currentUser.email;
-            
-            // Verificar se é admin
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role')
-                .eq('id', currentUser.id)
-                .single();
-            
-            if (!profile || profile.role !== 'admin') {
-                alert('Acesso negado. Você não é administrador.');
-                window.location.href = 'app_corrigido_final.html';
-                return;
-            }
-            
-            // Carregar conteúdo inicial
-            loadCommunityMessages();
+            return true;
         }
 
-        // ====== NAVEGAÇÃO ======
-        function showSection(section) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(s => s.style.display = 'none');
-            
-            // Show selected section
-            document.getElementById(section + 'Section').style.display = 'block';
-            
-            // Update active tab
+        // Logout
+        async function logout() {
+            localStorage.removeItem('isAdmin');
+            await supabase.auth.signOut();
+            window.location.href = 'admin-login.html';
+        }
+
+        // Alternar abas
+        function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             
-            // Load data if needed
-            if (section === 'list') loadPosts();
-            if (section === 'community') loadCommunityMessages();
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-section`).classList.add('active');
+            
+            if (tab === 'list') {
+                loadContents();
+            } else if (tab === 'modules') {
+                loadModules();
+            } else if (tab === 'feed') {
+                loadFeedPosts();
+            } else if (tab === 'community') {
+                loadCommunityMessages();
+            }
         }
 
-        // ====== ADICIONAR CONTEÚDO ======
-        document.getElementById('contentForm')?.addEventListener('submit', async (e) => {
+        // Alternar tipo de conteúdo
+        function toggleContentInput() {
+            const type = document.getElementById('contentType').value;
+            document.getElementById('urlInput').style.display = type === 'url' || type === 'iframe' ? 'block' : 'none';
+            document.getElementById('htmlInput').style.display = type === 'html' ? 'block' : 'none';
+        }
+
+        // Salvar conteúdo
+        document.getElementById('contentForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            const title = document.getElementById('postTitle').value;
-            const content = document.getElementById('postContent').value;
-            const category = document.getElementById('postCategory').value;
-            
+            const editId = document.getElementById('contentForm').dataset.editId;
+            const isEditing = !!editId;
+
+            const formData = {
+                module: document.getElementById('module').value,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                image_url: document.getElementById('imageUrl').value || null,
+                content_type: document.getElementById('contentType').value,
+                content_url: document.getElementById('contentUrl').value || null,
+                content_html: document.getElementById('contentHtml').value || null,
+                bg_color: document.getElementById('bgColor').value || null,
+                order_position: parseInt(document.getElementById('orderPosition').value),
+                active: document.getElementById('isActive').checked
+            };
+
             try {
-                const { error } = await supabase
-                    .from('feed_posts')
-                    .insert([{
-                        title,
-                        content,
-                        category,
-                        active: true,
-                        created_at: new Date().toISOString()
-                    }]);
+                let result;
                 
-                if (error) throw error;
-                
-                alert('✅ Conteúdo publicado com sucesso!');
-                document.getElementById('contentForm').reset();
-                
+                if (isEditing) {
+                    result = await supabase.from('contents').update(formData).eq('id', editId);
+                } else {
+                    result = await supabase.from('contents').insert([formData]);
+                }
+
+                const { error } = result;
+
+                if (!error) {
+                    showMessage('Conteúdo salvo com sucesso!', 'success');
+                    if (isEditing) {
+                        cancelEdit();
+                    } else {
+                        resetForm();
+                    }
+                    if (document.getElementById('list-section').classList.contains('active')) {
+                        loadContents();
+                    }
+                } else {
+                    showMessage('Erro ao salvar: ' + error.message, 'error');
+                }
             } catch (error) {
-                console.error('Erro:', error);
-                alert('❌ Erro ao publicar conteúdo');
+                showMessage('Erro ao salvar conteúdo', 'error');
             }
         });
 
-        // ====== LISTAR POSTS ======
-        async function loadPosts() {
+        // Carregar conteúdos
+        async function loadContents() {
+            const filterModule = document.getElementById('filterModule').value;
+            let query = supabase.from('contents').select('*');
+            
+            if (filterModule) {
+                query = query.eq('module', filterModule);
+            }
+            
+            query = query.order('order_position');
+
             try {
-                const { data: posts, error } = await supabase
+                const { data, error } = await query;
+                
+                if (!error && data) {
+                    displayContents(data);
+                } else {
+                    document.getElementById('contentList').innerHTML = '<p>Erro ao carregar conteúdos</p>';
+                }
+            } catch (error) {
+                document.getElementById('contentList').innerHTML = '<p>Erro ao carregar conteúdos</p>';
+            }
+        }
+
+        // Exibir conteúdos
+        function displayContents(contents) {
+            if (contents.length === 0) {
+                document.getElementById('contentList').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Nenhum conteúdo encontrado</p>';
+                return;
+            }
+
+            const moduleNames = {
+                'quiz': 'Quiz Interativo',
+                'exercises': 'Exercícios',
+                'library': 'Biblioteca',
+                'diary': 'Diário'
+            };
+
+            let html = '';
+            contents.forEach(content => {
+                html += `
+                    <div class="content-item">
+                        <div class="content-image" style="background-image: url('${content.image_url || ''}'); background-color: ${content.bg_color || '#e0e0e0'}"></div>
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${content.title}
+                                <span class="status-badge ${content.active ? 'status-active' : 'status-inactive'}">
+                                    ${content.active ? '✓ Ativo' : '✗ Inativo'}
+                                </span>
+                            </div>
+                            <div class="content-module">
+                                <strong>Módulo:</strong> ${moduleNames[content.module] || content.module} | 
+                                <strong>Ordem:</strong> ${content.order_position} |
+                                <strong>Tipo:</strong> ${content.content_type.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editContent('${content.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteContent('${content.id}')">🗑️ Excluir</button>
+                            <button class="btn btn-small btn-secondary" onclick="toggleStatus('${content.id}', ${content.active})">
+                                ${content.active ? '📍 Desativar' : '📌 Ativar'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('contentList').innerHTML = html;
+        }
+
+        // Alternar status
+        async function toggleStatus(id, currentStatus) {
+            try {
+                const { error } = await supabase.from('contents').update({ active: !currentStatus }).eq('id', id);
+                if (!error) {
+                    showMessage(`Conteúdo ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+                    loadContents();
+                } else {
+                    showMessage('Erro ao alterar status: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao alterar status', 'error');
+            }
+        }
+
+        // Editar conteúdo
+        async function editContent(id) {
+            try {
+                const { data, error } = await supabase.from('contents').select('*').eq('id', id).single();
+                if (error) {
+                    showMessage('Erro ao carregar conteúdo: ' + error.message, 'error');
+                    return;
+                }
+                
+                if (data) {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                    document.querySelector('.tab').classList.add('active');
+                    document.getElementById('add-section').classList.add('active');
+                    
+                    document.getElementById('module').value = data.module;
+                    document.getElementById('title').value = data.title;
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('imageUrl').value = data.image_url || '';
+                    document.getElementById('bgColor').value = data.bg_color || '';
+                    document.getElementById('orderPosition').value = data.order_position;
+                    document.getElementById('isActive').checked = data.active;
+                    document.getElementById('contentType').value = data.content_type;
+                    
+                    toggleContentInput();
+                    if (data.content_type === 'url' || data.content_type === 'iframe') {
+                        document.getElementById('contentUrl').value = data.content_url || '';
+                    } else if (data.content_type === 'html') {
+                        document.getElementById('contentHtml').value = data.content_html || '';
+                    }
+
+                    document.getElementById('contentForm').dataset.editId = id;
+                    document.querySelector('#contentForm button[type="submit"]').innerHTML = '💾 Atualizar Conteúdo';
+                    
+                    if (!document.getElementById('cancelEdit')) {
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.id = 'cancelEdit';
+                        cancelBtn.type = 'button';
+                        cancelBtn.className = 'btn btn-secondary';
+                        cancelBtn.innerHTML = 'Cancelar Edição';
+                        cancelBtn.onclick = cancelEdit;
+                        document.querySelector('#contentForm .button-group').appendChild(cancelBtn);
+                    }
+                    
+                    showMessage('Conteúdo carregado para edição', 'success');
+                }
+            } catch (error) {
+                showMessage('Erro ao editar conteúdo', 'error');
+            }
+        }
+
+        // Cancelar edição
+        function cancelEdit() {
+            delete document.getElementById('contentForm').dataset.editId;
+            document.querySelector('#contentForm button[type="submit"]').innerHTML = '💾 Salvar Conteúdo';
+            const cancelBtn = document.getElementById('cancelEdit');
+            if (cancelBtn) cancelBtn.remove();
+            resetForm();
+        }
+
+        // Excluir conteúdo
+        async function deleteContent(id) {
+            if (!confirm('Tem certeza que deseja excluir este conteúdo?')) return;
+            
+            try {
+                const { error } = await supabase.from('contents').delete().eq('id', id);
+                if (!error) {
+                    showMessage('Conteúdo excluído com sucesso!', 'success');
+                    loadContents();
+                } else {
+                    showMessage('Erro ao excluir: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir conteúdo', 'error');
+            }
+        }
+
+        // Gerenciar Módulos
+        async function loadModules() {
+            try {
+                const { data, error } = await supabase.from('modules').select('*').order('order_position');
+                if (!error && data) {
+                    displayModules(data);
+                    updateModuleSelects(data);
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar módulos', 'error');
+            }
+        }
+
+        function displayModules(modules) {
+            const list = document.getElementById('moduleList');
+            if (modules.length === 0) {
+                list.innerHTML = '<p>Nenhum módulo encontrado</p>';
+                return;
+            }
+            
+            let html = '';
+            modules.forEach(mod => {
+                html += `
+                    <div class="module-item">
+                        <div class="module-item-image" style="background-image: url('${mod.image_url || ''}'); background-color: ${mod.bg_color || '#e0e0e0'}"></div>
+                        <div class="module-item-info">
+                            <div class="module-item-title">${mod.name}</div>
+                            <small>Chave: ${mod.key} | Ordem: ${mod.order_position}</small>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editModule('${mod.key}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        // Salvar módulo
+        document.getElementById('moduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const key = document.getElementById('newModuleKey').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const name = document.getElementById('newModuleName').value;
+            const imageUrl = document.getElementById('newModuleImage').value || null;
+            const bgColor = document.getElementById('newModuleColor').value || null;
+            const orderPosition = parseInt(document.getElementById('newModuleOrder').value);
+            const editKey = document.getElementById('editModuleKey').value;
+
+            try {
+                let result;
+                if (editKey) {
+                    result = await supabase.from('modules').update({ 
+                        name, 
+                        image_url: imageUrl, 
+                        bg_color: bgColor,
+                        order_position: orderPosition 
+                    }).eq('key', editKey);
+                } else {
+                    result = await supabase.from('modules').insert([{ 
+                        key, 
+                        name, 
+                        image_url: imageUrl, 
+                        bg_color: bgColor,
+                        order_position: orderPosition 
+                    }]);
+                }
+                
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Módulo ${editKey ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+                    resetModuleForm();
+                    loadModules();
+                } else {
+                    showMessage(`Erro ao salvar módulo: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar módulo', 'error');
+            }
+        });
+
+        // Editar módulo
+        async function editModule(key) {
+            try {
+                const { data, error } = await supabase.from('modules').select('*').eq('key', key).single();
+                if (error) {
+                    showMessage('Erro ao carregar módulo: ' + error.message, 'error');
+                    return;
+                }
+                
+                if (data) {
+                    document.getElementById('newModuleKey').value = data.key;
+                    document.getElementById('newModuleKey').disabled = true;
+                    document.getElementById('newModuleName').value = data.name;
+                    document.getElementById('newModuleImage').value = data.image_url || '';
+                    document.getElementById('newModuleColor').value = data.bg_color || '';
+                    document.getElementById('newModuleOrder').value = data.order_position;
+                    document.getElementById('editModuleKey').value = data.key;
+                    document.getElementById('saveModuleBtn').innerHTML = '💾 Atualizar Módulo';
+                    
+                    showMessage('Módulo carregado para edição', 'success');
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar módulo', 'error');
+            }
+        }
+
+        // Excluir módulo
+        async function deleteModule(key) {
+            if (!confirm('Tem certeza? Todos os conteúdos deste módulo não serão mais exibidos.')) return;
+            
+            try {
+                const { error } = await supabase.from('modules').delete().eq('key', key);
+                if (!error) {
+                    showMessage('Módulo excluído com sucesso!', 'success');
+                    loadModules();
+                } else {
+                    showMessage('Erro ao excluir módulo: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir módulo', 'error');
+            }
+        }
+
+        // Reset formulário módulo
+        function resetModuleForm() {
+            document.getElementById('moduleForm').reset();
+            document.getElementById('editModuleKey').value = '';
+            document.getElementById('newModuleKey').disabled = false;
+            document.getElementById('saveModuleBtn').innerHTML = 'Adicionar Módulo';
+        }
+
+        // Atualizar selects de módulos
+        function updateModuleSelects(modules) {
+            const selects = document.querySelectorAll('#module, #filterModule');
+            selects.forEach(select => {
+                const defaultOptions = Array.from(select.options).filter(opt => opt.value === '');
+                select.innerHTML = '';
+                defaultOptions.forEach(opt => select.appendChild(opt));
+
+                modules.forEach(mod => {
+                    const option = document.createElement('option');
+                    option.value = mod.key;
+                    option.text = mod.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Reset formulário
+        function resetForm() {
+            document.getElementById('contentForm').reset();
+        }
+
+        // Mostrar mensagem
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // ====== FUNÇÕES DO FEED ======
+        async function loadFeedPosts() {
+            try {
+                const { data, error } = await supabase
                     .from('feed_posts')
                     .select('*')
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
-                
-                const postsDiv = document.getElementById('postsList');
-                
-                if (posts && posts.length > 0) {
-                    let html = '';
-                    posts.forEach(post => {
-                        const date = new Date(post.created_at).toLocaleDateString('pt-BR');
-                        html += `
-                            <div class="post-card">
-                                <h3 class="post-title">${post.title}</h3>
-                                <p class="post-content">${post.content}</p>
-                                <div class="post-meta">
-                                    <span>${post.category || 'Geral'}</span>
-                                    <span>${date}</span>
-                                </div>
-                            </div>
-                        `;
-                    });
-                    postsDiv.innerHTML = html;
-                } else {
-                    postsDiv.innerHTML = '<div class="empty-state">Nenhum conteúdo publicado</div>';
+                if (!error && data) {
+                    displayFeedPosts(data);
                 }
             } catch (error) {
-                console.error
+                console.error('Erro ao carregar posts:', error);
+            }
+        }
+
+        function displayFeedPosts(posts) {
+            const list = document.getElementById('feedList');
+            if (posts.length === 0) {
+                list.innerHTML = '<p>Nenhum post encontrado</p>';
+                return;
+            }
+            
+            let html = '';
+            posts.forEach(post => {
+                const statusBadge = post.active ? 
+                    '<span class="status-badge status-active">✓ Ativo</span>' : 
+                    '<span class="status-badge status-inactive">✗ Inativo</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${post.highlight ? '⭐ ' : ''}${post.title}
+                                ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Categoria:</strong> ${post.category} | 
+                                <strong>Data:</strong> ${new Date(post.created_at).toLocaleDateString('pt-BR')}
+                            </div>
+                            <div style="color: #666; margin-top: 5px;">${post.content.substring(0, 100)}...</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editFeedPost('${post.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteFeedPost('${post.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        // Salvar post do feed
+        document.getElementById('feedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const editId = document.getElementById('editFeedId').value;
+            const formData = {
+                title: document.getElementById('feedTitle').value,
+                category: document.getElementById('feedCategory').value,
+                content: document.getElementById('feedContent').value,
+                image_url: document.getElementById('feedImage').value || null,
+                tags: document.getElementById('feedTags').value || null,
+                active: document.getElementById('feedActive').checked,
+                highlight: document.getElementById('feedHighlight').checked
+            };
+            
+            try {
+                let result;
+                if (editId) {
+                    result = await supabase.from('feed_posts').update(formData).eq('id', editId);
+                } else {
+                    result = await supabase.from('feed_posts').insert([formData]);
+                }
+                
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success');
+                    resetFeedForm();
+                    loadFeedPosts();
+                } else {
+                    showMessage('Erro ao salvar post: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar post', 'error');
+            }
+        });
+
+        async function editFeedPost(id) {
+            try {
+                const { data, error } = await supabase.from('feed_posts').select('*').eq('id', id).single();
+                if (!error && data) {
+                    document.getElementById('editFeedId').value = data.id;
+                    document.getElementById('feedTitle').value = data.title;
+                    document.getElementById('feedCategory').value = data.category;
+                    document.getElementById('feedContent').value = data.content;
+                    document.getElementById('feedImage').value = data.image_url || '';
+                    document.getElementById('feedTags').value = data.tags || '';
+                    document.getElementById('feedActive').checked = data.active;
+                    document.getElementById('feedHighlight').checked = data.highlight;
+                    document.getElementById('saveFeedBtn').innerHTML = '💾 Atualizar Post';
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar post', 'error');
+            }
+        }
+
+        async function deleteFeedPost(id) {
+            if (!confirm('Tem certeza que deseja excluir este post?')) return;
+            
+            try {
+                const { error } = await supabase.from('feed_posts').delete().eq('id', id);
+                if (!error) {
+                    showMessage('Post excluído com sucesso!', 'success');
+                    loadFeedPosts();
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir post', 'error');
+            }
+        }
+
+        function resetFeedForm() {
+            document.getElementById('feedForm').reset();
+            document.getElementById('editFeedId').value = '';
+            document.getElementById('feedActive').checked = true;
+            document.getElementById('feedHighlight').checked = false;
+            document.getElementById('saveFeedBtn').innerHTML = '💾 Publicar Post';
+        }
+
+        // ====== FUNÇÕES DA COMUNIDADE ======
+        async function loadCommunityMessages() {
+            const filter = document.getElementById('filterStatus')?.value || 'pending';
+            
+            console.log('Carregando mensagens com filtro:', filter);
+            
+            try {
+                // Query simplificada primeiro
+                let { data: messages, error } = await supabase
+                    .from('community_messages')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Erro ao carregar mensagens:', error);
+                    document.getElementById('communityList').innerHTML = `
+                        <p style="color: red;">Erro: ${error.message}</p>
+                    `;
+                    return;
+                }
+                
+                // Filtrar no JavaScript
+                if (filter === 'pending') {
+                    messages = messages.filter(m => m.approved === false);
+                } else if (filter === 'approved') {
+                    messages = messages.filter(m => m.approved === true);
+                }
+                
+                console.log('Mensagens carregadas:', messages);
+                
+                // Buscar perfis separadamente
+                if (messages && messages.length > 0) {
+                    for (let msg of messages) {
+                        if (msg.user_id) {
+                            const { data: profile } = await supabase
+                                .from('profiles')
+                                .select('name, email')
+                                .eq('id', msg.user_id)
+                                .single();
+                            
+                            msg.profiles = profile;
+                        }
+                    }
+                }
+                
+                displayCommunityMessages(messages || []);
+                
+            } catch (error) {
+                console.error('Erro geral:', error);
+                document.getElementById('communityList').innerHTML = `
+                    <p style="color: red;">Erro: ${error.message}</p>
+                `;
+            }
+        }
+
+        function displayCommunityMessages(messages) {
+            const list = document.getElementById('communityList');
+            
+            if (messages.length === 0) {
+                list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
+                return;
+            }
+            
+            let html = '';
+            messages.forEach(msg => {
+                const author = msg.profiles ? msg.profiles.name || msg.profiles.email : 'Anônimo';
+                const statusBadge = msg.approved ? 
+                    '<span class="status-badge status-active">Aprovada</span>' : 
+                    '<span class="status-badge status-inactive">Pendente</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${author} ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
+                            </div>
+                            <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                ${msg.message}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            ${!msg.approved ? `
+                                <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                            ` : ''}
+                            <button class="btn btn-small btn-danger" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        async function approveMessage(id) {
+            try {
+                const { error } = await supabase
+                    .from('community_messages')
+                    .update({ approved: true })
+                    .eq('id', id);
+                
+                if (!error) {
+                    showMessage('Mensagem aprovada!', 'success');
+                    loadCommunityMessages();
+                }
+            } catch (error) {
+                showMessage('Erro ao aprovar mensagem', 'error');
+            }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('community_messages')
+                    .delete()
+                    .eq('id', id);
+                
+                if (!error) {
+                    showMessage('Mensagem excluída!', 'success');
+                    loadCommunityMessages();
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir mensagem', 'error');
+            }
+        }
+
+        // Inicializar
+        async function init() {
+            const isAuth = await checkAuth();
+            if (isAuth) {
+                loadModules();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
