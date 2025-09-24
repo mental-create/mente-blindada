@@ -538,13 +538,13 @@
 </head>
 <body>
     <div class="container">
-        <div class="header">
+        <div class="header" id="mainHeader">
             <div class="time" id="time">09:40</div>
             <div class="date" id="date">Segunda-Feira, 22 de Setembro</div>
             <div class="app-icon"></div>
         </div>
         
-        <div class="title-bar">
+        <div class="title-bar" id="titleBar">
             <h1 class="title">MENTE BLINDADA 3-2-1</h1>
             <div class="greeting" id="greeting">Bom Dia!</div>
         </div>
@@ -709,6 +709,17 @@
                 }
             });
             
+            // Mostrar/esconder header baseado na view
+            const header = document.getElementById('mainHeader');
+            const titleBar = document.getElementById('titleBar');
+            if (view === 'home') {
+                header.style.display = 'block';
+                titleBar.style.display = 'block';
+            } else {
+                header.style.display = 'none';
+                titleBar.style.display = 'none';
+            }
+            
             // Carregar conteúdo baseado na view
             switch(view) {
                 case 'home':
@@ -784,6 +795,10 @@
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading active">Carregando conteúdos...</div>';
             
+            // Esconder header quando navegar para módulo
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('titleBar').style.display = 'none';
+            
             try {
                 const { data: contents, error } = await supabase
                     .from('contents')
@@ -800,7 +815,12 @@
                 const backBtn = document.createElement('button');
                 backBtn.className = 'back-button';
                 backBtn.innerHTML = '← Voltar';
-                backBtn.onclick = () => loadHomeModules();
+                backBtn.onclick = () => {
+                    // Mostrar header quando voltar ao home
+                    document.getElementById('mainHeader').style.display = 'block';
+                    document.getElementById('titleBar').style.display = 'block';
+                    loadHomeModules();
+                };
                 mainContent.appendChild(backBtn);
                 
                 const title = document.createElement('h2');
@@ -848,16 +868,21 @@
         function openContent(content) {
             const mainContent = document.getElementById('mainContent');
             
+            // Esconder header quando abrir conteúdo
+            document.getElementById('mainHeader').style.display = 'none';
+            document.getElementById('titleBar').style.display = 'none';
+            
             if (content.content_type === 'url' || content.content_type === 'iframe') {
-                // Incorporar URL em iframe
+                // Incorporar URL em iframe com scroll
                 if (content.content_url) {
                     mainContent.innerHTML = `
-                        <button class="back-button" onclick="loadModuleContents('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
+                        <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
                         <h2 class="module-title">${content.title}</h2>
-                        <div style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 300px); min-height: 500px;">
+                        <div style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 250px); min-height: 500px; overflow: hidden;">
                             <iframe src="${content.content_url}" 
-                                style="width: 100%; height: 100%; border: none; border-radius: 10px;"
+                                style="width: 100%; height: 100%; border: none; border-radius: 10px; overflow: auto;"
                                 frameborder="0"
+                                scrolling="yes"
                                 allowfullscreen>
                             </iframe>
                         </div>
@@ -868,13 +893,18 @@
             } else if (content.content_type === 'html') {
                 // Exibir HTML diretamente
                 mainContent.innerHTML = `
-                    <button class="back-button" onclick="loadModuleContents('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
+                    <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
                     <h2 class="module-title">${content.title}</h2>
-                    <div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px;">
+                    <div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px; overflow: auto; max-height: calc(100vh - 250px);">
                         ${content.content_html || '<p>Conteúdo não disponível</p>'}
                     </div>
                 `;
             }
+        }
+        
+        // Função para voltar ao módulo (sem mostrar header)
+        function backToModule(moduleKey, moduleName) {
+            loadModuleContents(moduleKey, moduleName);
         }
         
         // Função auxiliar para obter nome do módulo
@@ -1241,9 +1271,14 @@
             const file = event.target.files[0];
             if (!file || !supabase || !currentUser) return;
             
+            alert('Enviando foto...');
+            
             try {
-                const fileName = `${currentUser.id}-${Date.now()}.${file.name.split('.').pop()}`;
+                // Criar nome único para o arquivo
+                const fileExt = file.name.split('.').pop();
+                const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
                 
+                // Fazer upload para o storage
                 const { data, error } = await supabase.storage
                     .from('avatars')
                     .upload(fileName, file, {
@@ -1251,12 +1286,19 @@
                         upsert: true
                     });
                 
-                if (error) throw error;
+                if (error) {
+                    console.error('Erro no upload:', error);
+                    throw error;
+                }
                 
+                // Obter URL pública
                 const { data: { publicUrl } } = supabase.storage
                     .from('avatars')
                     .getPublicUrl(fileName);
                 
+                console.log('URL pública gerada:', publicUrl);
+                
+                // Atualizar perfil com URL do avatar
                 const { error: updateError } = await supabase
                     .from('profiles')
                     .update({ 
@@ -1265,22 +1307,27 @@
                     })
                     .eq('id', currentUser.id);
                 
-                if (updateError) throw updateError;
+                if (updateError) {
+                    console.error('Erro ao atualizar perfil:', updateError);
+                    throw updateError;
+                }
                 
+                // Atualizar o perfil local
                 if (!currentUser.profile) {
                     currentUser.profile = {};
                 }
                 currentUser.profile.avatar_url = publicUrl;
                 
-                alert('✅ Foto atualizada!');
+                alert('✅ Foto atualizada com sucesso!');
                 
+                // Recarregar o perfil
                 setTimeout(() => {
                     loadProfile();
                 }, 500);
                 
             } catch (error) {
-                console.error('Erro ao fazer upload:', error);
-                alert('❌ Erro ao enviar foto\n\nTente novamente.');
+                console.error('Erro completo:', error);
+                alert('❌ Erro ao enviar foto. Verifique se o bucket "avatars" existe e está público no Supabase.');
             }
         }
 
@@ -1315,6 +1362,7 @@
         window.loadHomeModules = loadHomeModules;
         window.loadModuleContents = loadModuleContents;
         window.openContent = openContent;
+        window.backToModule = backToModule;
 
         // Inicializar app
         window.addEventListener('DOMContentLoaded', init);
