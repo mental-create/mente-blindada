@@ -174,11 +174,24 @@
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Verificar se já está logado
-        async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (session && localStorage.getItem('isAdmin') === 'true') {
-                window.location.href = 'admin.html';
+        // Função para redirecionar se o usuário já estiver logado e for admin
+        async function checkAuthAndRedirect() {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (session) {
+                    // Se houver uma sessão, verificar o role do usuário
+                    const { data: profile, error } = await supabase
+                        .from('profiles')
+                        .select('is_admin')
+                        .eq('id', session.user.id)
+                        .single();
+
+                    if (!error && profile && profile.is_admin) {
+                        window.location.href = 'admin.html';
+                    }
+                }
+            } catch (e) {
+                console.error('Erro na verificação inicial de autenticação:', e);
             }
         }
 
@@ -199,21 +212,38 @@
                     password: password
                 });
 
-                if (error) throw error;
+                if (error) {
+                    throw error;
+                }
 
-                // Verificar se é admin baseado na tabela perfis
-// Aceitar qualquer login válido como admin
-localStorage.setItem('isAdmin', 'true');
-window.location.href = 'admin.html';
-
+                if (data.user) {
+                    // Verificar se o usuário que logou é um admin
+                    const { data: profile, error: profileError } = await supabase
+                        .from('profiles')
+                        .select('is_admin')
+                        .eq('id', data.user.id)
+                        .single();
+                    
+                    if (profileError || !profile || !profile.is_admin) {
+                        // Se não for admin, fazer logout e mostrar erro
+                        await supabase.auth.signOut();
+                        throw new Error('Você não tem permissão para acessar este painel.');
+                    }
+                    
+                    // Se for admin, redirecionar
+                    window.location.href = 'admin.html';
+                } else {
+                    throw new Error('Falha no login. Verifique as credenciais.');
+                }
             } catch (error) {
                 console.error('Erro:', error);
-                showError(error.message || 'Erro ao fazer login');
+                showError(error.message || 'Erro ao fazer login. Credenciais incorretas?');
             } finally {
                 showLoading(false);
             }
         });
 
+        // Funções auxiliares
         function showError(message) {
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = message;
@@ -230,7 +260,7 @@ window.location.href = 'admin.html';
         }
 
         // Inicializar
-        checkAuth();
+        checkAuthAndRedirect();
     </script>
 </body>
 </html>
