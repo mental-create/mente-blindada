@@ -512,6 +512,34 @@
             color: #999;
         }
 
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 12px;
+            height: 12px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 10px;
+            min-height: 40px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #555;
+        }
+
+        /* Para iframe específico */
+        .iframe-container {
+            position: relative;
+            overflow: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
         @media (max-width: 380px) {
             .time {
                 font-size: 60px;
@@ -873,18 +901,18 @@
             document.getElementById('titleBar').style.display = 'none';
             
             if (content.content_type === 'url' || content.content_type === 'iframe') {
-                // Incorporar URL em iframe com scroll
+                // Incorporar URL em iframe com scroll visível
                 if (content.content_url) {
                     mainContent.innerHTML = `
                         <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
                         <h2 class="module-title">${content.title}</h2>
-                        <div style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 250px); min-height: 500px; overflow: hidden;">
+                        <div class="iframe-container" style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 250px); min-height: 500px; overflow: auto; position: relative;">
                             <iframe src="${content.content_url}" 
-                                style="width: 100%; height: 100%; border: none; border-radius: 10px; overflow: auto;"
+                                style="width: 100%; height: 100%; border: none; border-radius: 10px; display: block;"
                                 frameborder="0"
-                                scrolling="yes"
                                 allowfullscreen>
                             </iframe>
+                            <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 8px; height: 100px; background: #ccc; border-radius: 10px; pointer-events: none;"></div>
                         </div>
                     `;
                 } else {
@@ -1269,48 +1297,86 @@
 
         async function uploadAvatar(event) {
             const file = event.target.files[0];
-            if (!file || !supabase || !currentUser) return;
+            if (!file || !supabase || !currentUser) {
+                alert('Erro: arquivo ou usuário não encontrado');
+                return;
+            }
+            
+            // Verificar se o arquivo é uma imagem
+            if (!file.type.startsWith('image/')) {
+                alert('Por favor, selecione uma imagem');
+                return;
+            }
+            
+            // Limitar tamanho do arquivo (5MB)
+            if (file.size > 5 * 1024 * 1024) {
+                alert('Imagem muito grande. Máximo 5MB');
+                return;
+            }
             
             alert('Enviando foto...');
             
             try {
+                // Deletar avatar anterior se existir
+                if (currentUser.profile && currentUser.profile.avatar_url) {
+                    const oldFileName = currentUser.profile.avatar_url.split('/').pop();
+                    if (oldFileName && oldFileName.startsWith(currentUser.id)) {
+                        await supabase.storage
+                            .from('avatars')
+                            .remove([oldFileName]);
+                    }
+                }
+                
                 // Criar nome único para o arquivo
-                const fileExt = file.name.split('.').pop();
-                const fileName = `${currentUser.id}-${Date.now()}.${fileExt}`;
+                const timestamp = Date.now();
+                const fileExt = file.name.split('.').pop().toLowerCase();
+                const fileName = `${currentUser.id}_${timestamp}.${fileExt}`;
+                
+                console.log('Fazendo upload do arquivo:', fileName);
                 
                 // Fazer upload para o storage
-                const { data, error } = await supabase.storage
+                const { data: uploadData, error: uploadError } = await supabase.storage
                     .from('avatars')
                     .upload(fileName, file, {
                         cacheControl: '3600',
-                        upsert: true
+                        upsert: false
                     });
                 
-                if (error) {
-                    console.error('Erro no upload:', error);
-                    throw error;
+                if (uploadError) {
+                    console.error('Erro no upload:', uploadError);
+                    throw new Error(`Erro no upload: ${uploadError.message}`);
                 }
                 
+                console.log('Upload concluído:', uploadData);
+                
                 // Obter URL pública
-                const { data: { publicUrl } } = supabase.storage
+                const { data: urlData } = supabase.storage
                     .from('avatars')
                     .getPublicUrl(fileName);
                 
+                const publicUrl = urlData.publicUrl;
                 console.log('URL pública gerada:', publicUrl);
                 
                 // Atualizar perfil com URL do avatar
-                const { error: updateError } = await supabase
+                const { data: updateData, error: updateError } = await supabase
                     .from('profiles')
                     .update({ 
                         avatar_url: publicUrl,
                         updated_at: new Date().toISOString()
                     })
-                    .eq('id', currentUser.id);
+                    .eq('id', currentUser.id)
+                    .select();
                 
                 if (updateError) {
                     console.error('Erro ao atualizar perfil:', updateError);
-                    throw updateError;
+                    // Tentar deletar a imagem que foi enviada
+                    await supabase.storage
+                        .from('avatars')
+                        .remove([fileName]);
+                    throw new Error(`Erro ao atualizar perfil: ${updateError.message}`);
                 }
+                
+                console.log('Perfil atualizado:', updateData);
                 
                 // Atualizar o perfil local
                 if (!currentUser.profile) {
@@ -1327,7 +1393,7 @@
                 
             } catch (error) {
                 console.error('Erro completo:', error);
-                alert('❌ Erro ao enviar foto. Verifique se o bucket "avatars" existe e está público no Supabase.');
+                alert(`❌ Erro: ${error.message}`);
             }
         }
 
