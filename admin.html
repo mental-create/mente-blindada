@@ -305,6 +305,8 @@
             <button class="tab active" onclick="switchTab('add')">Adicionar Conteúdo</button>
             <button class="tab" onclick="switchTab('list')">Listar Conteúdos</button>
             <button class="tab" onclick="switchTab('modules')">Gerenciar Módulos</button>
+            <button class="tab" onclick="switchTab('feed')">Gerenciar Feed</button>
+            <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
 
         <!-- Adicionar Conteúdo -->
@@ -442,6 +444,89 @@
                 </div>
             </div>
         </div>
+
+        <!-- Gerenciar Feed -->
+        <div id="feed-section" class="content-section">
+            <h2>Gerenciar Feed</h2>
+            
+            <form id="feedForm" style="margin-bottom: 30px;">
+                <input type="hidden" id="editFeedId">
+                <div class="form-group">
+                    <label for="feedTitle">Título do Post</label>
+                    <input type="text" id="feedTitle" placeholder="Título do post" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedCategory">Categoria</label>
+                    <select id="feedCategory" required>
+                        <option value="">Selecione...</option>
+                        <option value="motivacao">💪 Motivação</option>
+                        <option value="meditacao">🧘 Meditação</option>
+                        <option value="exercicios">🏃 Exercícios</option>
+                        <option value="alimentacao">🥗 Alimentação</option>
+                        <option value="sono">😴 Sono</option>
+                        <option value="relacionamentos">❤️ Relacionamentos</option>
+                        <option value="produtividade">📈 Produtividade</option>
+                        <option value="autoconhecimento">🔍 Autoconhecimento</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedContent">Conteúdo</label>
+                    <textarea id="feedContent" rows="5" placeholder="Conteúdo do post..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedImage">URL da Imagem (opcional)</label>
+                    <input type="url" id="feedImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedTags">Tags (separadas por vírgula)</label>
+                    <input type="text" id="feedTags" placeholder="saúde mental, bem-estar">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedActive" checked> Post Ativo
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedHighlight"> ⭐ Destacar Post
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button>
+                </div>
+            </form>
+            
+            <h3>Posts Publicados</h3>
+            <div id="feedList">
+                <div class="loading">Carregando posts...</div>
+            </div>
+        </div>
+
+        <!-- Moderar Comunidade -->
+        <div id="community-section" class="content-section">
+            <h2>Moderar Comunidade</h2>
+            
+            <div class="form-group">
+                <label for="filterStatus">Filtrar por Status</label>
+                <select id="filterStatus" onchange="loadCommunityMessages()">
+                    <option value="pending">Pendentes de Aprovação</option>
+                    <option value="approved">Aprovadas</option>
+                    <option value="all">Todas</option>
+                </select>
+            </div>
+            
+            <div id="communityList" style="margin-top: 20px;">
+                <div class="loading">Carregando mensagens...</div>
+            </div>
+        </div>
     </div>
 
     <!-- Scripts -->
@@ -489,6 +574,10 @@
                 loadContents();
             } else if (tab === 'modules') {
                 loadModules();
+            } else if (tab === 'feed') {
+                loadFeedPosts();
+            } else if (tab === 'community') {
+                loadCommunityMessages();
             }
         }
 
@@ -872,6 +961,236 @@
             setTimeout(() => {
                 messageArea.innerHTML = '';
             }, 5000);
+        }
+
+        // ====== FUNÇÕES DO FEED ======
+        async function loadFeedPosts() {
+            try {
+                const { data, error } = await supabase
+                    .from('feed_posts')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (!error && data) {
+                    displayFeedPosts(data);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar posts:', error);
+            }
+        }
+
+        function displayFeedPosts(posts) {
+            const list = document.getElementById('feedList');
+            if (posts.length === 0) {
+                list.innerHTML = '<p>Nenhum post encontrado</p>';
+                return;
+            }
+            
+            let html = '';
+            posts.forEach(post => {
+                const statusBadge = post.active ? 
+                    '<span class="status-badge status-active">✓ Ativo</span>' : 
+                    '<span class="status-badge status-inactive">✗ Inativo</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${post.highlight ? '⭐ ' : ''}${post.title}
+                                ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Categoria:</strong> ${post.category} | 
+                                <strong>Data:</strong> ${new Date(post.created_at).toLocaleDateString('pt-BR')}
+                            </div>
+                            <div style="color: #666; margin-top: 5px;">${post.content.substring(0, 100)}...</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editFeedPost('${post.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteFeedPost('${post.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        // Salvar post do feed
+        document.getElementById('feedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const editId = document.getElementById('editFeedId').value;
+            const formData = {
+                title: document.getElementById('feedTitle').value,
+                category: document.getElementById('feedCategory').value,
+                content: document.getElementById('feedContent').value,
+                image_url: document.getElementById('feedImage').value || null,
+                tags: document.getElementById('feedTags').value || null,
+                active: document.getElementById('feedActive').checked,
+                highlight: document.getElementById('feedHighlight').checked
+            };
+            
+            try {
+                let result;
+                if (editId) {
+                    result = await supabase.from('feed_posts').update(formData).eq('id', editId);
+                } else {
+                    result = await supabase.from('feed_posts').insert([formData]);
+                }
+                
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success');
+                    resetFeedForm();
+                    loadFeedPosts();
+                } else {
+                    showMessage('Erro ao salvar post: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar post', 'error');
+            }
+        });
+
+        async function editFeedPost(id) {
+            try {
+                const { data, error } = await supabase.from('feed_posts').select('*').eq('id', id).single();
+                if (!error && data) {
+                    document.getElementById('editFeedId').value = data.id;
+                    document.getElementById('feedTitle').value = data.title;
+                    document.getElementById('feedCategory').value = data.category;
+                    document.getElementById('feedContent').value = data.content;
+                    document.getElementById('feedImage').value = data.image_url || '';
+                    document.getElementById('feedTags').value = data.tags || '';
+                    document.getElementById('feedActive').checked = data.active;
+                    document.getElementById('feedHighlight').checked = data.highlight;
+                    document.getElementById('saveFeedBtn').innerHTML = '💾 Atualizar Post';
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar post', 'error');
+            }
+        }
+
+        async function deleteFeedPost(id) {
+            if (!confirm('Tem certeza que deseja excluir este post?')) return;
+            
+            try {
+                const { error } = await supabase.from('feed_posts').delete().eq('id', id);
+                if (!error) {
+                    showMessage('Post excluído com sucesso!', 'success');
+                    loadFeedPosts();
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir post', 'error');
+            }
+        }
+
+        function resetFeedForm() {
+            document.getElementById('feedForm').reset();
+            document.getElementById('editFeedId').value = '';
+            document.getElementById('feedActive').checked = true;
+            document.getElementById('feedHighlight').checked = false;
+            document.getElementById('saveFeedBtn').innerHTML = '💾 Publicar Post';
+        }
+
+        // ====== FUNÇÕES DA COMUNIDADE ======
+        async function loadCommunityMessages() {
+            const filter = document.getElementById('filterStatus').value;
+            let query = supabase
+                .from('community_messages')
+                .select(`
+                    *,
+                    profiles (name, email)
+                `)
+                .order('created_at', { ascending: false });
+            
+            if (filter === 'pending') {
+                query = query.eq('approved', false);
+            } else if (filter === 'approved') {
+                query = query.eq('approved', true);
+            }
+            
+            try {
+                const { data, error } = await query;
+                if (!error && data) {
+                    displayCommunityMessages(data);
+                }
+            } catch (error) {
+                console.error('Erro ao carregar mensagens:', error);
+            }
+        }
+
+        function displayCommunityMessages(messages) {
+            const list = document.getElementById('communityList');
+            
+            if (messages.length === 0) {
+                list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
+                return;
+            }
+            
+            let html = '';
+            messages.forEach(msg => {
+                const author = msg.profiles ? msg.profiles.name || msg.profiles.email : 'Anônimo';
+                const statusBadge = msg.approved ? 
+                    '<span class="status-badge status-active">Aprovada</span>' : 
+                    '<span class="status-badge status-inactive">Pendente</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${author} ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
+                            </div>
+                            <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                ${msg.message}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            ${!msg.approved ? `
+                                <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                            ` : ''}
+                            <button class="btn btn-small btn-danger" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        async function approveMessage(id) {
+            try {
+                const { error } = await supabase
+                    .from('community_messages')
+                    .update({ approved: true })
+                    .eq('id', id);
+                
+                if (!error) {
+                    showMessage('Mensagem aprovada!', 'success');
+                    loadCommunityMessages();
+                }
+            } catch (error) {
+                showMessage('Erro ao aprovar mensagem', 'error');
+            }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
+            
+            try {
+                const { error } = await supabase
+                    .from('community_messages')
+                    .delete()
+                    .eq('id', id);
+                
+                if (!error) {
+                    showMessage('Mensagem excluída!', 'success');
+                    loadCommunityMessages();
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir mensagem', 'error');
+            }
         }
 
         // Inicializar
