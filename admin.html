@@ -517,10 +517,11 @@
             <div class="form-group">
                 <label for="filterStatus">Filtrar por Status</label>
                 <select id="filterStatus" onchange="loadCommunityMessages()">
-                    <option value="pending">Pendentes de Aprovação</option>
-                    <option value="approved">Aprovadas</option>
-                    <option value="all">Todas</option>
-                </select>
+    <option value="pending">Pendentes de Aprovação</option>
+    <option value="approved">Aprovadas</option>
+    <option value="rejected">Rejeitadas</option>
+    <option value="all">Todas</option>
+</select>
             </div>
             
             <div id="communityList" style="margin-top: 20px;">
@@ -1094,133 +1095,169 @@
 
         // ====== FUNÇÕES DA COMUNIDADE ======
         async function loadCommunityMessages() {
-            const filter = document.getElementById('filterStatus')?.value || 'pending';
-            
-            console.log('Carregando mensagens com filtro:', filter);
-            
-            try {
-                // Query simplificada primeiro
-                let { data: messages, error } = await supabase
-                    .from('community_messages')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('Erro ao carregar mensagens:', error);
-                    document.getElementById('communityList').innerHTML = `
-                        <p style="color: red;">Erro: ${error.message}</p>
-                    `;
-                    return;
-                }
-                
-                // Filtrar no JavaScript
-                if (filter === 'pending') {
-                    messages = messages.filter(m => m.approved === false);
-                } else if (filter === 'approved') {
-                    messages = messages.filter(m => m.approved === true);
-                }
-                
-                console.log('Mensagens carregadas:', messages);
-                
-                // Buscar perfis separadamente
-                if (messages && messages.length > 0) {
-                    for (let msg of messages) {
-                        if (msg.user_id) {
-                            const { data: profile } = await supabase
-                                .from('profiles')
-                                .select('name, email')
-                                .eq('id', msg.user_id)
-                                .single();
-                            
-                            msg.profiles = profile;
-                        }
-                    }
-                }
-                
-                displayCommunityMessages(messages || []);
-                
-            } catch (error) {
-                console.error('Erro geral:', error);
-                document.getElementById('communityList').innerHTML = `
-                    <p style="color: red;">Erro: ${error.message}</p>
-                `;
-            }
+    const filter = document.getElementById('filterStatus')?.value || 'pending';
+    
+    console.log('Carregando mensagens com filtro:', filter);
+    
+    try {
+        // MUDANÇA: Usando community_posts
+        let query = supabase
+            .from('community_posts')
+            .select(`
+                *,
+                profiles (
+                    name,
+                    email
+                )
+            `)
+            .order('created_at', { ascending: false });
+        
+        // Filtrar por status
+        if (filter === 'pending') {
+            query = query.eq('status', 'pending');
+        } else if (filter === 'approved') {
+            query = query.eq('status', 'approved');
+        } else if (filter === 'rejected') {
+            query = query.eq('status', 'rejected');
         }
+        // Se filter === 'all', não adiciona filtro
+        
+        const { data: messages, error } = await query;
+        
+        if (error) {
+            console.error('Erro ao carregar mensagens:', error);
+            document.getElementById('communityList').innerHTML = `
+                <p style="color: red;">Erro: ${error.message}</p>
+            `;
+            return;
+        }
+        
+        console.log('Mensagens carregadas:', messages);
+        displayCommunityMessages(messages || []);
+        
+    } catch (error) {
+        console.error('Erro geral:', error);
+        document.getElementById('communityList').innerHTML = `
+            <p style="color: red;">Erro: ${error.message}</p>
+        `;
+    }
+}
 
-        function displayCommunityMessages(messages) {
-            const list = document.getElementById('communityList');
-            
-            if (messages.length === 0) {
-                list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
-                return;
-            }
-            
-            let html = '';
-            messages.forEach(msg => {
-                const author = msg.profiles ? msg.profiles.name || msg.profiles.email : 'Anônimo';
-                const statusBadge = msg.approved ? 
-                    '<span class="status-badge status-active">Aprovada</span>' : 
-                    '<span class="status-badge status-inactive">Pendente</span>';
-                
-                html += `
-                    <div class="content-item">
-                        <div class="content-info">
-                            <div class="content-title">
-                                ${author} ${statusBadge}
-                            </div>
-                            <div class="content-module">
-                                <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
-                            </div>
-                            <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-                                ${msg.message}
-                            </div>
-                        </div>
-                        <div class="content-actions">
-                            ${!msg.approved ? `
-                                <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
-                            ` : ''}
-                            <button class="btn btn-small btn-danger" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button>
-                        </div>
+function displayCommunityMessages(messages) {
+    const list = document.getElementById('communityList');
+    
+    if (messages.length === 0) {
+        list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
+        return;
+    }
+    
+    let html = '';
+    messages.forEach(msg => {
+        const author = msg.profiles ? msg.profiles.name || msg.profiles.email : 'Anônimo';
+        
+        // Badge de status baseado no campo status
+        let statusBadge = '';
+        if (msg.status === 'approved') {
+            statusBadge = '<span class="status-badge status-active">Aprovada</span>';
+        } else if (msg.status === 'pending') {
+            statusBadge = '<span class="status-badge status-inactive">Pendente</span>';
+        } else if (msg.status === 'rejected') {
+            statusBadge = '<span class="status-badge" style="background: #e74c3c; color: white;">Rejeitada</span>';
+        }
+        
+        html += `
+            <div class="content-item">
+                <div class="content-info">
+                    <div class="content-title">
+                        ${author} ${statusBadge}
                     </div>
-                `;
-            });
-            list.innerHTML = html;
-        }
+                    <div class="content-module">
+                        <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
+                    </div>
+                    <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                        ${msg.content}
+                    </div>
+                </div>
+                <div class="content-actions">
+                    ${msg.status === 'pending' ? `
+                        <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                        <button class="btn btn-small btn-danger" onclick="rejectMessage('${msg.id}')">❌ Rejeitar</button>
+                    ` : msg.status === 'approved' ? `
+                        <button class="btn btn-small btn-danger" onclick="rejectMessage('${msg.id}')">❌ Rejeitar</button>
+                    ` : `
+                        <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                    `}
+                    <button class="btn btn-small btn-danger" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button>
+                </div>
+            </div>
+        `;
+    });
+    list.innerHTML = html;
+}
 
-        async function approveMessage(id) {
-            try {
-                const { error } = await supabase
-                    .from('community_messages')
-                    .update({ approved: true })
-                    .eq('id', id);
-                
-                if (!error) {
-                    showMessage('Mensagem aprovada!', 'success');
-                    loadCommunityMessages();
-                }
-            } catch (error) {
-                showMessage('Erro ao aprovar mensagem', 'error');
-            }
+async function approveMessage(id) {
+    try {
+        // MUDANÇA: Atualizando campo status para 'approved'
+        const { error } = await supabase
+            .from('community_posts')
+            .update({ 
+                status: 'approved',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+        
+        if (!error) {
+            showMessage('Mensagem aprovada!', 'success');
+            loadCommunityMessages();
+        } else {
+            showMessage('Erro ao aprovar: ' + error.message, 'error');
         }
+    } catch (error) {
+        showMessage('Erro ao aprovar mensagem', 'error');
+    }
+}
 
-        async function deleteMessage(id) {
-            if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
-            
-            try {
-                const { error } = await supabase
-                    .from('community_messages')
-                    .delete()
-                    .eq('id', id);
-                
-                if (!error) {
-                    showMessage('Mensagem excluída!', 'success');
-                    loadCommunityMessages();
-                }
-            } catch (error) {
-                showMessage('Erro ao excluir mensagem', 'error');
-            }
+async function rejectMessage(id) {
+    try {
+        // MUDANÇA: Atualizando campo status para 'rejected'
+        const { error } = await supabase
+            .from('community_posts')
+            .update({ 
+                status: 'rejected',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', id);
+        
+        if (!error) {
+            showMessage('Mensagem rejeitada!', 'success');
+            loadCommunityMessages();
+        } else {
+            showMessage('Erro ao rejeitar: ' + error.message, 'error');
         }
+    } catch (error) {
+        showMessage('Erro ao rejeitar mensagem', 'error');
+    }
+}
 
+async function deleteMessage(id) {
+    if (!confirm('Tem certeza que deseja excluir esta mensagem permanentemente?')) return;
+    
+    try {
+        const { error } = await supabase
+            .from('community_posts')
+            .delete()
+            .eq('id', id);
+        
+        if (!error) {
+            showMessage('Mensagem excluída!', 'success');
+            loadCommunityMessages();
+        } else {
+            showMessage('Erro ao excluir: ' + error.message, 'error');
+        }
+    } catch (error) {
+        showMessage('Erro ao excluir mensagem', 'error');
+    }
+}
         // Inicializar
         async function init() {
             const isAuth = await checkAuth();
