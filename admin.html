@@ -2,10 +2,8 @@
 <html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mente Blindada 3-2-1</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Painel Admin - Mente Blindada</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * {
@@ -18,416 +16,105 @@
             font-family: 'Montserrat', sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            overflow-x: hidden;
+            padding: 20px;
         }
 
-        .container {
-            flex: 1;
-            width: 100%;
-            max-width: 480px;
+        .admin-container {
+            max-width: 1200px;
             margin: 0 auto;
-            background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 40%);
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-
-        /* Header Section */
-        .header {
-            padding: 20px;
-            color: white;
-            position: relative;
-        }
-
-        .time {
-            font-size: 72px;
-            font-weight: 300;
-            margin-bottom: 5px;
-            letter-spacing: -2px;
-        }
-
-        .date {
-            font-size: 20px;
-            font-weight: 300;
-            opacity: 0.95;
-            margin-bottom: 20px;
-            white-space: nowrap;
-        }
-
-        .app-icon {
-            position: absolute;
-            top: 30px;
-            right: 20px;
-            width: 80px;
-            height: 80px;
-            background: url('https://i.imgur.com/vKe7loB.png') no-repeat center;
-            background-size: contain;
-            border-radius: 20px;
-        }
-
-        .title-bar {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 20px;
-            border-radius: 20px;
-            margin: 0 20px;
-            backdrop-filter: blur(10px);
-        }
-
-        .title {
-            font-size: 24px;
-            font-weight: 800;
-            color: white;
-            text-align: center;
-            margin-bottom: 10px;
-            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
-            text-transform: uppercase;
-            letter-spacing: -0.5px;
-            white-space: nowrap;
-        }
-
-        .greeting {
-            font-size: 26px;
-            text-align: center;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex: 1;
-            background: #f0f4f8;
-            border-radius: 30px 30px 0 0;
-            margin-top: 20px;
-            padding: 30px 20px 100px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 20px;
-            align-content: start;
-            overflow-y: auto;
-        }
-
-        .card {
-            background: white;
-            border-radius: 20px;
-            padding: 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-            transition: transform 0.3s ease, box-shadow 0.3s ease;
-            cursor: pointer;
-            min-height: 200px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .card:active {
-            transform: scale(0.98);
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
-        }
-
-        .card-image {
-            width: 100%;
-            height: 140px;
-            background-size: contain;
-            background-position: center;
-            background-repeat: no-repeat;
-            border-radius: 12px;
-            margin-bottom: 12px;
-        }
-
-        .card-title {
-            font-size: 18px;
-            font-weight: 600;
-            color: #2c3e50;
-            text-align: center;
-            font-family: 'Montserrat', sans-serif;
-        }
-
-        /* Back Button */
-        .back-button {
-            grid-column: 1/-1;
-            padding: 12px 24px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            margin-bottom: 20px;
-        }
-
-        .back-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        /* Module Title */
-        .module-title {
-            grid-column: 1/-1;
-            text-align: center;
-            font-size: 24px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 20px;
-        }
-
-        /* Feed Styles */
-        .feed-container {
-            grid-column: 1/-1;
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-
-        .feed-post {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .feed-post-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .feed-author-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 18px;
-        }
-
-        .feed-author-info {
-            flex: 1;
-        }
-
-        .feed-author-name {
-            font-weight: 700;
-            color: #333;
-        }
-
-        .feed-post-time {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .feed-post-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #333;
-            margin-bottom: 10px;
-        }
-
-        .feed-post-content {
-            color: #666;
-            line-height: 1.6;
-            margin-bottom: 15px;
-        }
-
-        .feed-post-image {
-            width: 100%;
-            border-radius: 10px;
-            margin-bottom: 15px;
-        }
-
-        .feed-tags {
-            margin-top: 10px;
-            color: #666;
-            font-size: 12px;
-        }
-
-        /* Community Styles */
-        .community-container {
-            grid-column: 1/-1;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-
-        .community-input-box {
-            background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-
-        .community-input {
-            width: 100%;
-            padding: 15px;
-            border: 2px solid #e0e0e0;
-            border-radius: 10px;
-            font-family: 'Montserrat', sans-serif;
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        .community-submit-btn {
-            margin-top: 10px;
-            padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: none;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .community-submit-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3);
-        }
-
-        .community-message {
-            background: white;
-            border-radius: 15px;
-            padding: 15px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.08);
-        }
-
-        .community-message-header {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 10px;
-        }
-
-        .community-avatar {
-            width: 35px;
-            height: 35px;
-            border-radius: 50%;
-            background: #e0e0e0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .community-author {
-            flex: 1;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .community-time {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .community-text {
-            color: #666;
-            line-height: 1.5;
-        }
-
-        /* Profile Styles */
-        .profile-container {
-            grid-column: 1/-1;
             background: white;
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
         }
 
-        .profile-header {
-            text-align: center;
-            margin-bottom: 30px;
-        }
-
-        .profile-avatar {
-            width: 120px;
-            height: 120px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            margin: 0 auto 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 48px;
-            color: white;
-            position: relative;
-            cursor: pointer;
-            overflow: hidden;
-        }
-
-        .profile-avatar img {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            position: absolute;
-            top: 0;
-            left: 0;
-        }
-
-        .profile-avatar-edit {
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            background: white;
-            border-radius: 50%;
-            width: 35px;
-            height: 35px;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            cursor: pointer;
-            z-index: 10;
-        }
-
-        .profile-avatar:hover .profile-avatar-edit {
-            display: flex;
-        }
-
-        .profile-name {
-            font-size: 24px;
-            font-weight: 700;
+        h1 {
             color: #333;
-            margin-bottom: 5px;
+            margin-bottom: 30px;
+            text-align: center;
+            font-size: 32px;
+            font-weight: 800;
         }
 
-        .profile-email {
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e0e0e0;
+            flex-wrap: wrap;
+        }
+
+        .tab {
+            padding: 15px 25px;
+            background: none;
+            border: none;
             color: #666;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 3px solid transparent;
+            margin-bottom: -2px;
+        }
+
+        .tab.active {
+            color: #4169E1;
+            border-bottom-color: #4169E1;
+        }
+
+        .content-section {
+            display: none;
+        }
+
+        .content-section.active {
+            display: block;
+        }
+
+        .form-group {
             margin-bottom: 20px;
         }
 
-        .profile-form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: #333;
+            font-weight: 600;
         }
 
-        .profile-input {
+        input[type="text"],
+        input[type="url"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
             padding: 12px;
             border: 2px solid #e0e0e0;
             border-radius: 10px;
             font-family: 'Montserrat', sans-serif;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
         }
 
-        .profile-save-btn {
+        input:focus,
+        select:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #4169E1;
+        }
+
+        textarea {
+            min-height: 150px;
+            resize: vertical;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn {
             padding: 12px 30px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #4169E1;
             color: white;
             border: none;
             border-radius: 10px;
@@ -436,996 +123,1113 @@
             transition: all 0.3s ease;
         }
 
+        .btn:hover {
+            background: #3051b8;
+            transform: translateY(-2px);
+        }
+
+        .btn-secondary {
+            background: #666;
+        }
+
+        .btn-danger {
+            background: #e74c3c;
+        }
+
+        .content-list {
+            margin-top: 30px;
+        }
+
+        .content-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 20px;
+        }
+
+        .content-image {
+            width: 80px;
+            height: 80px;
+            border-radius: 10px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .content-info {
+            flex: 1;
+        }
+
+        .content-title {
+            font-weight: 700;
+            color: #333;
+            margin-bottom: 5px;
+        }
+
+        .content-module {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .content-actions {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+            white-space: nowrap;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-left: 10px;
+        }
+
+        .status-active {
+            background: #27ae60;
+            color: white;
+        }
+
+        .status-inactive {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .upload-area {
+            border: 2px dashed #4169E1;
+            border-radius: 10px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .upload-area:hover {
+            background: #f0f4f8;
+        }
+
+        .preview-image {
+            max-width: 200px;
+            margin-top: 15px;
+            border-radius: 10px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .module-item {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 10px;
+        }
+
+        .module-item-image {
+            width: 60px;
+            height: 60px;
+            border-radius: 8px;
+            background-size: cover;
+            background-position: center;
+            flex-shrink: 0;
+        }
+
+        .module-item-info {
+            flex: 1;
+        }
+
+        .module-item-title {
+            font-weight: 700;
+            color: #333;
+        }
+
         .logout-btn {
-            margin-top: 20px;
-            padding: 12px 30px;
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            padding: 10px 20px;
             background: #e74c3c;
             color: white;
             border: none;
             border-radius: 10px;
+            cursor: pointer;
             font-weight: 600;
-            cursor: pointer;
-            width: 100%;
         }
 
-        /* Navigation Bar */
-        .nav-bar {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(180deg, #1a237e 0%, #0d47a1 100%);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
-            z-index: 1000;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px 20px;
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            cursor: pointer;
-            flex: 1;
-        }
-
-        .nav-item.active {
-            color: white;
-            background: rgba(255, 255, 255, 0.15);
-            border-radius: 10px;
-            margin: 0 5px;
-        }
-
-        .nav-icon {
-            font-size: 24px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        /* Loading State */
-        .loading {
-            display: none;
-            text-align: center;
-            padding: 40px;
-            color: #666;
-            grid-column: 1/-1;
-        }
-
-        .loading.active {
-            display: block;
-        }
-
-        /* Empty State */
-        .empty-state {
-            grid-column: 1/-1;
-            text-align: center;
-            padding: 40px;
-            color: #999;
-        }
-
-        /* Custom Scrollbar */
-        ::-webkit-scrollbar {
-            width: 12px;
-            height: 12px;
-        }
-
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 10px;
-            min-height: 40px;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
-        }
-
-        /* Para iframe específico */
-        .iframe-container {
-            position: relative;
-            overflow: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        @media (max-width: 380px) {
-            .time {
-                font-size: 60px;
-            }
-            
-            .date {
-                font-size: 18px;
-            }
-            
-            .title {
-                font-size: 20px;
-            }
-            
-            .greeting {
-                font-size: 22px;
-            }
-            
-            .app-icon {
-                width: 70px;
-                height: 70px;
-            }
+        .logout-btn:hover {
+            background: #c0392b;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="header" id="mainHeader">
-            <div class="time" id="time">09:40</div>
-            <div class="date" id="date">Segunda-Feira, 22 de Setembro</div>
-            <div class="app-icon"></div>
-        </div>
+    <div class="admin-container">
+        <button class="logout-btn" onclick="logout()">Sair</button>
+        <h1>🔧 PAINEL ADMINISTRATIVO</h1>
         
-        <div class="title-bar" id="titleBar">
-            <h1 class="title">MENTE BLINDADA 3-2-1</h1>
-            <div class="greeting" id="greeting">Bom Dia!</div>
+        <div id="messageArea"></div>
+
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('add')">Adicionar Conteúdo</button>
+            <button class="tab" onclick="switchTab('list')">Listar Conteúdos</button>
+            <button class="tab" onclick="switchTab('modules')">Gerenciar Módulos</button>
+            <button class="tab" onclick="switchTab('feed')">Gerenciar Feed</button>
+            <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
-        
-        <div class="main-content" id="mainContent">
-            <!-- Conteúdo dinâmico será inserido aqui -->
+
+        <!-- Adicionar Conteúdo -->
+        <div id="add-section" class="content-section active">
+            <form id="contentForm">
+                <div class="form-group">
+                    <label for="module">Módulo</label>
+                    <select id="module" required>
+                        <option value="">Selecione o módulo</option>
+                        <option value="quiz">Quiz Interativo</option>
+                        <option value="exercises">Exercícios</option>
+                        <option value="library">Biblioteca</option>
+                        <option value="diary">Diário</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="title">Título do Conteúdo</label>
+                    <input type="text" id="title" placeholder="Ex: Técnicas de Respiração" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Descrição (opcional)</label>
+                    <textarea id="description" placeholder="Breve descrição do conteúdo..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="imageUrl">URL da Imagem</label>
+                    <input type="url" id="imageUrl" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+
+                <div class="form-group">
+                    <label for="contentType">Tipo de Conteúdo</label>
+                    <select id="contentType" onchange="toggleContentInput()">
+                        <option value="url">URL Externa (Gamma, etc.)</option>
+                        <option value="iframe">iFrame</option>
+                        <option value="html">Código HTML</option>
+                    </select>
+                </div>
+
+                <div class="form-group" id="urlInput">
+                    <label for="contentUrl">URL do Conteúdo</label>
+                    <input type="url" id="contentUrl" placeholder="https://gamma.app/public/seu-conteudo">
+                </div>
+
+                <div class="form-group" id="htmlInput" style="display: none;">
+                    <label for="contentHtml">Código HTML</label>
+                    <textarea id="contentHtml" placeholder="Cole o código HTML aqui..."></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="bgColor">Cor de Fundo (opcional)</label>
+                    <input type="text" id="bgColor" placeholder="#a8d5e2">
+                </div>
+
+                <div class="form-group">
+                    <label for="orderPosition">Ordem de Exibição</label>
+                    <input type="number" id="orderPosition" value="1" min="1">
+                </div>
+
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="isActive" checked>
+                        Conteúdo Ativo
+                    </label>
+                </div>
+
+                <div class="button-group">
+                    <button type="submit" class="btn">💾 Salvar Conteúdo</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetForm()">Limpar</button>
+                </div>
+            </form>
         </div>
-        
-        <nav class="nav-bar">
-            <div class="nav-item active" onclick="handleNavClick('home')" data-nav="home">
-                <span class="nav-icon">🏠</span>
-                <span class="nav-label">INÍCIO</span>
+
+        <!-- Listar Conteúdo -->
+        <div id="list-section" class="content-section">
+            <div class="form-group">
+                <label for="filterModule">Filtrar por Módulo</label>
+                <select id="filterModule" onchange="loadContents()">
+                    <option value="">Todos os Módulos</option>
+                    <option value="quiz">Quiz Interativo</option>
+                    <option value="exercises">Exercícios</option>
+                    <option value="library">Biblioteca</option>
+                    <option value="diary">Diário</option>
+                </select>
+            </div>
+
+            <div class="content-list" id="contentList">
+                <div class="loading">Carregando conteúdos...</div>
+            </div>
+        </div>
+
+        <!-- Gerenciar Módulos -->
+        <div id="modules-section" class="content-section">
+            <h2>Gerenciar Módulos</h2>
+            <p>Adicione ou edite os módulos do seu app.</p>
+            
+            <form id="moduleForm" style="margin-top: 20px;">
+                <input type="hidden" id="editModuleKey">
+                <div class="form-group">
+                    <label for="newModuleKey">Chave do Módulo (sem espaços)</label>
+                    <input type="text" id="newModuleKey" placeholder="Ex: meditacao" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleName">Nome do Módulo</label>
+                    <input type="text" id="newModuleName" placeholder="Ex: Meditação Guiada" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleImage">URL da Imagem</label>
+                    <input type="url" id="newModuleImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleColor">Cor de Fundo</label>
+                    <input type="text" id="newModuleColor" placeholder="#a8d5e2">
+                </div>
+                
+                <div class="form-group">
+                    <label for="newModuleOrder">Ordem de Exibição</label>
+                    <input type="number" id="newModuleOrder" value="1" min="1" required>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button>
+                </div>
+            </form>
+
+            <div style="margin-top: 30px;">
+                <h3>Módulos Atuais</h3>
+                <div id="moduleList">
+                    <div class="loading">Carregando módulos...</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Gerenciar Feed -->
+        <div id="feed-section" class="content-section">
+            <h2>Gerenciar Feed</h2>
+            
+            <form id="feedForm" style="margin-bottom: 30px;">
+                <input type="hidden" id="editFeedId">
+                <div class="form-group">
+                    <label for="feedTitle">Título do Post</label>
+                    <input type="text" id="feedTitle" placeholder="Título do post" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedCategory">Categoria</label>
+                    <select id="feedCategory" required>
+                        <option value="">Selecione...</option>
+                        <option value="motivacao">💪 Motivação</option>
+                        <option value="meditacao">🧘 Meditação</option>
+                        <option value="exercicios">🏃 Exercícios</option>
+                        <option value="alimentacao">🥗 Alimentação</option>
+                        <option value="sono">😴 Sono</option>
+                        <option value="relacionamentos">❤️ Relacionamentos</option>
+                        <option value="produtividade">📈 Produtividade</option>
+                        <option value="autoconhecimento">🔍 Autoconhecimento</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedContent">Conteúdo</label>
+                    <textarea id="feedContent" rows="5" placeholder="Conteúdo do post..." required></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedImage">URL da Imagem (opcional)</label>
+                    <input type="url" id="feedImage" placeholder="https://exemplo.com/imagem.jpg">
+                </div>
+                
+                <div class="form-group">
+                    <label for="feedTags">Tags (separadas por vírgula)</label>
+                    <input type="text" id="feedTags" placeholder="saúde mental, bem-estar">
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedActive" checked> Post Ativo
+                    </label>
+                </div>
+                
+                <div class="form-group">
+                    <label>
+                        <input type="checkbox" id="feedHighlight"> ⭐ Destacar Post
+                    </label>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button>
+                </div>
+            </form>
+            
+            <h3>Posts Publicados</h3>
+            <div id="feedList">
+                <div class="loading">Carregando posts...</div>
+            </div>
+        </div>
+
+        <!-- Moderar Comunidade -->
+        <div id="community-section" class="content-section">
+            <h2>Moderar Comunidade</h2>
+            
+            <div class="form-group">
+                <label for="filterStatus">Filtrar por Status</label>
+                <select id="filterStatus" onchange="loadCommunityMessages()">
+                    <option value="pending">Pendentes de Aprovação</option>
+                    <option value="approved">Aprovadas</option>
+                    <option value="all">Todas</option>
+                </select>
             </div>
             
-            <div class="nav-item" onclick="handleNavClick('feed')" data-nav="feed">
-                <span class="nav-icon">📋</span>
-                <span class="nav-label">Feed</span>
+            <div id="communityList" style="margin-top: 20px;">
+                <div class="loading">Carregando mensagens...</div>
             </div>
-            
-            <div class="nav-item" onclick="handleNavClick('community')" data-nav="community">
-                <span class="nav-icon">💬</span>
-                <span class="nav-label">Comunidade</span>
-            </div>
-            
-            <div class="nav-item" onclick="handleNavClick('profile')" data-nav="profile">
-                <span class="nav-icon">👤</span>
-                <span class="nav-label">Perfil</span>
-            </div>
-        </nav>
+        </div>
     </div>
 
-    <!-- Supabase Integration -->
+    <!-- Scripts -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <script>
-        // ====== CONFIGURAÇÃO DO SUPABASE ======
+        // Configuração do Supabase
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
-
-        let supabase;
-        let currentUser = null;
-        let currentView = 'home';
         
-        function initSupabase() {
-            try {
-                supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                console.log('✅ Supabase configurado');
-                return true;
-            } catch (e) {
-                console.error('Erro ao configurar Supabase:', e);
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // Verificar autenticação
+        async function checkAuth() {
+            const isAdmin = localStorage.getItem('isAdmin');
+            if (!isAdmin) {
+                window.location.href = 'admin-login.html';
                 return false;
             }
-        }
-
-        // ====== AUTENTICAÇÃO ======
-        async function checkAuth() {
-            if (!supabase) return false;
             
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    currentUser = session.user;
-                    
-                    // Carregar ou criar perfil do usuário
-                    let { data: profile, error } = await supabase
-                        .from('profiles')
-                        .select('*')
-                        .eq('id', session.user.id)
-                        .single();
-                    
-                    // Se não existir perfil, criar um
-                    if (error || !profile) {
-                        const { data: newProfile } = await supabase
-                            .from('profiles')
-                            .insert([{
-                                id: session.user.id,
-                                email: session.user.email,
-                                name: session.user.email.split('@')[0]
-                            }])
-                            .select()
-                            .single();
-                        
-                        profile = newProfile;
-                    }
-                    
-                    if (profile) {
-                        currentUser.profile = profile;
-                    }
-                    
-                    updateGreeting();
-                    return true;
-                } else {
-                    window.location.href = 'index.html';
-                    return false;
-                }
-            } catch (error) {
-                console.error('Erro ao verificar autenticação:', error);
-                return currentUser !== null;
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = 'admin-login.html';
+                return false;
             }
+            
+            return true;
         }
 
+        // Logout
         async function logout() {
-            if (!supabase) return;
+            localStorage.removeItem('isAdmin');
+            await supabase.auth.signOut();
+            window.location.href = 'admin-login.html';
+        }
+
+        // Alternar abas
+        function switchTab(tab) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             
-            if (confirm('Deseja realmente sair?')) {
-                await supabase.auth.signOut();
-                window.location.href = 'index.html';
+            event.target.classList.add('active');
+            document.getElementById(`${tab}-section`).classList.add('active');
+            
+            if (tab === 'list') {
+                loadContents();
+            } else if (tab === 'modules') {
+                loadModules();
+            } else if (tab === 'feed') {
+                loadFeedPosts();
+            } else if (tab === 'community') {
+                loadCommunityMessages();
             }
         }
 
-        // ====== FUNÇÕES DE TEMPO ======
-        function updateTime() {
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            document.getElementById('time').textContent = `${hours}:${minutes}`;
+        // Alternar tipo de conteúdo
+        function toggleContentInput() {
+            const type = document.getElementById('contentType').value;
+            document.getElementById('urlInput').style.display = type === 'url' || type === 'iframe' ? 'block' : 'none';
+            document.getElementById('htmlInput').style.display = type === 'html' ? 'block' : 'none';
         }
 
-        function updateDate() {
-            const now = new Date();
-            const days = ['Domingo', 'Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado'];
-            const months = ['Janeiro', 'Fevereiro', 'Março', 'Abril', 'Maio', 'Junho', 'Julho', 'Agosto', 'Setembro', 'Outubro', 'Novembro', 'Dezembro'];
+        // Salvar conteúdo
+        document.getElementById('contentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
             
-            const dayName = days[now.getDay()];
-            const day = now.getDate();
-            const month = months[now.getMonth()];
-            
-            document.getElementById('date').textContent = `${dayName}, ${day} de ${month}`;
-        }
+            const editId = document.getElementById('contentForm').dataset.editId;
+            const isEditing = !!editId;
 
-        function updateGreeting() {
-            const hour = new Date().getHours();
-            const greetingElement = document.getElementById('greeting');
-            
-            let greeting = '';
-            if (hour < 12) {
-                greeting = '🌅 Bom Dia';
-            } else if (hour < 18) {
-                greeting = '☀️ Boa Tarde';
-            } else {
-                greeting = '🌙 Boa Noite';
-            }
-            
-            if (currentUser && currentUser.profile && currentUser.profile.name) {
-                greeting += ', ' + currentUser.profile.name.split(' ')[0] + '!';
-            } else {
-                greeting += '!';
-            }
-            
-            greetingElement.innerHTML = greeting;
-        }
+            const formData = {
+                module: document.getElementById('module').value,
+                title: document.getElementById('title').value,
+                description: document.getElementById('description').value,
+                image_url: document.getElementById('imageUrl').value || null,
+                content_type: document.getElementById('contentType').value,
+                content_url: document.getElementById('contentUrl').value || null,
+                content_html: document.getElementById('contentHtml').value || null,
+                bg_color: document.getElementById('bgColor').value || null,
+                order_position: parseInt(document.getElementById('orderPosition').value),
+                active: document.getElementById('isActive').checked
+            };
 
-        // ====== NAVEGAÇÃO ======
-        function handleNavClick(view) {
-            currentView = view;
-            
-            // Atualizar navegação ativa
-            document.querySelectorAll('.nav-item').forEach(item => {
-                item.classList.remove('active');
-                if (item.dataset.nav === view) {
-                    item.classList.add('active');
-                }
-            });
-            
-            // Mostrar/esconder header baseado na view
-            const header = document.getElementById('mainHeader');
-            const titleBar = document.getElementById('titleBar');
-            if (view === 'home') {
-                header.style.display = 'block';
-                titleBar.style.display = 'block';
-            } else {
-                header.style.display = 'none';
-                titleBar.style.display = 'none';
-            }
-            
-            // Carregar conteúdo baseado na view
-            switch(view) {
-                case 'home':
-                    loadHomeModules();
-                    break;
-                case 'feed':
-                    loadFeed();
-                    break;
-                case 'community':
-                    loadCommunity();
-                    break;
-                case 'profile':
-                    loadProfile();
-                    break;
-            }
-            
-            // Feedback háptico
-            if (navigator.vibrate) {
-                navigator.vibrate(30);
-            }
-        }
-
-        // ====== HOME - MÓDULOS ======
-        async function loadHomeModules() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando módulos...</div>';
-            
             try {
-                const { data: modules, error } = await supabase
-                    .from('modules')
-                    .select('*')
-                    .order('order_position');
+                let result;
                 
-                if (error) throw error;
-                
-                mainContent.innerHTML = '';
-                modules.forEach(mod => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color || '#e0e0e0'};"></div>
-                        <span class="card-title">${mod.name}</span>
-                    `;
-                    card.onclick = () => loadModuleContents(mod.key, mod.name);
-                    mainContent.appendChild(card);
-                });
-            } catch (error) {
-                console.error('Erro ao carregar módulos:', error);
-                // Fallback para módulos padrão
-                const modules = [
-                    { key: 'quiz', name: 'Quiz Interativo', image_url: 'https://i.imgur.com/mlrXyGH.png', bg_color: '#a8d5e2' },
-                    { key: 'exercises', name: 'Exercícios', image_url: 'https://i.imgur.com/L8g633e.png', bg_color: '#6b7db8' },
-                    { key: 'library', name: 'Biblioteca', image_url: 'https://i.imgur.com/jbRTk2Y.png', bg_color: '#5d7471' },
-                    { key: 'diary', name: 'Diário', image_url: 'https://i.imgur.com/zQG0nNP.png', bg_color: '#e8a87c' }
-                ];
-                
-                mainContent.innerHTML = '';
-                modules.forEach(mod => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `
-                        <div class="card-image" style="background-image: url('${mod.image_url}'); background-color: ${mod.bg_color};"></div>
-                        <span class="card-title">${mod.name}</span>
-                    `;
-                    card.onclick = () => loadModuleContents(mod.key, mod.name);
-                    mainContent.appendChild(card);
-                });
-            }
-        }
-
-        // ====== CARREGAR CONTEÚDOS DO MÓDULO ======
-        async function loadModuleContents(moduleKey, moduleName) {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando conteúdos...</div>';
-            
-            // Esconder header quando navegar para módulo
-            document.getElementById('mainHeader').style.display = 'none';
-            document.getElementById('titleBar').style.display = 'none';
-            
-            try {
-                const { data: contents, error } = await supabase
-                    .from('contents')
-                    .select('*')
-                    .eq('module', moduleKey)
-                    .eq('active', true)
-                    .order('order_position');
-                
-                if (error) throw error;
-                
-                mainContent.innerHTML = '';
-                
-                // Adicionar botão voltar e título
-                const backBtn = document.createElement('button');
-                backBtn.className = 'back-button';
-                backBtn.innerHTML = '← Voltar';
-                backBtn.onclick = () => {
-                    // Mostrar header quando voltar ao home
-                    document.getElementById('mainHeader').style.display = 'block';
-                    document.getElementById('titleBar').style.display = 'block';
-                    loadHomeModules();
-                };
-                mainContent.appendChild(backBtn);
-                
-                const title = document.createElement('h2');
-                title.className = 'module-title';
-                title.textContent = moduleName;
-                mainContent.appendChild(title);
-                
-                if (!contents || contents.length === 0) {
-                    const emptyDiv = document.createElement('div');
-                    emptyDiv.className = 'empty-state';
-                    emptyDiv.innerHTML = '<p>Nenhum conteúdo disponível ainda.</p>';
-                    mainContent.appendChild(emptyDiv);
-                    return;
-                }
-                
-                // Adicionar cards de conteúdo
-                contents.forEach(content => {
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    
-                    // Se tem imagem, usa ela, senão usa cor de fundo
-                    const imageStyle = content.image_url 
-                        ? `background-image: url('${content.image_url}');`
-                        : '';
-                    const bgColor = content.bg_color || '#e0e0e0';
-                    
-                    card.innerHTML = `
-                        <div class="card-image" style="${imageStyle} background-color: ${bgColor};"></div>
-                        <span class="card-title">${content.title}</span>
-                    `;
-                    card.onclick = () => openContent(content);
-                    mainContent.appendChild(card);
-                });
-                
-            } catch (error) {
-                console.error('Erro ao carregar conteúdos:', error);
-                mainContent.innerHTML = `
-                    <button class="back-button" onclick="loadHomeModules()">← Voltar</button>
-                    <div class="empty-state">Erro ao carregar conteúdos</div>
-                `;
-            }
-        }
-
-        // ====== ABRIR CONTEÚDO ======
-        function openContent(content) {
-            const mainContent = document.getElementById('mainContent');
-            
-            // Esconder header quando abrir conteúdo
-            document.getElementById('mainHeader').style.display = 'none';
-            document.getElementById('titleBar').style.display = 'none';
-            
-            if (content.content_type === 'url' || content.content_type === 'iframe') {
-                // Incorporar URL em iframe com scroll visível
-                if (content.content_url) {
-                    mainContent.innerHTML = `
-                        <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
-                        <h2 class="module-title">${content.title}</h2>
-                        <div class="iframe-container" style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 250px); min-height: 500px; overflow: auto; position: relative;">
-                            <iframe src="${content.content_url}" 
-                                style="width: 100%; height: 100%; border: none; border-radius: 10px; display: block;"
-                                frameborder="0"
-                                allowfullscreen>
-                            </iframe>
-                            <div style="position: absolute; right: 5px; top: 50%; transform: translateY(-50%); width: 8px; height: 100px; background: #ccc; border-radius: 10px; pointer-events: none;"></div>
-                        </div>
-                    `;
+                if (isEditing) {
+                    result = await supabase.from('contents').update(formData).eq('id', editId);
                 } else {
-                    alert('URL do conteúdo não disponível');
+                    result = await supabase.from('contents').insert([formData]);
                 }
-            } else if (content.content_type === 'html') {
-                // Exibir HTML diretamente
-                mainContent.innerHTML = `
-                    <button class="back-button" onclick="backToModule('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
-                    <h2 class="module-title">${content.title}</h2>
-                    <div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px; overflow: auto; max-height: calc(100vh - 250px);">
-                        ${content.content_html || '<p>Conteúdo não disponível</p>'}
-                    </div>
-                `;
+
+                const { error } = result;
+
+                if (!error) {
+                    showMessage('Conteúdo salvo com sucesso!', 'success');
+                    if (isEditing) {
+                        cancelEdit();
+                    } else {
+                        resetForm();
+                    }
+                    if (document.getElementById('list-section').classList.contains('active')) {
+                        loadContents();
+                    }
+                } else {
+                    showMessage('Erro ao salvar: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar conteúdo', 'error');
+            }
+        });
+
+        // Carregar conteúdos
+        async function loadContents() {
+            const filterModule = document.getElementById('filterModule').value;
+            let query = supabase.from('contents').select('*');
+            
+            if (filterModule) {
+                query = query.eq('module', filterModule);
+            }
+            
+            query = query.order('order_position');
+
+            try {
+                const { data, error } = await query;
+                
+                if (!error && data) {
+                    displayContents(data);
+                } else {
+                    document.getElementById('contentList').innerHTML = '<p>Erro ao carregar conteúdos</p>';
+                }
+            } catch (error) {
+                document.getElementById('contentList').innerHTML = '<p>Erro ao carregar conteúdos</p>';
             }
         }
-        
-        // Função para voltar ao módulo (sem mostrar header)
-        function backToModule(moduleKey, moduleName) {
-            loadModuleContents(moduleKey, moduleName);
-        }
-        
-        // Função auxiliar para obter nome do módulo
-        function getModuleName(moduleKey) {
+
+        // Exibir conteúdos
+        function displayContents(contents) {
+            if (contents.length === 0) {
+                document.getElementById('contentList').innerHTML = '<p style="text-align: center; color: #666; padding: 40px;">Nenhum conteúdo encontrado</p>';
+                return;
+            }
+
             const moduleNames = {
                 'quiz': 'Quiz Interativo',
                 'exercises': 'Exercícios',
                 'library': 'Biblioteca',
                 'diary': 'Diário'
             };
-            return moduleNames[moduleKey] || moduleKey;
+
+            let html = '';
+            contents.forEach(content => {
+                html += `
+                    <div class="content-item">
+                        <div class="content-image" style="background-image: url('${content.image_url || ''}'); background-color: ${content.bg_color || '#e0e0e0'}"></div>
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${content.title}
+                                <span class="status-badge ${content.active ? 'status-active' : 'status-inactive'}">
+                                    ${content.active ? '✓ Ativo' : '✗ Inativo'}
+                                </span>
+                            </div>
+                            <div class="content-module">
+                                <strong>Módulo:</strong> ${moduleNames[content.module] || content.module} | 
+                                <strong>Ordem:</strong> ${content.order_position} |
+                                <strong>Tipo:</strong> ${content.content_type.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editContent('${content.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteContent('${content.id}')">🗑️ Excluir</button>
+                            <button class="btn btn-small btn-secondary" onclick="toggleStatus('${content.id}', ${content.active})">
+                                ${content.active ? '📍 Desativar' : '📌 Ativar'}
+                            </button>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            document.getElementById('contentList').innerHTML = html;
         }
 
-        // ====== FEED ======
-        function getCategoryIcon(category) {
-            const icons = {
-                'motivacao': '💪',
-                'meditacao': '🧘',
-                'exercicios': '🏃',
-                'alimentacao': '🥗',
-                'sono': '😴',
-                'relacionamentos': '❤️',
-                'produtividade': '📈',
-                'autoconhecimento': '🔍'
-            };
-            return icons[category] || '📝';
+        // Alternar status
+        async function toggleStatus(id, currentStatus) {
+            try {
+                const { error } = await supabase.from('contents').update({ active: !currentStatus }).eq('id', id);
+                if (!error) {
+                    showMessage(`Conteúdo ${!currentStatus ? 'ativado' : 'desativado'} com sucesso!`, 'success');
+                    loadContents();
+                } else {
+                    showMessage('Erro ao alterar status: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao alterar status', 'error');
+            }
         }
 
-        async function loadFeed() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando feed...</div>';
+        // Editar conteúdo
+        async function editContent(id) {
+            try {
+                const { data, error } = await supabase.from('contents').select('*').eq('id', id).single();
+                if (error) {
+                    showMessage('Erro ao carregar conteúdo: ' + error.message, 'error');
+                    return;
+                }
+                
+                if (data) {
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+                    document.querySelector('.tab').classList.add('active');
+                    document.getElementById('add-section').classList.add('active');
+                    
+                    document.getElementById('module').value = data.module;
+                    document.getElementById('title').value = data.title;
+                    document.getElementById('description').value = data.description || '';
+                    document.getElementById('imageUrl').value = data.image_url || '';
+                    document.getElementById('bgColor').value = data.bg_color || '';
+                    document.getElementById('orderPosition').value = data.order_position;
+                    document.getElementById('isActive').checked = data.active;
+                    document.getElementById('contentType').value = data.content_type;
+                    
+                    toggleContentInput();
+                    if (data.content_type === 'url' || data.content_type === 'iframe') {
+                        document.getElementById('contentUrl').value = data.content_url || '';
+                    } else if (data.content_type === 'html') {
+                        document.getElementById('contentHtml').value = data.content_html || '';
+                    }
+
+                    document.getElementById('contentForm').dataset.editId = id;
+                    document.querySelector('#contentForm button[type="submit"]').innerHTML = '💾 Atualizar Conteúdo';
+                    
+                    if (!document.getElementById('cancelEdit')) {
+                        const cancelBtn = document.createElement('button');
+                        cancelBtn.id = 'cancelEdit';
+                        cancelBtn.type = 'button';
+                        cancelBtn.className = 'btn btn-secondary';
+                        cancelBtn.innerHTML = 'Cancelar Edição';
+                        cancelBtn.onclick = cancelEdit;
+                        document.querySelector('#contentForm .button-group').appendChild(cancelBtn);
+                    }
+                    
+                    showMessage('Conteúdo carregado para edição', 'success');
+                }
+            } catch (error) {
+                showMessage('Erro ao editar conteúdo', 'error');
+            }
+        }
+
+        // Cancelar edição
+        function cancelEdit() {
+            delete document.getElementById('contentForm').dataset.editId;
+            document.querySelector('#contentForm button[type="submit"]').innerHTML = '💾 Salvar Conteúdo';
+            const cancelBtn = document.getElementById('cancelEdit');
+            if (cancelBtn) cancelBtn.remove();
+            resetForm();
+        }
+
+        // Excluir conteúdo
+        async function deleteContent(id) {
+            if (!confirm('Tem certeza que deseja excluir este conteúdo?')) return;
             
             try {
-                const { data: posts, error } = await supabase
+                const { error } = await supabase.from('contents').delete().eq('id', id);
+                if (!error) {
+                    showMessage('Conteúdo excluído com sucesso!', 'success');
+                    loadContents();
+                } else {
+                    showMessage('Erro ao excluir: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir conteúdo', 'error');
+            }
+        }
+
+        // Gerenciar Módulos
+        async function loadModules() {
+            try {
+                const { data, error } = await supabase.from('modules').select('*').order('order_position');
+                if (!error && data) {
+                    displayModules(data);
+                    updateModuleSelects(data);
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar módulos', 'error');
+            }
+        }
+
+        function displayModules(modules) {
+            const list = document.getElementById('moduleList');
+            if (modules.length === 0) {
+                list.innerHTML = '<p>Nenhum módulo encontrado</p>';
+                return;
+            }
+            
+            let html = '';
+            modules.forEach(mod => {
+                html += `
+                    <div class="module-item">
+                        <div class="module-item-image" style="background-image: url('${mod.image_url || ''}'); background-color: ${mod.bg_color || '#e0e0e0'}"></div>
+                        <div class="module-item-info">
+                            <div class="module-item-title">${mod.name}</div>
+                            <small>Chave: ${mod.key} | Ordem: ${mod.order_position}</small>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editModule('${mod.key}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
+        }
+
+        // Salvar módulo
+        document.getElementById('moduleForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const key = document.getElementById('newModuleKey').value.toLowerCase().replace(/[^a-z0-9]/g, '');
+            const name = document.getElementById('newModuleName').value;
+            const imageUrl = document.getElementById('newModuleImage').value || null;
+            const bgColor = document.getElementById('newModuleColor').value || null;
+            const orderPosition = parseInt(document.getElementById('newModuleOrder').value);
+            const editKey = document.getElementById('editModuleKey').value;
+
+            try {
+                let result;
+                if (editKey) {
+                    result = await supabase.from('modules').update({ 
+                        name, 
+                        image_url: imageUrl, 
+                        bg_color: bgColor,
+                        order_position: orderPosition 
+                    }).eq('key', editKey);
+                } else {
+                    result = await supabase.from('modules').insert([{ 
+                        key, 
+                        name, 
+                        image_url: imageUrl, 
+                        bg_color: bgColor,
+                        order_position: orderPosition 
+                    }]);
+                }
+                
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Módulo ${editKey ? 'atualizado' : 'adicionado'} com sucesso!`, 'success');
+                    resetModuleForm();
+                    loadModules();
+                } else {
+                    showMessage(`Erro ao salvar módulo: ${error.message}`, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar módulo', 'error');
+            }
+        });
+
+        // Editar módulo
+        async function editModule(key) {
+            try {
+                const { data, error } = await supabase.from('modules').select('*').eq('key', key).single();
+                if (error) {
+                    showMessage('Erro ao carregar módulo: ' + error.message, 'error');
+                    return;
+                }
+                
+                if (data) {
+                    document.getElementById('newModuleKey').value = data.key;
+                    document.getElementById('newModuleKey').disabled = true;
+                    document.getElementById('newModuleName').value = data.name;
+                    document.getElementById('newModuleImage').value = data.image_url || '';
+                    document.getElementById('newModuleColor').value = data.bg_color || '';
+                    document.getElementById('newModuleOrder').value = data.order_position;
+                    document.getElementById('editModuleKey').value = data.key;
+                    document.getElementById('saveModuleBtn').innerHTML = '💾 Atualizar Módulo';
+                    
+                    showMessage('Módulo carregado para edição', 'success');
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar módulo', 'error');
+            }
+        }
+
+        // Excluir módulo
+        async function deleteModule(key) {
+            if (!confirm('Tem certeza? Todos os conteúdos deste módulo não serão mais exibidos.')) return;
+            
+            try {
+                const { error } = await supabase.from('modules').delete().eq('key', key);
+                if (!error) {
+                    showMessage('Módulo excluído com sucesso!', 'success');
+                    loadModules();
+                } else {
+                    showMessage('Erro ao excluir módulo: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir módulo', 'error');
+            }
+        }
+
+        // Reset formulário módulo
+        function resetModuleForm() {
+            document.getElementById('moduleForm').reset();
+            document.getElementById('editModuleKey').value = '';
+            document.getElementById('newModuleKey').disabled = false;
+            document.getElementById('saveModuleBtn').innerHTML = 'Adicionar Módulo';
+        }
+
+        // Atualizar selects de módulos
+        function updateModuleSelects(modules) {
+            const selects = document.querySelectorAll('#module, #filterModule');
+            selects.forEach(select => {
+                const defaultOptions = Array.from(select.options).filter(opt => opt.value === '');
+                select.innerHTML = '';
+                defaultOptions.forEach(opt => select.appendChild(opt));
+
+                modules.forEach(mod => {
+                    const option = document.createElement('option');
+                    option.value = mod.key;
+                    option.text = mod.name;
+                    select.appendChild(option);
+                });
+            });
+        }
+
+        // Reset formulário
+        function resetForm() {
+            document.getElementById('contentForm').reset();
+        }
+
+        // Mostrar mensagem
+        function showMessage(message, type) {
+            const messageArea = document.getElementById('messageArea');
+            messageArea.innerHTML = `<div class="message ${type}">${message}</div>`;
+            setTimeout(() => {
+                messageArea.innerHTML = '';
+            }, 5000);
+        }
+
+        // ====== FUNÇÕES DO FEED ======
+        async function loadFeedPosts() {
+            try {
+                const { data, error } = await supabase
                     .from('feed_posts')
                     .select('*')
-                    .eq('active', true)
-                    .order('highlight', { ascending: false })
                     .order('created_at', { ascending: false });
                 
-                if (error) throw error;
-                
-                if (!posts || posts.length === 0) {
-                    mainContent.innerHTML = `
-                        <div class="empty-state">
-                            <h3>📋 Feed vazio</h3>
-                            <p>Nenhuma postagem ainda.</p>
-                        </div>
-                    `;
-                    return;
+                if (!error && data) {
+                    displayFeedPosts(data);
                 }
-                
-                mainContent.innerHTML = '<div class="feed-container"></div>';
-                const feedContainer = mainContent.querySelector('.feed-container');
-                
-                posts.forEach(post => {
-                    const postEl = createFeedPost(post);
-                    feedContainer.appendChild(postEl);
-                });
-                
             } catch (error) {
-                console.error('Erro ao carregar feed:', error);
-                mainContent.innerHTML = `
-                    <div class="empty-state">
-                        <h3>📋 Feed</h3>
-                        <p>Erro ao carregar postagens.</p>
-                    </div>
-                `;
+                console.error('Erro ao carregar posts:', error);
             }
         }
 
-        function createFeedPost(post) {
-            const div = document.createElement('div');
-            div.className = 'feed-post';
+        function displayFeedPosts(posts) {
+            const list = document.getElementById('feedList');
+            if (posts.length === 0) {
+                list.innerHTML = '<p>Nenhum post encontrado</p>';
+                return;
+            }
             
-            const postDate = new Date(post.created_at).toLocaleDateString('pt-BR');
-            const categoryIcon = getCategoryIcon(post.category);
-            const categoryName = getCategoryName(post.category);
-            
-            div.innerHTML = `
-                <div class="feed-post-header">
-                    <div class="feed-author-avatar">${categoryIcon}</div>
-                    <div class="feed-author-info">
-                        <div class="feed-author-name">${categoryName}</div>
-                        <div class="feed-post-time">${postDate}</div>
+            let html = '';
+            posts.forEach(post => {
+                const statusBadge = post.active ? 
+                    '<span class="status-badge status-active">✓ Ativo</span>' : 
+                    '<span class="status-badge status-inactive">✗ Inativo</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${post.highlight ? '⭐ ' : ''}${post.title}
+                                ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Categoria:</strong> ${post.category} | 
+                                <strong>Data:</strong> ${new Date(post.created_at).toLocaleDateString('pt-BR')}
+                            </div>
+                            <div style="color: #666; margin-top: 5px;">${post.content.substring(0, 100)}...</div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editFeedPost('${post.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteFeedPost('${post.id}')">🗑️ Excluir</button>
+                        </div>
                     </div>
-                    ${post.highlight ? '<span style="color: gold; font-size: 20px;">⭐</span>' : ''}
-                </div>
-                ${post.title ? `<div class="feed-post-title">${post.title}</div>` : ''}
-                <div class="feed-post-content">${post.content}</div>
-                ${post.image_url ? `<img src="${post.image_url}" class="feed-post-image">` : ''}
-                ${post.tags ? `<div class="feed-tags">🏷️ ${post.tags}</div>` : ''}
-            `;
-            
-            return div;
+                `;
+            });
+            list.innerHTML = html;
         }
 
-        function getCategoryName(category) {
-            const names = {
-                'motivacao': 'Motivação',
-                'meditacao': 'Meditação',
-                'exercicios': 'Exercícios',
-                'alimentacao': 'Alimentação',
-                'sono': 'Sono',
-                'relacionamentos': 'Relacionamentos',
-                'produtividade': 'Produtividade',
-                'autoconhecimento': 'Autoconhecimento'
+        // Salvar post do feed
+        document.getElementById('feedForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const editId = document.getElementById('editFeedId').value;
+            const formData = {
+                title: document.getElementById('feedTitle').value,
+                category: document.getElementById('feedCategory').value,
+                content: document.getElementById('feedContent').value,
+                image_url: document.getElementById('feedImage').value || null,
+                tags: document.getElementById('feedTags').value || null,
+                active: document.getElementById('feedActive').checked,
+                highlight: document.getElementById('feedHighlight').checked
             };
-            return names[category] || 'Geral';
-        }
-
-        // ====== COMUNIDADE ======
-        async function loadCommunity() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
             
             try {
-                const { data: messages, error } = await supabase
+                let result;
+                if (editId) {
+                    result = await supabase.from('feed_posts').update(formData).eq('id', editId);
+                } else {
+                    result = await supabase.from('feed_posts').insert([formData]);
+                }
+                
+                const { error } = result;
+                if (!error) {
+                    showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success');
+                    resetFeedForm();
+                    loadFeedPosts();
+                } else {
+                    showMessage('Erro ao salvar post: ' + error.message, 'error');
+                }
+            } catch (error) {
+                showMessage('Erro ao salvar post', 'error');
+            }
+        });
+
+        async function editFeedPost(id) {
+            try {
+                const { data, error } = await supabase.from('feed_posts').select('*').eq('id', id).single();
+                if (!error && data) {
+                    document.getElementById('editFeedId').value = data.id;
+                    document.getElementById('feedTitle').value = data.title;
+                    document.getElementById('feedCategory').value = data.category;
+                    document.getElementById('feedContent').value = data.content;
+                    document.getElementById('feedImage').value = data.image_url || '';
+                    document.getElementById('feedTags').value = data.tags || '';
+                    document.getElementById('feedActive').checked = data.active;
+                    document.getElementById('feedHighlight').checked = data.highlight;
+                    document.getElementById('saveFeedBtn').innerHTML = '💾 Atualizar Post';
+                }
+            } catch (error) {
+                showMessage('Erro ao carregar post', 'error');
+            }
+        }
+
+        async function deleteFeedPost(id) {
+            if (!confirm('Tem certeza que deseja excluir este post?')) return;
+            
+            try {
+                const { error } = await supabase.from('feed_posts').delete().eq('id', id);
+                if (!error) {
+                    showMessage('Post excluído com sucesso!', 'success');
+                    loadFeedPosts();
+                }
+            } catch (error) {
+                showMessage('Erro ao excluir post', 'error');
+            }
+        }
+
+        function resetFeedForm() {
+            document.getElementById('feedForm').reset();
+            document.getElementById('editFeedId').value = '';
+            document.getElementById('feedActive').checked = true;
+            document.getElementById('feedHighlight').checked = false;
+            document.getElementById('saveFeedBtn').innerHTML = '💾 Publicar Post';
+        }
+
+        // ====== FUNÇÕES DA COMUNIDADE ======
+        async function loadCommunityMessages() {
+            const filter = document.getElementById('filterStatus')?.value || 'pending';
+            
+            console.log('Carregando mensagens com filtro:', filter);
+            
+            try {
+                // Query simplificada primeiro
+                let { data: messages, error } = await supabase
                     .from('community_messages')
-                    .select(`
-                        *,
-                        profiles (
-                            name,
-                            email
-                        )
-                    `)
-                    .eq('approved', true)
+                    .select('*')
                     .order('created_at', { ascending: false });
                 
                 if (error) {
-                    console.error('Erro detalhado:', error);
-                    mainContent.innerHTML = `
-                        <div class="community-container">
-                            <div class="community-input-box">
-                                <textarea class="community-input" id="communityMessage" 
-                                    placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                                <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                    Enviar Mensagem
-                                </button>
-                                <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                    * Mensagens serão revisadas antes de aparecer
-                                </p>
-                            </div>
-                            <div class="empty-state">
-                                <p>Seja o primeiro a compartilhar!</p>
-                            </div>
-                        </div>
+                    console.error('Erro ao carregar mensagens:', error);
+                    document.getElementById('communityList').innerHTML = `
+                        <p style="color: red;">Erro: ${error.message}</p>
                     `;
                     return;
                 }
                 
-                mainContent.innerHTML = `
-                    <div class="community-container">
-                        <div class="community-input-box">
-                            <textarea class="community-input" id="communityMessage" 
-                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                Enviar Mensagem
-                            </button>
-                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                * Mensagens serão revisadas antes de aparecer
-                            </p>
-                        </div>
-                    </div>
-                `;
-                
-                const container = mainContent.querySelector('.community-container');
-                
-                if (messages && messages.length > 0) {
-                    messages.forEach(msg => {
-                        const msgEl = createCommunityMessage(msg);
-                        container.appendChild(msgEl);
-                    });
-                } else {
-                    const emptyMsg = document.createElement('div');
-                    emptyMsg.className = 'empty-state';
-                    emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
-                    container.appendChild(emptyMsg);
+                // Filtrar no JavaScript
+                if (filter === 'pending') {
+                    messages = messages.filter(m => m.approved === false);
+                } else if (filter === 'approved') {
+                    messages = messages.filter(m => m.approved === true);
                 }
                 
+                console.log('Mensagens carregadas:', messages);
+                
+                // Buscar perfis separadamente
+                if (messages && messages.length > 0) {
+                    for (let msg of messages) {
+                        if (msg.user_id) {
+                            const { data: profile } = await supabase
+                                .from('profiles')
+                                .select('name, email')
+                                .eq('id', msg.user_id)
+                                .single();
+                            
+                            msg.profiles = profile;
+                        }
+                    }
+                }
+                
+                displayCommunityMessages(messages || []);
+                
             } catch (error) {
-                console.error('Erro geral ao carregar comunidade:', error);
-                mainContent.innerHTML = `
-                    <div class="community-container">
-                        <div class="community-input-box">
-                            <textarea class="community-input" id="communityMessage" 
-                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                Enviar Mensagem
-                            </button>
-                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                * Mensagens serão revisadas antes de aparecer
-                            </p>
-                        </div>
-                        <div class="empty-state">
-                            <p>Área da comunidade</p>
-                        </div>
-                    </div>
+                console.error('Erro geral:', error);
+                document.getElementById('communityList').innerHTML = `
+                    <p style="color: red;">Erro: ${error.message}</p>
                 `;
             }
         }
 
-        function createCommunityMessage(msg) {
-            const div = document.createElement('div');
-            div.className = 'community-message';
+        function displayCommunityMessages(messages) {
+            const list = document.getElementById('communityList');
             
-            const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
-            const authorInitial = authorName.charAt(0).toUpperCase();
-            const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
+            if (messages.length === 0) {
+                list.innerHTML = '<p>Nenhuma mensagem encontrada</p>';
+                return;
+            }
             
-            div.innerHTML = `
-                <div class="community-message-header">
-                    <div class="community-avatar">${authorInitial}</div>
-                    <div class="community-author">${authorName}</div>
-                    <div class="community-time">${msgDate}</div>
-                </div>
-                <div class="community-text">${msg.message}</div>
-            `;
-            
-            return div;
+            let html = '';
+            messages.forEach(msg => {
+                const author = msg.profiles ? msg.profiles.name || msg.profiles.email : 'Anônimo';
+                const statusBadge = msg.approved ? 
+                    '<span class="status-badge status-active">Aprovada</span>' : 
+                    '<span class="status-badge status-inactive">Pendente</span>';
+                
+                html += `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${author} ${statusBadge}
+                            </div>
+                            <div class="content-module">
+                                <strong>Data:</strong> ${new Date(msg.created_at).toLocaleString('pt-BR')}
+                            </div>
+                            <div style="color: #333; margin-top: 10px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+                                ${msg.message}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            ${!msg.approved ? `
+                                <button class="btn btn-small" onclick="approveMessage('${msg.id}')">✅ Aprovar</button>
+                            ` : ''}
+                            <button class="btn btn-small btn-danger" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            });
+            list.innerHTML = html;
         }
 
-        async function sendCommunityMessage() {
-            const messageInput = document.getElementById('communityMessage');
-            const message = messageInput.value.trim();
-            
-            if (!message) {
-                alert('Por favor, escreva uma mensagem');
-                return;
+        async function approveMessage(id) {
+            try {
+                const { error } = await supabase
+                    .from('community_messages')
+                    .update({ approved: true })
+                    .eq('id', id);
+                
+                if (!error) {
+                    showMessage('Mensagem aprovada!', 'success');
+                    loadCommunityMessages();
+                }
+            } catch (error) {
+                showMessage('Erro ao aprovar mensagem', 'error');
             }
-            
-            if (!supabase || !currentUser) {
-                alert('Você precisa estar logado');
-                return;
-            }
+        }
+
+        async function deleteMessage(id) {
+            if (!confirm('Tem certeza que deseja excluir esta mensagem?')) return;
             
             try {
                 const { error } = await supabase
                     .from('community_messages')
-                    .insert([{
-                        user_id: currentUser.id,
-                        message: message,
-                        approved: false
-                    }]);
+                    .delete()
+                    .eq('id', id);
                 
-                if (error) {
-                    console.error('Erro ao enviar:', error);
-                    throw error;
-                }
-                
-                alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
-                messageInput.value = '';
-                
-            } catch (error) {
-                console.error('Erro ao enviar mensagem:', error);
-                alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
-            }
-        }
-
-        // ====== PERFIL ======
-        async function loadProfile() {
-            const mainContent = document.getElementById('mainContent');
-            
-            if (!currentUser) {
-                mainContent.innerHTML = `
-                    <div class="empty-state">
-                        <p>Faça login para ver seu perfil</p>
-                    </div>
-                `;
-                return;
-            }
-            
-            try {
-                const { data: profile } = await supabase
-                    .from('profiles')
-                    .select('*')
-                    .eq('id', currentUser.id)
-                    .single();
-                
-                if (profile) {
-                    currentUser.profile = profile;
+                if (!error) {
+                    showMessage('Mensagem excluída!', 'success');
+                    loadCommunityMessages();
                 }
             } catch (error) {
-                console.error('Erro ao recarregar perfil:', error);
-            }
-            
-            const profile = currentUser.profile || {};
-            const initial = (profile.name || currentUser.email || 'U').charAt(0).toUpperCase();
-            
-            // Verificar se tem avatar_url e se a imagem existe
-            let avatarContent = initial;
-            if (profile.avatar_url) {
-                avatarContent = `<img src="${profile.avatar_url}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
-            }
-            
-            mainContent.innerHTML = `
-                <div class="profile-container">
-                    <div class="profile-header">
-                        <div class="profile-avatar" onclick="document.getElementById('avatarFile').click()">
-                            ${avatarContent}
-                            <div class="profile-avatar-edit">📷</div>
-                            <input type="file" id="avatarFile" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
-                        </div>
-                        <div class="profile-name">${profile.name || 'Seu Nome'}</div>
-                        <div class="profile-email">${currentUser.email}</div>
-                    </div>
-                    
-                    <div class="profile-form">
-                        <input type="text" class="profile-input" id="profileName" 
-                            placeholder="Seu nome" value="${profile.name || ''}">
-                        <textarea class="profile-input" id="profileBio" 
-                            placeholder="Sobre você..." rows="3">${profile.bio || ''}</textarea>
-                        <button class="profile-save-btn" onclick="saveProfile()">
-                            Salvar Perfil
-                        </button>
-                    </div>
-                    
-                    <button class="logout-btn" onclick="logout()">
-                        Sair do App
-                    </button>
-                </div>
-            `;
-        }
-
-        async function saveProfile() {
-            if (!supabase || !currentUser) return;
-            
-            const name = document.getElementById('profileName').value.trim();
-            const bio = document.getElementById('profileBio').value.trim();
-            
-            if (!name) {
-                alert('Por favor, digite seu nome');
-                return;
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('profiles')
-                    .update({
-                        name: name,
-                        bio: bio,
-                        updated_at: new Date().toISOString()
-                    })
-                    .eq('id', currentUser.id);
-                
-                if (error) throw error;
-                
-                if (!currentUser.profile) {
-                    currentUser.profile = {};
-                }
-                currentUser.profile.name = name;
-                currentUser.profile.bio = bio;
-                
-                alert('✅ Perfil atualizado com sucesso!');
-                updateGreeting();
-                
-            } catch (error) {
-                console.error('Erro ao salvar perfil:', error);
-                alert('❌ Erro ao salvar perfil');
+                showMessage('Erro ao excluir mensagem', 'error');
             }
         }
 
-        async function uploadAvatar(event) {
-            const file = event.target.files[0];
-            if (!file || !supabase || !currentUser) {
-                alert('Erro: arquivo ou usuário não encontrado');
-                return;
-            }
-            
-            // Verificar se o arquivo é uma imagem
-            if (!file.type.startsWith('image/')) {
-                alert('Por favor, selecione uma imagem');
-                return;
-            }
-            
-            // Limitar tamanho do arquivo (2MB)
-            if (file.size > 2 * 1024 * 1024) {
-                alert('Imagem muito grande. Máximo 2MB');
-                return;
-            }
-            
-            try {
-                // Converter para base64 primeiro
-                const reader = new FileReader();
-                reader.readAsDataURL(file);
-                
-                reader.onload = async () => {
-                    const base64 = reader.result;
-                    
-                    // Criar um blob a partir do base64
-                    const base64Response = await fetch(base64);
-                    const blob = await base64Response.blob();
-                    
-                    // Nome único para o arquivo
-                    const fileName = `avatar-${currentUser.id}-${Date.now()}.jpg`;
-                    
-                    console.log('Iniciando upload:', fileName);
-                    alert('Enviando foto...');
-                    
-                    // Upload direto do blob
-                    const { data: uploadData, error: uploadError } = await supabase.storage
-                        .from('avatars')
-                        .upload(fileName, blob, {
-                            contentType: 'image/jpeg',
-                            cacheControl: '3600'
-                        });
-                    
-                    if (uploadError) {
-                        console.error('Erro no upload:', uploadError);
-                        alert(`Erro no upload: ${uploadError.message}`);
-                        return;
-                    }
-                    
-                    console.log('Upload concluído:', uploadData);
-                    
-                    // Obter URL pública
-                    const { data: { publicUrl } } = supabase.storage
-                        .from('avatars')
-                        .getPublicUrl(fileName);
-                    
-                    console.log('URL gerada:', publicUrl);
-                    
-                    // Atualizar perfil
-                    const { error: updateError } = await supabase
-                        .from('profiles')
-                        .update({ 
-                            avatar_url: publicUrl
-                        })
-                        .eq('id', currentUser.id);
-                    
-                    if (updateError) {
-                        console.error('Erro ao atualizar perfil:', updateError);
-                        // Deletar imagem se falhar
-                        await supabase.storage.from('avatars').remove([fileName]);
-                        alert('Erro ao atualizar perfil');
-                        return;
-                    }
-                    
-                    // Atualizar local
-                    if (!currentUser.profile) {
-                        currentUser.profile = {};
-                    }
-                    currentUser.profile.avatar_url = publicUrl;
-                    
-                    alert('✅ Foto atualizada!');
-                    loadProfile();
-                };
-                
-                reader.onerror = () => {
-                    alert('Erro ao ler arquivo');
-                };
-                
-            } catch (error) {
-                console.error('Erro:', error);
-                alert(`Erro: ${error.message}`);
-            }
-        }
-
-        // ====== INICIALIZAÇÃO ======
+        // Inicializar
         async function init() {
-            if (!initSupabase()) {
-                alert('Erro ao configurar o sistema');
-                return;
+            const isAuth = await checkAuth();
+            if (isAuth) {
+                loadModules();
             }
-            
-            const isAuthenticated = await checkAuth();
-            if (!isAuthenticated) {
-                return;
-            }
-            
-            updateTime();
-            updateDate();
-            updateGreeting();
-            loadHomeModules();
-            
-            // Atualizar relógio
-            setInterval(updateTime, 60000);
-            setInterval(updateGreeting, 3600000);
         }
 
-        // Tornar funções globais para onclick funcionar
-        window.sendCommunityMessage = sendCommunityMessage;
-        window.uploadAvatar = uploadAvatar;
-        window.saveProfile = saveProfile;
-        window.logout = logout;
-        window.handleNavClick = handleNavClick;
-        window.loadHomeModules = loadHomeModules;
-        window.loadModuleContents = loadModuleContents;
-        window.openContent = openContent;
-        window.backToModule = backToModule;
-
-        // Inicializar app
-        window.addEventListener('DOMContentLoaded', init);
+        init();
     </script>
 </body>
 </html>
