@@ -846,23 +846,46 @@
 
         // ====== ABRIR CONTEÚDO ======
         function openContent(content) {
+            const mainContent = document.getElementById('mainContent');
+            
             if (content.content_type === 'url' || content.content_type === 'iframe') {
-                // Abrir URL em nova aba
+                // Incorporar URL em iframe
                 if (content.content_url) {
-                    window.open(content.content_url, '_blank');
+                    mainContent.innerHTML = `
+                        <button class="back-button" onclick="loadModuleContents('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
+                        <h2 class="module-title">${content.title}</h2>
+                        <div style="grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 300px); min-height: 500px;">
+                            <iframe src="${content.content_url}" 
+                                style="width: 100%; height: 100%; border: none; border-radius: 10px;"
+                                frameborder="0"
+                                allowfullscreen>
+                            </iframe>
+                        </div>
+                    `;
                 } else {
                     alert('URL do conteúdo não disponível');
                 }
             } else if (content.content_type === 'html') {
                 // Exibir HTML diretamente
-                const mainContent = document.getElementById('mainContent');
                 mainContent.innerHTML = `
-                    <button class="back-button" onclick="loadModuleContents('${content.module}', '${content.module}')">← Voltar</button>
+                    <button class="back-button" onclick="loadModuleContents('${content.module}', '${getModuleName(content.module)}')">← Voltar</button>
+                    <h2 class="module-title">${content.title}</h2>
                     <div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px;">
                         ${content.content_html || '<p>Conteúdo não disponível</p>'}
                     </div>
                 `;
             }
+        }
+        
+        // Função auxiliar para obter nome do módulo
+        function getModuleName(moduleKey) {
+            const moduleNames = {
+                'quiz': 'Quiz Interativo',
+                'exercises': 'Exercícios',
+                'library': 'Biblioteca',
+                'diary': 'Diário'
+            };
+            return moduleNames[moduleKey] || moduleKey;
         }
 
         // ====== FEED ======
@@ -1141,15 +1164,17 @@
             const profile = currentUser.profile || {};
             const initial = (profile.name || currentUser.email || 'U').charAt(0).toUpperCase();
             
+            // Verificar se tem avatar_url e se a imagem existe
+            let avatarContent = initial;
+            if (profile.avatar_url) {
+                avatarContent = `<img src="${profile.avatar_url}" alt="Avatar" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">`;
+            }
+            
             mainContent.innerHTML = `
                 <div class="profile-container">
                     <div class="profile-header">
                         <div class="profile-avatar" onclick="document.getElementById('avatarFile').click()">
-                            ${profile.avatar_url ? 
-                                `<img src="${profile.avatar_url}" alt="Avatar" onerror="this.style.display='none'">` : 
-                                ''
-                            }
-                            ${!profile.avatar_url ? initial : ''}
+                            ${avatarContent}
                             <div class="profile-avatar-edit">📷</div>
                             <input type="file" id="avatarFile" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
                         </div>
