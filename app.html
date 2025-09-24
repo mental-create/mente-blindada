@@ -1046,151 +1046,153 @@
 
         // ====== COMUNIDADE ======
         async function loadCommunity() {
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
-            
-            try {
-                const { data: messages, error } = await supabase
-                    .from('community_messages')
-                    .select(`
-                        *,
-                        profiles (
-                            name,
-                            email
-                        )
-                    `)
-                    .eq('approved', true)
-                    .order('created_at', { ascending: false });
-                
-                if (error) {
-                    console.error('Erro detalhado:', error);
-                    mainContent.innerHTML = `
-                        <div class="community-container">
-                            <div class="community-input-box">
-                                <textarea class="community-input" id="communityMessage" 
-                                    placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                                <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                    Enviar Mensagem
-                                </button>
-                                <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                    * Mensagens serão revisadas antes de aparecer
-                                </p>
-                            </div>
-                            <div class="empty-state">
-                                <p>Seja o primeiro a compartilhar!</p>
-                            </div>
-                        </div>
-                    `;
-                    return;
-                }
-                
-                mainContent.innerHTML = `
-                    <div class="community-container">
-                        <div class="community-input-box">
-                            <textarea class="community-input" id="communityMessage" 
-                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                Enviar Mensagem
-                            </button>
-                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                * Mensagens serão revisadas antes de aparecer
-                            </p>
-                        </div>
+    const mainContent = document.getElementById('mainContent');
+    mainContent.innerHTML = '<div class="loading active">Carregando comunidade...</div>';
+    
+    try {
+        // MUDANÇA: Usando community_posts com campo status
+        const { data: messages, error } = await supabase
+            .from('community_posts')
+            .select(`
+                *,
+                profiles (
+                    name,
+                    email
+                )
+            `)
+            .eq('status', 'approved') // MUDANÇA: campo status ao invés de approved
+            .order('created_at', { ascending: false });
+        
+        if (error) {
+            console.error('Erro detalhado:', error);
+            mainContent.innerHTML = `
+                <div class="community-container">
+                    <div class="community-input-box">
+                        <textarea class="community-input" id="communityMessage" 
+                            placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                        <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                            Enviar Mensagem
+                        </button>
+                        <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                            * Mensagens serão revisadas antes de aparecer
+                        </p>
                     </div>
-                `;
-                
-                const container = mainContent.querySelector('.community-container');
-                
-                if (messages && messages.length > 0) {
-                    messages.forEach(msg => {
-                        const msgEl = createCommunityMessage(msg);
-                        container.appendChild(msgEl);
-                    });
-                } else {
-                    const emptyMsg = document.createElement('div');
-                    emptyMsg.className = 'empty-state';
-                    emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
-                    container.appendChild(emptyMsg);
-                }
-                
-            } catch (error) {
-                console.error('Erro geral ao carregar comunidade:', error);
-                mainContent.innerHTML = `
-                    <div class="community-container">
-                        <div class="community-input-box">
-                            <textarea class="community-input" id="communityMessage" 
-                                placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
-                            <button class="community-submit-btn" onclick="sendCommunityMessage()">
-                                Enviar Mensagem
-                            </button>
-                            <p style="font-size: 12px; color: #999; margin-top: 10px;">
-                                * Mensagens serão revisadas antes de aparecer
-                            </p>
-                        </div>
-                        <div class="empty-state">
-                            <p>Área da comunidade</p>
-                        </div>
+                    <div class="empty-state">
+                        <p>Seja o primeiro a compartilhar!</p>
                     </div>
-                `;
-            }
-        }
-
-        function createCommunityMessage(msg) {
-            const div = document.createElement('div');
-            div.className = 'community-message';
-            
-            const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
-            const authorInitial = authorName.charAt(0).toUpperCase();
-            const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
-            
-            div.innerHTML = `
-                <div class="community-message-header">
-                    <div class="community-avatar">${authorInitial}</div>
-                    <div class="community-author">${authorName}</div>
-                    <div class="community-time">${msgDate}</div>
                 </div>
-                <div class="community-text">${msg.message}</div>
             `;
-            
-            return div;
+            return;
         }
+        
+        mainContent.innerHTML = `
+            <div class="community-container">
+                <div class="community-input-box">
+                    <textarea class="community-input" id="communityMessage" 
+                        placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                    <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                        Enviar Mensagem
+                    </button>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                        * Mensagens serão revisadas antes de aparecer
+                    </p>
+                </div>
+            </div>
+        `;
+        
+        const container = mainContent.querySelector('.community-container');
+        
+        if (messages && messages.length > 0) {
+            messages.forEach(msg => {
+                const msgEl = createCommunityMessage(msg);
+                container.appendChild(msgEl);
+            });
+        } else {
+            const emptyMsg = document.createElement('div');
+            emptyMsg.className = 'empty-state';
+            emptyMsg.innerHTML = '<p>Seja o primeiro a compartilhar!</p>';
+            container.appendChild(emptyMsg);
+        }
+        
+    } catch (error) {
+        console.error('Erro geral ao carregar comunidade:', error);
+        mainContent.innerHTML = `
+            <div class="community-container">
+                <div class="community-input-box">
+                    <textarea class="community-input" id="communityMessage" 
+                        placeholder="Compartilhe sua experiência ou deixe uma mensagem..."></textarea>
+                    <button class="community-submit-btn" onclick="sendCommunityMessage()">
+                        Enviar Mensagem
+                    </button>
+                    <p style="font-size: 12px; color: #999; margin-top: 10px;">
+                        * Mensagens serão revisadas antes de aparecer
+                    </p>
+                </div>
+                <div class="empty-state">
+                    <p>Área da comunidade</p>
+                </div>
+            </div>
+        `;
+    }
+}
 
-        async function sendCommunityMessage() {
-            const messageInput = document.getElementById('communityMessage');
-            const message = messageInput.value.trim();
-            
-            if (!message) {
-                alert('Por favor, escreva uma mensagem');
-                return;
-            }
-            
-            if (!supabase || !currentUser) {
-                alert('Você precisa estar logado');
-                return;
-            }
-            
-            try {
-                const { error } = await supabase
-                    .from('community_messages')
-                    .insert([{
-                        user_id: currentUser.id,
-                        message: message,
-                        approved: false
-                    }]);
-                
-                if (error) {
-                    console.error('Erro ao enviar:', error);
-                    throw error;
-                }
-                
-                alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
-                messageInput.value = '';
-                
-            } catch (error) {
-                console.error('Erro ao enviar mensagem:', error);
-                alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
-            }
+function createCommunityMessage(msg) {
+    const div = document.createElement('div');
+    div.className = 'community-message';
+    
+    const authorName = msg.profiles ? msg.profiles.name : 'Anônimo';
+    const authorInitial = authorName.charAt(0).toUpperCase();
+    const msgDate = new Date(msg.created_at).toLocaleDateString('pt-BR');
+    
+    div.innerHTML = `
+        <div class="community-message-header">
+            <div class="community-avatar">${authorInitial}</div>
+            <div class="community-author">${authorName}</div>
+            <div class="community-time">${msgDate}</div>
+        </div>
+        <div class="community-text">${msg.content}</div>
+    `;
+    
+    return div;
+}
+
+async function sendCommunityMessage() {
+    const messageInput = document.getElementById('communityMessage');
+    const message = messageInput.value.trim();
+    
+    if (!message) {
+        alert('Por favor, escreva uma mensagem');
+        return;
+    }
+    
+    if (!supabase || !currentUser) {
+        alert('Você precisa estar logado');
+        return;
+    }
+    
+    try {
+        // MUDANÇA: Usando community_posts com campo content e status
+        const { error } = await supabase
+            .from('community_posts')
+            .insert([{
+                user_id: currentUser.id,
+                content: message, // MUDANÇA: campo content ao invés de message
+                status: 'pending' // MUDANÇA: campo status ao invés de approved
+            }]);
+        
+        if (error) {
+            console.error('Erro ao enviar:', error);
+            throw error;
         }
+        
+        alert('✅ Mensagem enviada!\n\nAguarde aprovação da moderação.');
+        messageInput.value = '';
+        
+    } catch (error) {
+        console.error('Erro ao enviar mensagem:', error);
+        alert('❌ Erro ao enviar mensagem\n\nTente novamente.');
+    }
+}
 
         // ====== PERFIL ======
         async function loadProfile() {
