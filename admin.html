@@ -267,10 +267,22 @@
         function displayContents(contents) { const listEl = document.getElementById('contentList'); if (!contents || contents.length === 0) { listEl.innerHTML = '<p>Nenhum conteúdo encontrado.</p>'; return; } listEl.innerHTML = contents.map(c => { const sm = subModulesMap.get(c.sub_module_id); const m = modulesMap.get(c.module_key); return `<div class="content-item"><div class="content-image" style="background-image: url('${c.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${c.title} <span class="status-badge ${c.active ? 'status-active' : 'status-inactive'}">${c.active ? 'Ativo' : 'Inativo'}</span></div><div class="content-module">${m?.name || '...'} → ${sm?.name || '...'}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editContent('${c.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteContent('${c.id}')">Excluir</button></div></div>`}).join(''); }
         async function deleteContent(id) { if (!confirm('Tem a certeza que deseja excluir este conteúdo?')) return; const { error } = await supabase.from('contents').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Conteúdo excluído com sucesso!', 'success'); loadContents(); }}
 
-        // --- GERENCIAMENTO DE SUB-MÓDULOS ---
+        // --- GERENCIAMENTO DE SUB-MÓDULOS (COM CORREÇÃO) ---
         document.getElementById('subModuleForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveSubModuleBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('subModuleImageUrl').value; if (document.getElementById('subModuleImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('subModuleImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editSubModuleId').value; const formData = { module_key: document.getElementById('parentModuleKey').value, name: document.getElementById('subModuleName').value, image_url: imageUrl || null, order_position: parseInt(document.getElementById('subModuleOrder').value) }; const { error } = editId ? await supabase.from('sub_modules').update(formData).eq('id', editId) : await supabase.from('sub_modules').insert([formData]); if (error) throw error; showMessage(`Sub-módulo ${editId ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetSubModuleForm(); loadSubModules(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = document.getElementById('editSubModuleId').value ? 'Atualizar Sub-Módulo' : 'Adicionar Sub-Módulo'; } });
         function resetSubModuleForm() { document.getElementById('subModuleForm').reset(); document.getElementById('editSubModuleId').value = ''; document.getElementById('subModuleImageUrl').value = ''; document.getElementById('subModuleImagePreview').innerHTML = ''; document.getElementById('saveSubModuleBtn').textContent = 'Adicionar Sub-Módulo';}
-        function editSubModule(id) { const sm = subModulesMap.get(id); if (!sm) return; resetSubModuleForm(); document.getElementById('editSubModuleId').value = sm.id; document.getElementById('parentModuleKey').value = sm.module_key; document.getElementById('subModuleName').value = sm.name; document.getElementById('subModuleOrder').value = sm.order_position; document.getElementById('subModuleImageUrl').value = sm.image_url; if(sm.image_url) document.getElementById('subModuleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${sm.image_url}" alt="Preview">`; document.getElementById('saveSubModuleBtn').textContent = 'Atualizar Sub-Módulo'; window.scrollTo(0, 0); }
+        function editSubModule(id) {
+            const sm = subModulesMap.get(parseInt(id)); // CORREÇÃO APLICADA AQUI
+            if (!sm) { console.error(`Sub-módulo com ID ${id} não encontrado no map.`); return; }
+            resetSubModuleForm(); 
+            document.getElementById('editSubModuleId').value = sm.id; 
+            document.getElementById('parentModuleKey').value = sm.module_key; 
+            document.getElementById('subModuleName').value = sm.name; 
+            document.getElementById('subModuleOrder').value = sm.order_position; 
+            document.getElementById('subModuleImageUrl').value = sm.image_url; 
+            if(sm.image_url) document.getElementById('subModuleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${sm.image_url}" alt="Preview">`; 
+            document.getElementById('saveSubModuleBtn').textContent = 'Atualizar Sub-Módulo'; 
+            window.scrollTo(0, 0); 
+        }
         async function loadSubModules() { const listEl = document.getElementById('subModuleList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const { data, error } = await supabase.from('sub_modules').select('*').order('order_position'); if (error) return; displaySubModules(data); }
         function displaySubModules(subModules) { const listEl = document.getElementById('subModuleList'); if (!subModules || subModules.length === 0) { listEl.innerHTML = '<p>Nenhum sub-módulo.</p>'; return; } listEl.innerHTML = subModules.map(sm => { const m = modulesMap.get(sm.module_key); return `<div class="content-item"><div class="content-image" style="background-image: url('${sm.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${sm.name}</div><div class="content-module">${m?.name || '...'}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editSubModule('${sm.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteSubModule('${sm.id}')">Excluir</button></div></div>`}).join(''); }
         async function deleteSubModule(id) { if (!confirm('Excluir sub-módulo irá apagar todos os conteúdos dentro dele. Continuar?')) return; const { error } = await supabase.from('sub_modules').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Sub-módulo excluído com sucesso!', 'success'); await loadInitialData(); loadSubModules(); }}
@@ -297,7 +309,7 @@
         async function updateMessageStatus(id, status) { const { error } = await supabase.from('community_posts').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id); if (error) showMessage('Erro ao atualizar status: ' + error.message, 'error'); else { showMessage(`Mensagem ${status === 'approved' ? 'aprovada' : 'rejeitada'}!`, 'success'); loadCommunityMessages(); } }
         async function deleteMessage(id) { if (!confirm('Tem a certeza que deseja excluir esta mensagem permanentemente?')) return; const { error } = await supabase.from('community_posts').delete().eq('id', id); if (error) showMessage('Erro ao excluir: ' + error.message, 'error'); else { showMessage('Mensagem excluída com sucesso!', 'success'); loadCommunityMessages(); } }
 
-        // --- EVENT LISTENERS E INICIALIZAÇÃO (CORRIGIDO) ---
+        // --- EVENT LISTENERS E INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', init);
         Object.assign(window, { 
             logout, switchTab, updateModuleSelects, updateSubModuleSelect, toggleContentInput, 
@@ -311,3 +323,5 @@
     </script>
 </body>
 </html>
+}
+Quero finalizar o projeto. Para isso quero excluir a seção “Gerir Feed” e “Moderar Comunidade”, pois no momento não vou precisar.
