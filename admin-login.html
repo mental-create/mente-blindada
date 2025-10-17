@@ -151,7 +151,7 @@
 
             <div class="form-group">
                 <label>Senha</label>
-                <input type="password" id="adminPassword" required placeholder="Digite sua senha">
+                <input type="password" id="adminPassword" required placeholder="Digite a sua senha">
             </div>
 
             <button type="submit" class="btn" id="loginBtn">
@@ -161,41 +161,17 @@
 
         <div class="loading" id="loading">
             <div class="loading-spinner"></div>
-            <p>Verificando...</p>
+            <p>A verificar...</p>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script>
-        // Configuração do Supabase
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
-
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // Função para redirecionar se o usuário já estiver logado e for admin
-        async function checkAuthAndRedirect() {
-            try {
-                const { data: { session } } = await supabase.auth.getSession();
-                if (session) {
-                    // Se houver uma sessão, verificar o role do usuário
-                    const { data: profile, error } = await supabase
-                        .from('profiles')
-                        .select('is_admin')
-                        .eq('id', session.user.id)
-                        .single();
-
-                    if (!error && profile && profile.is_admin) {
-                        window.location.href = 'admin.html';
-                    }
-                }
-            } catch (e) {
-                console.error('Erro na verificação inicial de autenticação:', e);
-            }
-        }
-
-        // Login do admin
         document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -206,18 +182,14 @@
             hideError();
 
             try {
-                // Login com email e senha
                 const { data, error } = await supabase.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
 
-                if (error) {
-                    throw error;
-                }
+                if (error) throw error;
 
                 if (data.user) {
-                    // Verificar se o usuário que logou é um admin
                     const { data: profile, error: profileError } = await supabase
                         .from('profiles')
                         .select('is_admin')
@@ -225,25 +197,22 @@
                         .single();
                     
                     if (profileError || !profile || !profile.is_admin) {
-                        // Se não for admin, fazer logout e mostrar erro
                         await supabase.auth.signOut();
-                        throw new Error('Você não tem permissão para acessar este painel.');
+                        throw new Error('Você não tem permissão para aceder a este painel.');
                     }
                     
-                    // Se for admin, redirecionar
-                    window.location.href = 'admin.html';
+                    // SÓ redirecionar DEPOIS de tudo verificado
+                    window.location.href = `${window.location.origin}/admin.html`;
                 } else {
                     throw new Error('Falha no login. Verifique as credenciais.');
                 }
             } catch (error) {
-                console.error('Erro:', error);
                 showError(error.message || 'Erro ao fazer login. Credenciais incorretas?');
             } finally {
                 showLoading(false);
             }
         });
 
-        // Funções auxiliares
         function showError(message) {
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = message;
@@ -258,9 +227,7 @@
             document.getElementById('loading').classList.toggle('active', show);
             document.getElementById('loginBtn').disabled = show;
         }
-
-        // Inicializar
-        checkAuthAndRedirect();
     </script>
 </body>
 </html>
+
