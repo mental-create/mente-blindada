@@ -1,0 +1,732 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa da Sua Ansiedade - Quiz Interativo</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        }
+
+        .header p {
+            font-size: 1.1em;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px 30px;
+        }
+
+        .intro {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .intro h2 {
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .intro p {
+            color: #666;
+            line-height: 1.6;
+            font-size: 1.05em;
+        }
+
+        .start-btn {
+            display: block;
+            width: 100%;
+            max-width: 300px;
+            margin: 30px auto;
+            padding: 18px 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s, box-shadow 0.3s;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .start-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.6);
+        }
+
+        .quiz-section {
+            display: none;
+        }
+
+        .quiz-section.active {
+            display: block;
+            animation: fadeIn 0.5s;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+            border-radius: 10px;
+        }
+
+        .question-card {
+            background: #f8f9fa;
+            padding: 30px;
+            border-radius: 15px;
+            margin-bottom: 30px;
+            border-left: 5px solid #667eea;
+        }
+
+        .question-card h3 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 1.3em;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            display: flex;
+            align-items: center;
+            padding: 15px 20px;
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f0f4ff;
+            transform: translateX(5px);
+        }
+
+        .option input[type="checkbox"],
+        .option input[type="radio"] {
+            margin-right: 15px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .option label {
+            cursor: pointer;
+            flex: 1;
+            font-size: 1.05em;
+            color: #444;
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #f0f4ff;
+        }
+
+        .intensity-scale {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 10px;
+            margin-top: 15px;
+            padding: 20px;
+            background: white;
+            border-radius: 10px;
+        }
+
+        .intensity-scale input[type="range"] {
+            flex: 1;
+            height: 8px;
+            border-radius: 5px;
+            background: #e0e0e0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .intensity-scale input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+        }
+
+        .intensity-scale input[type="range"]::-moz-range-thumb {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            background: #667eea;
+            cursor: pointer;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.4);
+            border: none;
+        }
+
+        .intensity-value {
+            font-weight: bold;
+            color: #667eea;
+            font-size: 1.5em;
+            min-width: 50px;
+            text-align: center;
+        }
+
+        .nav-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.05em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+        }
+
+        /* --- New Result Styles --- */
+        .results.active { display: block; animation: fadeIn 0.5s; }
+        .results h2 { color: #667eea; text-align: center; margin-bottom: 20px; font-size: 2em; }
+        .results .result-section { background: #f8f9fa; padding: 25px; border-radius: 15px; margin-bottom: 25px; border-left: 5px solid #667eea; }
+        .results .result-section h3 { color: #667eea; margin-bottom: 15px; font-size: 1.5em; display: flex; align-items: center; gap: 10px; }
+        .results .result-section p.educational-text { color: #555; line-height: 1.6; margin-bottom: 20px; font-style: italic; }
+        .results ul { list-style: none; padding-left: 0; }
+        .results ul li { background: white; padding: 12px 18px; border-radius: 8px; margin-bottom: 8px; border: 1px solid #eee; color: #444; }
+        
+        .anxiety-cycle { background: #f0f4ff; padding: 20px; border-radius: 15px; border: 2px dashed #667eea; }
+        .anxiety-cycle ol { list-style-type: none; padding-left: 0; counter-reset: cycle-counter; }
+        .anxiety-cycle li { padding: 10px; position: relative; padding-left: 45px; margin-bottom: 10px; }
+        .anxiety-cycle li:before {
+            counter-increment: cycle-counter;
+            content: counter(cycle-counter);
+            position: absolute;
+            left: 0;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 30px;
+            height: 30px;
+            background: #667eea;
+            border-radius: 50%;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+        }
+        .anxiety-cycle li:not(:last-child):after {
+            content: '→';
+            position: absolute;
+            left: 12px;
+            bottom: -5px;
+            color: #667eea;
+            font-size: 1.5em;
+        }
+        .anxiety-cycle p { margin-top: 15px; font-weight: bold; color: #5a5a9c; }
+
+        .action-plan ul li { padding-left: 35px; position: relative; }
+        .action-plan ul li:before { content: '💡'; position: absolute; left: 10px; top: 12px; }
+        
+        .alert-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 20px; border-radius: 10px; margin-top: 20px; color: #856404; }
+        .alert-box strong { display: block; margin-bottom: 5px; }
+
+        .restart-btn {
+            display: block; width: 100%; max-width: 300px; margin: 40px auto 0; padding: 15px 40px; background: white;
+            color: #667eea; border: 2px solid #667eea; border-radius: 50px; font-size: 1.1em; font-weight: bold;
+            cursor: pointer; transition: all 0.3s;
+        }
+        .restart-btn:hover { background: #667eea; color: white; transform: translateY(-2px); }
+
+        @media (max-width: 768px) {
+            .header h1 { font-size: 1.8em; }
+            .content { padding: 30px 20px; }
+            .nav-buttons { flex-direction: column; }
+            .btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧭 Mapa da Sua Ansiedade</h1>
+            <p>Descubra seus gatilhos e sintomas de ansiedade</p>
+        </div>
+
+        <div class="content">
+            <div class="intro" id="intro">
+                <h2>Bem-vindo ao Quiz Interativo</h2>
+                <p>Este questionário foi desenvolvido para ajudá-lo a identificar seus gatilhos pessoais de ansiedade e reconhecer os sintomas que você experimenta. O autoconhecimento é o primeiro passo para gerenciar a ansiedade de forma eficaz.</p>
+                <p style="margin-top: 15px;"><strong>Importante:</strong> Este quiz é uma ferramenta educacional e não substitui avaliação profissional.</p>
+                <button class="start-btn" id="startBtn">Começar o Quiz</button>
+            </div>
+
+            <div class="quiz-section" id="quiz">
+                <div class="progress-bar">
+                    <div class="progress-fill" id="progress"></div>
+                </div>
+                <div id="questionsContainer"></div>
+                <div class="nav-buttons">
+                    <button class="btn btn-secondary" id="prevBtn" style="display: none;">← Anterior</button>
+                    <button class="btn btn-primary" id="nextBtn">Próxima →</button>
+                </div>
+            </div>
+
+            <div class="results" id="results"></div>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+             {
+                category: "Gatilhos: Situações Sociais",
+                question: "Quais dessas situações sociais causam ansiedade em você?",
+                type: "multiple",
+                options: [ "Falar em público ou fazer apresentações", "Ir a festas ou eventos com muitas pessoas", "Conhecer pessoas novas", "Conversar em grupos grandes", "Ser o centro das atenções", "Fazer ou receber críticas", "Confrontos ou discussões", "Nenhuma dessas situações me causa ansiedade" ]
+            },
+            { category: "Intensidade", question: "Qual o nível de intensidade da ansiedade nas situações sociais? (0 = nenhuma, 10 = extrema)", type: "scale", options: [] },
+            {
+                category: "Gatilhos: Ambientes e Lugares",
+                question: "Quais ambientes ou lugares disparam sua ansiedade?",
+                type: "multiple",
+                options: [ "Lugares fechados ou apertados (elevadores, aviões)", "Lugares muito abertos ou vazios", "Multidões e aglomerações", "Hospitais ou consultórios médicos", "Local de trabalho", "Shopping centers lotados", "Transporte público", "Nenhum lugar específico me causa ansiedade" ]
+            },
+            { category: "Intensidade", question: "Intensidade da ansiedade relacionada a lugares (0-10):", type: "scale", options: [] },
+            {
+                category: "Gatilhos: Trabalho e Estudo",
+                question: "Quais situações de trabalho ou estudo causam ansiedade?",
+                type: "multiple",
+                options: [ "Prazos apertados", "Excesso de trabalho ou responsabilidades", "Apresentações ou reuniões importantes", "Avaliações de desempenho", "Conflitos com colegas ou superiores", "Medo de cometer erros", "Pressão por resultados", "Provas e exames", "Não tenho ansiedade relacionada ao trabalho/estudo" ]
+            },
+            { category: "Intensidade", question: "Intensidade da ansiedade no trabalho/estudo (0-10):", type: "scale", options: [] },
+            {
+                category: "Gatilhos: Pensamentos",
+                question: "Quais tipos de pensamentos disparam sua ansiedade?",
+                type: "multiple",
+                options: [ "Pensamentos catastróficos ('e se acontecer o pior?')", "Preocupações sobre o futuro", "Ruminação sobre erros do passado", "Antecipação de perigos que podem não acontecer", "Perfeccionismo excessivo", "Autocrítica severa ('não sou bom o suficiente')", "Medo de fracassar", "Comparação com outras pessoas", "Meus pensamentos raramente causam ansiedade" ]
+            },
+            {
+                category: "Gatilhos: Físicos e Saúde",
+                question: "Quais fatores físicos aumentam sua ansiedade?",
+                type: "multiple",
+                options: [ "Consumo excessivo de cafeína", "Falta de sono ou sono de má qualidade", "Fome ou hipoglicemia", "Uso de álcool", "Alterações hormonais (TPM, menopausa)", "Sentir o coração acelerar (por qualquer motivo)", "Dores ou sensações corporais incomuns", "Fatores físicos não influenciam minha ansiedade" ]
+            },
+            {
+                category: "Sintomas: Físicos",
+                question: "Quais sintomas físicos você experimenta quando está ansioso?",
+                type: "multiple",
+                options: [ "Coração acelerado (taquicardia)", "Falta de ar ou respiração acelerada", "Suor excessivo (mãos, pés, corpo)", "Tremores nas mãos ou pernas", "Tensão ou dores musculares", "Náuseas ou desconforto estomacal", "Dores de cabeça ou enxaquecas", "Tontura ou vertigem", "Sensação de nó na garganta", "Formigamento nas extremidades", "Não tenho sintomas físicos significativos" ]
+            },
+            {
+                category: "Sintomas: Psicológicos",
+                question: "Quais sintomas mentais e emocionais você apresenta?",
+                type: "multiple",
+                options: [ "Preocupação excessiva e constante", "Pensamentos acelerados", "Dificuldade de concentração", "Sensação de 'mente em branco'", "Medo intenso desproporcional", "Sensação de perigo iminente", "Irritabilidade aumentada", "Inquietação constante", "Dificuldade para tomar decisões", "Medo de perder o controle", "Raramente tenho sintomas psicológicos" ]
+            },
+            {
+                category: "Sintomas: Comportamentais",
+                question: "Como você tende a reagir comportamentalmente à ansiedade?",
+                type: "multiple",
+                options: [ "Evito situações que causam ansiedade", "Procrastino tarefas importantes", "Me isolo socialmente", "Verifico coisas repetidamente", "Busco reasseguramento constante de outras pessoas", "Tenho dificuldade de sair de casa", "Falo rápido demais ou muito", "Evito contato visual", "Meu comportamento não muda significativamente" ]
+            },
+            {
+                category: "Frequência",
+                question: "Com que frequência você experimenta sintomas de ansiedade?",
+                type: "single",
+                options: [ "Raramente (algumas vezes por ano)", "Ocasionalmente (algumas vezes por mês)", "Frequentemente (várias vezes por semana)", "Diariamente ou quase todos os dias)", "Constantemente (várias vezes ao dia)" ]
+            },
+            {
+                category: "Impacto",
+                question: "Quanto a ansiedade interfere nas suas atividades diárias?",
+                type: "single",
+                options: [ "Não interfere", "Interfere pouco", "Interfere moderadamente", "Interfere bastante", "Interfere gravemente" ]
+            }
+        ];
+
+        let currentQuestion = 0;
+        let answers = {};
+
+        document.getElementById('startBtn').addEventListener('click', startQuiz);
+        document.getElementById('prevBtn').addEventListener('click', previousQuestion);
+        document.getElementById('nextBtn').addEventListener('click', nextQuestion);
+
+        function startQuiz() {
+            document.getElementById('intro').style.display = 'none';
+            document.getElementById('quiz').classList.add('active');
+            renderQuestion();
+        }
+
+        function renderQuestion() {
+            const q = questions[currentQuestion];
+            const container = document.getElementById('questionsContainer');
+            
+            let html = `<div class="question-card">
+                <span class="question-number">Questão ${currentQuestion + 1} de ${questions.length}</span>
+                <p style="color: #667eea; font-weight: 600; margin-bottom: 15px; font-size: 1.1em;">${q.category}</p>
+                <h3>${q.question}</h3>`;
+
+            if (q.type === 'multiple') {
+                html += '<div class="options">';
+                q.options.forEach((option, index) => {
+                    const isChecked = answers[currentQuestion]?.includes(index);
+                    const selectedClass = isChecked ? 'selected' : '';
+                    html += `<div class="option ${selectedClass}" data-index="${index}">
+                            <input type="checkbox" id="opt${index}" ${isChecked ? 'checked' : ''}>
+                            <label for="opt${index}">${option}</label>
+                        </div>`;
+                });
+                html += '</div>';
+            } else if (q.type === 'scale') {
+                const value = answers[currentQuestion] !== undefined ? answers[currentQuestion] : 5;
+                html += `<div class="intensity-scale">
+                        <span style="color: #888; font-weight: 600;">0</span>
+                        <input type="range" min="0" max="10" value="${value}" id="scaleInput">
+                        <span style="color: #888; font-weight: 600;">10</span>
+                        <div class="intensity-value" id="scaleValue">${value}</div>
+                    </div>`;
+            } else if (q.type === 'single') {
+                html += '<div class="options">';
+                q.options.forEach((option, index) => {
+                    const isChecked = answers[currentQuestion] === index;
+                    const selectedClass = isChecked ? 'selected' : '';
+                    html += `<div class="option ${selectedClass}" data-index="${index}">
+                            <input type="radio" name="single${currentQuestion}" id="opt${index}" ${isChecked ? 'checked' : ''}>
+                            <label for="opt${index}">${option}</label>
+                        </div>`;
+                });
+                html += '</div>';
+            }
+
+            html += '</div>';
+            container.innerHTML = html;
+
+            if (q.type === 'multiple') {
+                document.querySelectorAll('.option').forEach(opt => {
+                    opt.addEventListener('click', function(e) {
+                        if (e.target.tagName === 'INPUT') return;
+                        const index = parseInt(this.getAttribute('data-index'));
+                        const checkbox = this.querySelector('input[type="checkbox"]');
+                        checkbox.checked = !checkbox.checked;
+                        if (!answers[currentQuestion]) answers[currentQuestion] = [];
+                        const idx = answers[currentQuestion].indexOf(index);
+                        if (checkbox.checked && idx === -1) answers[currentQuestion].push(index);
+                        else if (!checkbox.checked && idx > -1) answers[currentQuestion].splice(idx, 1);
+                        this.classList.toggle('selected', checkbox.checked);
+                    });
+                });
+            } else if (q.type === 'scale') {
+                const scaleInput = document.getElementById('scaleInput');
+                scaleInput.addEventListener('input', () => { document.getElementById('scaleValue').textContent = scaleInput.value; });
+                scaleInput.addEventListener('change', () => { answers[currentQuestion] = parseInt(scaleInput.value); });
+                if(answers[currentQuestion] === undefined) answers[currentQuestion] = 5;
+            } else if (q.type === 'single') {
+                document.querySelectorAll('.option').forEach(opt => {
+                    opt.addEventListener('click', function(e) {
+                         if (e.target.tagName === 'INPUT') return;
+                        const index = parseInt(this.getAttribute('data-index'));
+                        this.querySelector('input[type="radio"]').checked = true;
+                        answers[currentQuestion] = index;
+                        document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+                        this.classList.add('selected');
+                    });
+                });
+            }
+            updateProgress();
+            updateButtons();
+        }
+        
+        function updateProgress() {
+            document.getElementById('progress').style.width = `${((currentQuestion + 1) / questions.length) * 100}%`;
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion > 0 ? 'block' : 'none';
+            document.getElementById('nextBtn').textContent = currentQuestion === questions.length - 1 ? 'Ver Resultados ✓' : 'Próxima →';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                renderQuestion();
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                renderQuestion();
+            }
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            answers = {};
+            document.getElementById('results').innerHTML = '';
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('intro').style.display = 'block';
+            window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+
+        // =================================================================
+        // ======================= NEW SHOWRESULTS FUNCTION =================
+        // =================================================================
+        function showResults() {
+            document.getElementById('quiz').classList.remove('active');
+            const resultsContainer = document.getElementById('results');
+            
+            // --- 1. GATHER DATA ---
+            const socialTriggers = answers[0] || [];
+            const socialIntensity = answers[1] ?? 5;
+            const placeTriggers = answers[2] || [];
+            const workTriggers = answers[4] || [];
+            const workIntensity = answers[5] ?? 5;
+            const thoughtTriggers = answers[6] || [];
+            const physicalHealthTriggers = answers[7] || [];
+            const physicalSymptoms = answers[8] || [];
+            const psychSymptoms = answers[9] || [];
+            const behavSymptoms = answers[10] || [];
+            const frequency = answers[11] ?? 0;
+            const impact = answers[12] ?? 0;
+
+            let html = `<h2>📊 Seu Mapa Detalhado da Ansiedade</h2>`;
+
+            // --- 2. GENERATE ANXIETY PROFILE ---
+            const profile = generateAnxietyProfile();
+            html += `<div class="result-section">
+                        <h3>${profile.title}</h3>
+                        <p class="educational-text">${profile.description}</p>
+                     </div>`;
+
+            // --- 3. GENERATE TRIGGERS SECTION ---
+            html += generateTriggersHtml();
+
+            // --- 4. GENERATE SYMPTOMS SECTION ---
+            html += generateSymptomsHtml();
+
+            // --- 5. GENERATE ANXIETY CYCLE ---
+            html += generateAnxietyCycleHtml();
+            
+            // --- 6. GENERATE ACTION PLAN ---
+            html += generateActionPlanHtml();
+            
+            // --- Final Elements ---
+            if (frequency >= 3 || impact >= 3) {
+                html += `<div class="alert-box">
+                           <strong>Recomendação Importante</strong>
+                           Seus resultados indicam que a ansiedade está impactando sua vida de forma significativa. Considerar a ajuda de um profissional de saúde mental (psicólogo ou psiquiatra) é um passo corajoso e muito eficaz.
+                         </div>`;
+            }
+            html += `<button class="restart-btn" id="restartBtn">🔄 Refazer o Quiz</button>`;
+
+            resultsContainer.innerHTML = html;
+            resultsContainer.classList.add('active');
+            document.getElementById('restartBtn').addEventListener('click', restartQuiz);
+            window.scrollTo({top: 0, behavior: 'smooth'});
+
+            // --- HELPER FUNCTIONS ---
+            function getListItems(questionIndex, answersArray, noneIndex) {
+                if (!answersArray || answersArray.length === 0 || (answersArray.length === 1 && answersArray.includes(noneIndex))) {
+                    return '';
+                }
+                return answersArray
+                    .filter(i => i !== noneIndex)
+                    .map(i => `<li>${questions[questionIndex].options[i]}</li>`)
+                    .join('');
+            }
+
+            function generateAnxietyProfile() {
+                const scores = {
+                    social: socialTriggers.filter(i => i !== 7).length * (socialIntensity / 10),
+                    work: workTriggers.filter(i => i !== 8).length * (workIntensity / 10),
+                    thoughts: thoughtTriggers.filter(i => i !== 8).length,
+                    physical: physicalSymptoms.filter(i => i !== 10).length
+                };
+                const dominantProfile = Object.keys(scores).reduce((a, b) => scores[a] > scores[b] ? a : b);
+
+                let profileData = { title: "Perfil: Ansiedade Generalizada", description: "Sua ansiedade parece se manifestar em diversas áreas da vida, com uma mistura de gatilhos e sintomas. Isso indica um estado de alerta constante, onde diferentes situações podem ativar sua resposta de ansiedade." };
+
+                if (scores[dominantProfile] > 2) {
+                    switch (dominantProfile) {
+                        case 'social':
+                            profileData = { title: "Perfil: Foco em Ansiedade Social", description: "Seu mapa indica que as interações sociais são a principal fonte de sua ansiedade. O medo de julgamento e a pressão em situações com outras pessoas parecem ser o motor que ativa suas respostas ansiosas, tanto mentais quanto físicas." };
+                            break;
+                        case 'work':
+                            profileData = { title: "Perfil: Foco em Desempenho e Pressão", description: "Seus gatilhos mais fortes estão ligados ao ambiente de trabalho ou estudo. A pressão por prazos, o medo de falhar e a busca por resultados parecem alimentar um ciclo de preocupação e estresse que se manifesta como ansiedade." };
+                            break;
+                        case 'thoughts':
+                            profileData = { title: "Perfil: Gatilhos Internos e Preocupação", description: "Sua ansiedade parece ser fortemente alimentada por padrões de pensamento. Preocupações com o futuro, autocrítica e pensamentos catastróficos são os principais gatilhos que iniciam a espiral de ansiedade, mesmo sem um fator externo aparente." };
+                            break;
+                        case 'physical':
+                             profileData = { title: "Perfil: Alta Resposta Física", description: "Sua experiência de ansiedade é marcadamente física. Você sente a ansiedade de forma intensa no corpo, com sintomas que podem ser assustadores. Isso sugere que seu sistema de 'luta ou fuga' é ativado de forma muito rápida e potente." };
+                            break;
+                    }
+                }
+                return profileData;
+            }
+
+            function generateTriggersHtml() {
+                let triggersHtml = '<div class="result-section"><h3>🎯 Mapeando Seus Gatilhos</h3>';
+                const socialList = getListItems(0, socialTriggers, 7);
+                const placeList = getListItems(2, placeTriggers, 7);
+                const workList = getListItems(4, workTriggers, 8);
+                const thoughtList = getListItems(6, thoughtTriggers, 8);
+                const physicalHealthList = getListItems(7, physicalHealthTriggers, 7);
+                
+                if (socialList) triggersHtml += `<h4>Gatilhos Sociais (Intensidade: ${socialIntensity}/10)</h4><p class="educational-text">Medo de ser julgado ou avaliado negativamente em interações.</p><ul>${socialList}</ul>`;
+                if (workList) triggersHtml += `<h4>Gatilhos de Desempenho (Intensidade: ${workIntensity}/10)</h4><p class="educational-text">Pressão por resultados e medo de falhar no trabalho ou estudos.</p><ul>${workList}</ul>`;
+                if (thoughtList) triggersHtml += `<h4>Gatilhos de Pensamento</h4><p class="educational-text">Padrões de pensamento que iniciam a ansiedade de dentro para fora.</p><ul>${thoughtList}</ul>`;
+                if (placeList) triggersHtml += `<h4>Gatilhos de Ambiente</h4><p class="educational-text">Lugares ou contextos específicos que disparam o alerta de perigo.</p><ul>${placeList}</ul>`;
+                if (physicalHealthList) triggersHtml += `<h4>Gatilhos Físicos e de Saúde</h4><p class="educational-text">Fatores corporais ou de estilo de vida que podem desregular seu sistema nervoso.</p><ul>${physicalHealthList}</ul>`;
+                
+                if (!socialList && !placeList && !workList && !thoughtList && !physicalHealthList) triggersHtml += "<p>Você não identificou gatilhos específicos, o que pode indicar uma ansiedade mais generalizada.</p>";
+                
+                return triggersHtml + '</div>';
+            }
+
+            function generateSymptomsHtml() {
+                let symptomsHtml = '<div class="result-section"><h3>⚠️ Como a Ansiedade se Manifesta</h3>';
+                const physicalList = getListItems(8, physicalSymptoms, 10);
+                const psychList = getListItems(9, psychSymptoms, 10);
+                const behavList = getListItems(10, behavSymptoms, 8);
+
+                if (physicalList) symptomsHtml += `<h4>Sintomas Físicos</h4><p class="educational-text">A resposta de "luta ou fuga" do seu corpo, preparando-o para uma ameaça percebida.</p><ul>${physicalList}</ul>`;
+                if (psychList) symptomsHtml += `<h4>Sintomas Psicológicos</h4><p class="educational-text">A tentativa da sua mente de antecipar e controlar o perigo, resultando em um estado de alerta mental.</p><ul>${psychList}</ul>`;
+                if (behavList) symptomsHtml += `<h4>Sintomas Comportamentais</h4><p class="educational-text">As ações que você toma para tentar evitar ou reduzir o desconforto da ansiedade.</p><ul>${behavList}</ul>`;
+                
+                if (!physicalList && !psychList && !behavList) symptomsHtml += "<p>Você não reportou sintomas específicos de ansiedade.</p>";
+
+                return symptomsHtml + '</div>';
+            }
+
+            function generateAnxietyCycleHtml() {
+                const trigger = questions[4].options[workTriggers.filter(i => i !== 8)[0]] || questions[0].options[socialTriggers.filter(i => i !== 7)[0]];
+                const thought = questions[9].options[psychSymptoms.filter(i => i !== 10)[0]];
+                const physical = questions[8].options[physicalSymptoms.filter(i => i !== 10)[0]];
+                const behavior = questions[10].options[behavSymptoms.filter(i => i !== 8)[0]];
+
+                if (!trigger || !thought || !physical || !behavior) return '';
+
+                return `<div class="result-section">
+                            <h3>🔄 O Ciclo da Sua Ansiedade</h3>
+                            <div class="anxiety-cycle">
+                                <ol>
+                                    <li><strong>Gatilho:</strong> Uma situação como "<strong>${trigger}</strong>" acontece.</li>
+                                    <li><strong>Pensamento/Sintoma:</strong> Sua mente reage com "<strong>${thought}</strong>".</li>
+                                    <li><strong>Sensação Física:</strong> Seu corpo responde com "<strong>${physical}</strong>".</li>
+                                    <li><strong>Comportamento:</strong> Para lidar com isso, você tende a "<strong>${behavior}</strong>".</li>
+                                </ol>
+                                <p>Este ciclo, ao evitar o desconforto, acaba reforçando a ansiedade a longo prazo. Reconhecê-lo é o primeiro passo para quebrá-lo.</p>
+                            </div>
+                        </div>`;
+            }
+
+            function generateActionPlanHtml() {
+                 let planHtml = '<div class="result-section action-plan"><h3>✅ Seu Plano de Ação Personalizado</h3>';
+                 let recommendations = new Set(); // Use a Set to avoid duplicate recommendations
+
+                 if (socialTriggers.filter(i => i !== 7).length > 0) recommendations.add("Pratique a Exposição Gradual: Comece com interações sociais pequenas e de baixo risco para ensinar ao seu cérebro que você está seguro.");
+                 if (workTriggers.filter(i => i !== 8).length > 0) recommendations.add("Desafie o Perfeccionismo: Permita-se entregar tarefas 'boas o suficiente' em vez de perfeitas, para reduzir a pressão e o medo de errar.");
+                 if (thoughtTriggers.filter(i => i !== 8).length > 2) recommendations.add("Inicie um 'Diário de Preocupações': Anote seus pensamentos ansiosos. Isso ajuda a externalizá-los e a analisá-los com mais clareza.");
+                 if (physicalSymptoms.filter(i => i !== 10).length > 1) recommendations.add("Aprenda a Respiração Diafragmática (4-7-8): Inspire por 4s, segure por 7s e expire por 8s. Isso acalma o sistema nervoso e reduz os sintomas físicos rapidamente.");
+                 if (behavSymptoms.includes(0) || behavSymptoms.includes(2)) recommendations.add("Enfrente a Evitação: Escolha uma pequena coisa que você está evitando e se proponha a fazê-la. O alívio de superar o medo é poderoso.");
+                 if (physicalHealthTriggers.includes(1)) recommendations.add("Priorize a Higiene do Sono: Crie uma rotina relaxante antes de dormir. Um sono de qualidade é um dos pilares para a regulação da ansiedade.");
+
+                if (recommendations.size === 0) {
+                    planHtml += "<p>Com base em suas respostas, um bom começo é focar em práticas gerais de bem-estar, como exercícios físicos regulares e técnicas de relaxamento.</p>"
+                } else {
+                    planHtml += '<ul>';
+                    recommendations.forEach(rec => {
+                        planHtml += `<li>${rec}</li>`;
+                    });
+                    planHtml += '</ul>';
+                }
+
+                 return planHtml + '</div>';
+            }
+        }
+    </script>
+</body>
+</html>

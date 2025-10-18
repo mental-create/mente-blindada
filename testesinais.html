@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Sinais Precoces da Ansiedade</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-purple: #7060B3;
+            --light-purple: #e9e6f5;
+            --white: #fff;
+            --text-color: #333;
+            --green: #28a745;
+            --blue: #0d6efd;
+            --orange: #fd7e14;
+            --red: #dc3545;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--primary-purple);
+            color: var(--text-color);
+            margin: 0;
+            padding: 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .quiz-container {
+            width: 100%;
+            max-width: 600px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+            text-align: center;
+        }
+
+        .quiz-screen { padding: 2rem 2.5rem; }
+        h2 { color: var(--primary-purple); margin-top: 0; }
+        p { font-size: 1.1rem; line-height: 1.6; color: #555; }
+        
+        .btn {
+            display: inline-block; background-color: var(--primary-purple); color: var(--white);
+            padding: 1rem 2rem; border-radius: 12px; border: none; font-size: 1.1rem;
+            font-weight: 600; cursor: pointer; transition: transform 0.2s, background-color 0.2s;
+            margin-top: 1rem;
+        }
+        
+        .btn:hover { transform: translateY(-3px); background-color: #5a4b9a; }
+        #quiz-screen { display: none; }
+
+        #progress-bar-container {
+            width: 100%; background-color: #eee; border-radius: 5px; margin-bottom: 2rem;
+        }
+        #progress-bar {
+            width: 0%; height: 10px; background-color: var(--primary-purple);
+            border-radius: 5px; transition: width 0.3s ease-in-out;
+        }
+
+        #question-text { font-size: 1.3rem; font-weight: 600; margin-bottom: 2rem; }
+        #options-container { display: flex; flex-direction: column; gap: 1rem; }
+
+        .option-btn {
+            background-color: var(--light-purple); border: 2px solid transparent; color: var(--text-color);
+            padding: 1rem; border-radius: 12px; font-size: 1rem;
+            cursor: pointer; text-align: left; transition: background-color 0.2s, border-color 0.2s;
+        }
+        .option-btn:hover { border-color: var(--primary-purple); }
+        
+        #result-screen { display: none; }
+        .result-icon { font-size: 4rem; margin-bottom: 1rem; }
+        .result-title { font-size: 1.8rem; margin-bottom: 0.5rem; }
+        .result-text { font-size: 1rem; margin-bottom: 1.5rem; }
+        .final-tip {
+            font-size: 0.95rem; background-color: var(--light-purple); padding: 1rem;
+            border-radius: 12px; margin-top: 1.5rem; color: #3f356f;
+        }
+        .disclaimer { font-size: 0.8rem; color: #888; margin-top: 1.5rem; }
+    </style>
+</head>
+<body>
+    <div class="quiz-container">
+        <div id="start-screen" class="quiz-screen">
+            <i class="fas fa-search-plus" style="font-size: 3rem; color: var(--primary-purple); margin-bottom: 1rem;"></i>
+            <h2>Reconhecendo Sinais Precoces</h2>
+            <p>Este teste rápido ajuda você a refletir sobre os primeiros sinais da ansiedade. Responda com base em como você tem se sentido recentemente.</p>
+            <button id="start-btn" class="btn">Começar Teste</button>
+        </div>
+
+        <div id="quiz-screen" class="quiz-screen">
+            <div id="progress-bar-container"><div id="progress-bar"></div></div>
+            <p id="question-text"></p>
+            <div id="options-container"></div>
+        </div>
+
+        <div id="result-screen" class="quiz-screen">
+            <div id="result-icon-container"></div>
+            <h2 id="result-title"></h2>
+            <p id="result-text"></p>
+            <div id="final-tip-container"></div>
+            <button id="restart-btn" class="btn">Refazer Teste</button>
+            <p class="disclaimer">Este teste é apenas para fins educacionais e de autoavaliação. Não substitui a consulta com um profissional de saúde mental.</p>
+        </div>
+    </div>
+
+    <script>
+        const quizData = [
+            {
+                question: "1. Como você percebe sua respiração em momentos de estresse ou ansiedade?",
+                options: [
+                    { text: "a) Respiração normal, sem alteração", key: 'a' },
+                    { text: "b) Um pouco mais rápida, mas consigo controlar", key: 'b' },
+                    { text: "c) Respiração acelerada e difícil de controlar", key: 'c' },
+                    { text: "d) Fico sem fôlego e com dificuldade para respirar", key: 'd' }
+                ]
+            },
+            {
+                question: "2. Em relação ao seu corpo, você tem notado alguma alteração quando está começando a se sentir estressado(a)?",
+                options: [
+                    { text: "a) Não percebo nada no meu corpo", key: 'a' },
+                    { text: "b) Às vezes, meus ombros ficam ligeiramente tensos", key: 'b' },
+                    { text: "c) Sinto uma leve dor ou sensação estranha no estômago", key: 'c' },
+                    { text: "d) Meus músculos ficam tensos e minha postura muda significativamente", key: 'd' }
+                ]
+            },
+            {
+                question: "3. Em termos de emoções, como você se sente quando está começando a ficar sobrecarregado(a)?",
+                options: [
+                    { text: "a) Não percebo mudança nas minhas emoções", key: 'a' },
+                    { text: "b) Fico um pouco inquieto(a) sem saber o porquê", key: 'b' },
+                    { text: "c) Começo a ficar levemente irritado(a) ou impaciente", key: 'c' },
+                    { text: "d) Sinto um grande desconforto emocional e fico facilmente irritado(a)", key: 'd' }
+                ]
+            },
+            {
+                question: "4. Quais pensamentos você tem quando algo começa a dar errado ou você sente que algo não está certo?",
+                options: [
+                    { text: "a) Nenhum pensamento negativo, tudo está tranquilo", key: 'a' },
+                    { text: "b) Começo a me preocupar um pouco, mas é passageiro", key: 'b' },
+                    { text: "c) Começo a antecipar problemas e me preocupar com o futuro", key: 'c' },
+                    { text: "d) Fico obcecado(a) com 'e se...', pensando em muitos cenários negativos", key: 'd' }
+                ]
+            },
+            {
+                question: "5. Seu comportamento muda quando você sente que algo não está bem?",
+                options: [
+                    { text: "a) Não noto nenhuma mudança no meu comportamento", key: 'a' },
+                    { text: "b) Às vezes, fico mais distraído(a), mas sem grandes alterações", key: 'b' },
+                    { text: "c) Começo a procrastinar mais ou a evitar algumas tarefas", key: 'c' },
+                    { text: "d) Fico agitado(a), verificando as coisas repetidamente e evitando muitas responsabilidades", key: 'd' }
+                ]
+            },
+            {
+                question: "6. Quando percebe esses sinais, o que você faz?",
+                options: [
+                    { text: "a) Ignoro, não acho que precise fazer nada", key: 'a' },
+                    { text: "b) Tento relaxar um pouco, mas não dou muita atenção", key: 'b' },
+                    { text: "c) Faço algumas mudanças, como respirar fundo ou dar um tempo para mim", key: 'c' },
+                    { text: "d) Busco ativamente formas de lidar com isso e tento agir rapidamente", key: 'd' }
+                ]
+            }
+        ];
+
+        const resultData = {
+            a: {
+                icon: '<i class="fas fa-check-circle result-icon" style="color: var(--green);"></i>',
+                title: "Você parece estar em controle!",
+                text: "Você geralmente não nota muitos sinais precoces de estresse ou mudanças emocionais. Fique atento para qualquer sinal de que as coisas possam estar piorando. Proatividade pode ajudar a prevenir sobrecarga."
+            },
+            b: {
+                icon: '<i class="fas fa-eye result-icon" style="color: var(--blue);"></i>',
+                title: "Perceba as mudanças sutis!",
+                text: "Você está começando a perceber alguns sinais, mas talvez os ignore até que se tornem mais intensos. Tente estar mais atento às pequenas mudanças para intervir mais cedo."
+            },
+            c: {
+                icon: '<i class="fas fa-exclamation-circle result-icon" style="color: var(--orange);"></i>',
+                title: "Cuidado com os sinais intermediários!",
+                text: "Você já nota alguns sinais precoces, mas eles podem estar piorando. Atuar mais rapidamente pode evitar que esses sintomas evoluam para algo mais difícil de controlar."
+            },
+            d: {
+                icon: '<i class="fas fa-bullseye result-icon" style="color: var(--red);"></i>',
+                title: "Atenção total!",
+                text: "Você está bastante consciente dos sinais precoces e age para evitar que a situação piore. Continue com esse foco e procure maneiras de cuidar de si mesmo antes que o estresse se intensifique."
+            }
+        };
+
+        const finalTip = "<strong>Dica:</strong> Quanto mais cedo você identificar os sinais precoces, mais fácil será intervir e evitar que o problema se agrave. Lembre-se de cuidar de sua saúde mental e emocional regularmente.";
+
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultScreen = document.getElementById('result-screen');
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        const progressBar = document.getElementById('progress-bar');
+        const resultIconContainer = document.getElementById('result-icon-container');
+        const resultTitle = document.getElementById('result-title');
+        const resultText = document.getElementById('result-text');
+        const finalTipContainer = document.getElementById('final-tip-container');
+
+        let currentQuestionIndex = 0;
+        let answerCounts = { a: 0, b: 0, c: 0, d: 0 };
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            answerCounts = { a: 0, b: 0, c: 0, d: 0 };
+            startScreen.style.display = 'none';
+            resultScreen.style.display = 'none';
+            quizScreen.style.display = 'block';
+            showQuestion();
+        }
+
+        function showQuestion() {
+            const currentQuestion = quizData[currentQuestionIndex];
+            questionText.textContent = currentQuestion.question;
+            optionsContainer.innerHTML = '';
+            currentQuestion.options.forEach(option => {
+                const button = document.createElement('button');
+                button.innerHTML = option.text;
+                button.classList.add('option-btn');
+                button.addEventListener('click', () => selectAnswer(option.key));
+                optionsContainer.appendChild(button);
+            });
+            updateProgressBar();
+        }
+
+        function selectAnswer(key) {
+            answerCounts[key]++;
+            currentQuestionIndex++;
+            if (currentQuestionIndex < quizData.length) {
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }
+        
+        function updateProgressBar() {
+            const progress = (currentQuestionIndex / quizData.length) * 100;
+            progressBar.style.width = progress + '%';
+        }
+
+        function showResult() {
+            quizScreen.style.display = 'none';
+            resultScreen.style.display = 'block';
+            
+            let majorityKey = 'a';
+            let maxCount = 0;
+            for (const key in answerCounts) {
+                if (answerCounts[key] > maxCount) {
+                    maxCount = answerCounts[key];
+                    majorityKey = key;
+                }
+            }
+            
+            const result = resultData[majorityKey];
+            resultIconContainer.innerHTML = result.icon;
+            resultTitle.textContent = result.title;
+            resultText.textContent = result.text;
+            finalTipContainer.innerHTML = `<p class="final-tip">${finalTip}</p>`;
+        }
+
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', () => {
+            resultScreen.style.display = 'none';
+            startScreen.style.display = 'block';
+        });
+
+    </script>
+</body>
+</html>

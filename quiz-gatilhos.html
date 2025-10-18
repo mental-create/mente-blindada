@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Identifique Seus Gatilhos de Ansiedade</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            max-width: 800px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #667eea;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #666;
+            font-size: 1.1em;
+            line-height: 1.6;
+        }
+
+        .progress-bar {
+            background: #e0e0e0;
+            height: 8px;
+            border-radius: 4px;
+            margin: 20px 0;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .question-card {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .question-card.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .question {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
+
+        .emoji {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+            display: block;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 12px;
+            padding: 15px 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .option:hover {
+            background: #f0f0f0;
+            border-color: #667eea;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+
+        .option-text {
+            flex: 1;
+            font-size: 1em;
+        }
+
+        .navigation {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+            gap: 15px;
+        }
+
+        .btn {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #e0e0e0;
+            color: #666;
+        }
+
+        .btn-secondary:hover {
+            background: #d0d0d0;
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .results {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .results-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .results-title {
+            font-size: 2em;
+            color: #667eea;
+            margin-bottom: 10px;
+        }
+
+        .results-subtitle {
+            color: #666;
+            font-size: 1.1em;
+        }
+
+        .trigger-card {
+            background: linear-gradient(135deg, #667eea15 0%, #764ba215 100%);
+            border-left: 5px solid #667eea;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .trigger-title {
+            font-size: 1.3em;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .trigger-description {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .action-plan {
+            background: white;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+
+        .action-title {
+            font-weight: 600;
+            color: #667eea;
+            margin-bottom: 10px;
+            font-size: 1.1em;
+        }
+        
+        .action-step {
+            margin-bottom: 15px;
+        }
+        
+        .step-subtitle {
+            font-weight: bold;
+            color: #333;
+        }
+
+        .step-description {
+            color: #555;
+            font-size: 0.95em;
+        }
+        
+        .step-example {
+            font-style: italic;
+            color: #764ba2;
+            font-size: 0.9em;
+            margin-top: 5px;
+        }
+
+        .general-tips {
+            background: #fff8e1;
+            border-left: 5px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-top: 30px;
+        }
+
+        .tips-title {
+            font-size: 1.3em;
+            color: #f57c00;
+            margin-bottom: 15px;
+            font-weight: 600;
+        }
+
+        .tips-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .tips-list li {
+            padding-left: 25px;
+            position: relative;
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .tips-list li:before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: #ffc107;
+            font-weight: 600;
+        }
+
+        .restart-btn {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .question {
+                font-size: 1.1em;
+            }
+
+            .navigation {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 Identifique Seus Gatilhos de Ansiedade</h1>
+            <p class="subtitle">Responda as 10 questões abaixo para descobrir seus principais gatilhos e receber um plano de ação prático e personalizado.</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress-fill" id="progressBar"></div>
+        </div>
+
+        <div id="quizContainer">
+            <div class="question-card active" data-question="1">
+                <span class="emoji">🔮</span>
+                <div class="question">Você frequentemente se preocupa com eventos futuros que podem nunca acontecer?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="futuro"><div class="option-text">Sim, constantemente. Minha mente vive no futuro.</div></div>
+                    <div class="option" data-value="3" data-trigger="futuro"><div class="option-text">Às vezes, em situações específicas.</div></div>
+                    <div class="option" data-value="0" data-trigger="futuro"><div class="option-text">Raramente ou nunca.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="2">
+                <span class="emoji">💼</span>
+                <div class="question">O ambiente de trabalho ou pressões profissionais causam ansiedade significativa em você?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="trabalho"><div class="option-text">Sim, sinto estresse constante relacionado ao trabalho.</div></div>
+                    <div class="option" data-value="3" data-trigger="trabalho"><div class="option-text">Em períodos de alta demanda ou conflitos.</div></div>
+                    <div class="option" data-value="0" data-trigger="trabalho"><div class="option-text">Não, consigo lidar bem com o trabalho.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="3">
+                <span class="emoji">💔</span>
+                <div class="question">Conflitos ou problemas em relacionamentos pessoais afetam muito seu bem-estar emocional?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="relacionamentos"><div class="option-text">Sim, problemas relacionais me deixam muito ansioso(a).</div></div>
+                    <div class="option" data-value="3" data-trigger="relacionamentos"><div class="option-text">Dependendo da situação, pode me afetar.</div></div>
+                    <div class="option" data-value="0" data-trigger="relacionamentos"><div class="option-text">Não, mantenho equilíbrio emocional nessas situações.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="4">
+                <span class="emoji">🏥</span>
+                <div class="question">Você se preocupa excessivamente com sua saúde ou a de entes queridos?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="saude"><div class="option-text">Sim, qualquer sintoma me deixa muito preocupado(a).</div></div>
+                    <div class="option" data-value="3" data-trigger="saude"><div class="option-text">Às vezes, especialmente com sintomas novos.</div></div>
+                    <div class="option" data-value="0" data-trigger="saude"><div class="option-text">Não, mantenho preocupação equilibrada com a saúde.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="5">
+                <span class="emoji">👻</span>
+                <div class="question">Experiências traumáticas do passado ainda influenciam suas reações emocionais atuais?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="traumas"><div class="option-text">Sim, frequentemente sou impactado(a) por traumas passados.</div></div>
+                    <div class="option" data-value="3" data-trigger="traumas"><div class="option-text">Em algumas situações específicas.</div></div>
+                    <div class="option" data-value="0" data-trigger="traumas"><div class="option-text">Não, consegui processar bem minhas experiências passadas.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="6">
+                <span class="emoji">💰</span>
+                <div class="question">Questões financeiras (dívidas, insegurança econômica) são fonte de ansiedade para você?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="financeiro"><div class="option-text">Sim, perco o sono com preocupações financeiras.</div></div>
+                    <div class="option" data-value="3" data-trigger="financeiro"><div class="option-text">Às vezes, dependendo da situação econômica.</div></div>
+                    <div class="option" data-value="0" data-trigger="financeiro"><div class="option-text">Não, me sinto seguro(a) financeiramente.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="7">
+                <span class="emoji">📦</span>
+                <div class="question">Mudanças significativas na vida (mudança, novo emprego, etc.) causam ansiedade intensa?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="mudancas"><div class="option-text">Sim, mudanças me deixam muito ansioso(a).</div></div>
+                    <div class="option" data-value="3" data-trigger="mudancas"><div class="option-text">Depende da magnitude da mudança.</div></div>
+                    <div class="option" data-value="0" data-trigger="mudancas"><div class="option-text">Não, me adapto bem a mudanças.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="8">
+                <span class="emoji">🔍</span>
+                <div class="question">Você se considera perfeccionista e tem medo de cometer erros?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="perfeccionismo"><div class="option-text">Sim, sou extremamente autocrítico(a) e exigente.</div></div>
+                    <div class="option" data-value="3" data-trigger="perfeccionismo"><div class="option-text">Em algumas áreas da minha vida.</div></div>
+                    <div class="option" data-value="0" data-trigger="perfeccionismo"><div class="option-text">Não, aceito bem minhas imperfeições.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="9">
+                <span class="emoji">⚡</span>
+                <div class="question">Você vivenciou recentemente eventos traumáticos significativos (acidentes, violência, perdas)?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="eventos"><div class="option-text">Sim, e isso me afeta profundamente.</div></div>
+                    <div class="option" data-value="3" data-trigger="eventos"><div class="option-text">Sim, mas estou processando gradualmente.</div></div>
+                    <div class="option" data-value="0" data-trigger="eventos"><div class="option-text">Não recentemente.</div></div>
+                </div>
+            </div>
+            <div class="question-card" data-question="10">
+                <span class="emoji">🧬</span>
+                <div class="question">Você tem histórico familiar de ansiedade ou condições médicas que afetam seu estado emocional?</div>
+                <div class="options">
+                    <div class="option" data-value="5" data-trigger="biologico"><div class="option-text">Sim, tenho predisposição genética ou condições médicas.</div></div>
+                    <div class="option" data-value="3" data-trigger="biologico"><div class="option-text">Tenho alguns fatores biológicos que podem influenciar.</div></div>
+                    <div class="option" data-value="0" data-trigger="biologico"><div class="option-text">Não que eu saiba.</div></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="navigation">
+            <button class="btn btn-secondary" id="prevBtn" onclick="previousQuestion()" style="display: none;">Anterior</button>
+            <button class="btn btn-primary" id="nextBtn" onclick="nextQuestion()">Próxima</button>
+        </div>
+
+        <div class="results" id="results"></div>
+    </div>
+
+    <script>
+        let currentQuestion = 1;
+        const totalQuestions = 10;
+        const scores = { futuro: 0, trabalho: 0, relacionamentos: 0, saude: 0, traumas: 0, financeiro: 0, mudancas: 0, perfeccionismo: 0, eventos: 0, biologico: 0 };
+
+        const triggerInfo = {
+            futuro: {
+                emoji: "🔮", title: "Preocupações com o Futuro", description: "Sua mente tende a viajar para o futuro, criando cenários 'e se' que geram ansiedade sobre coisas que talvez nunca aconteçam.",
+                plan: [
+                    { title: "Ação Imediata: Aterrissagem Sensorial", description: "Quando a mente acelerar, pause e use a técnica 5-4-3-2-1: Nomeie 5 coisas que você vê, 4 que pode tocar, 3 que ouve, 2 que cheira e 1 que pode provar. Isso força seu cérebro a voltar para o presente." },
+                    { title: "Exercício de Reforço: 'Hora da Preocupação'", description: "Agende 15 minutos do seu dia para se preocupar intencionalmente. Fora desse horário, se um pensamento ansioso surgir, anote-o e diga a si mesmo: 'Vou pensar nisso na minha hora marcada'.", example: "Ex: Das 17:30 às 17:45, vou pensar em todos os 'e se'. Depois, encerro o assunto." },
+                    { title: "Desafio de Exposição: Aceitando a Incerteza", description: "Comece a praticar a incerteza em situações de baixo risco. A cada semana, suba um degrau.", example: "Semana 1: Peça uma recomendação de prato no restaurante sem ver o cardápio. → Semana 2: Vá a um evento sem planejar cada detalhe do percurso. → Semana 3: Delegue uma tarefa pequena sem supervisionar." }
+                ]
+            },
+            trabalho: {
+                emoji: "💼", title: "Estresse no Trabalho", description: "O ambiente profissional é uma fonte significativa de ansiedade, seja por prazos, sobrecarga, conflitos ou medo de falhar.",
+                plan: [
+                    { title: "Ação Imediata: Pausa Estratégica", description: "Use a técnica Pomodoro: trabalhe focado por 25 minutos e, obrigatoriamente, faça uma pausa de 5 minutos longe da tela. Isso combate a exaustão e a sensação de afogamento em tarefas." },
+                    { title: "Exercício de Reforço: 'O Suficiente por Hoje'", description: "No final do dia, liste 3 coisas que você CONCLUIU (em vez de focar no que faltou). Desligue as notificações de trabalho no celular após o expediente. Crie uma barreira clara entre trabalho e vida pessoal." },
+                    { title: "Desafio de Exposição: Praticando Limites", description: "Aprenda a dizer 'não' de forma construtiva. O objetivo é proteger seu tempo e energia.", example: "Semana 1: Quando pedirem algo, responda 'Preciso checar minha agenda e te retorno'. → Semana 2: Diga 'Não consigo fazer isso agora, mas posso na terça-feira'. → Semana 3: Ofereça uma alternativa: 'Não consigo assumir o projeto X, mas posso ajudar com a tarefa Y'." }
+                ]
+            },
+            relacionamentos: {
+                emoji: "💔", title: "Problemas em Relacionamentos", description: "Conflitos, medo de abandono ou dificuldades na comunicação com pessoas importantes afetam profundamente seu equilíbrio emocional.",
+                plan: [
+                    { title: "Ação Imediata: Respire Antes de Reagir", description: "Quando sentir uma emoção forte numa discussão, diga 'Preciso de um minuto' e respire fundo 3 vezes. Isso impede reações impulsivas e te dá tempo para pensar com mais clareza." },
+                    { title: "Exercício de Reforço: Comunicação 'Eu Sinto'", description: "Troque frases acusatórias ('Você sempre faz isso!') por frases que expressam seu sentimento ('Eu sinto X quando Y acontece'). Isso foca na sua percepção e diminui a defensividade do outro." },
+                    { title: "Desafio de Exposição: Vulnerabilidade Gradual", description: "Pratique se abrir de forma segura e controlada.", example: "Semana 1: Compartilhe uma opinião de baixo risco com um amigo. → Semana 2: Expresse uma necessidade pequena para seu parceiro(a). → Semana 3: Inicie uma conversa sobre um tópico sensível que você vem evitando." }
+                ]
+            },
+            saude: {
+                emoji: "🏥", title: "Preocupações com Saúde", description: "Você tem uma forte tendência a se preocupar com doenças, interpretando sintomas normais do corpo como sinais de algo grave.",
+                plan: [
+                    { title: "Ação Imediata: 'Check-up' da Realidade", description: "Quando sentir um sintoma e a ansiedade surgir, pergunte-se: 'Existem outras 3 explicações menos catastróficas para isso?'", example: "Ex: Dor de cabeça pode ser estresse, desidratação, má postura... não apenas um tumor." },
+                    { title: "Exercício de Reforço: 'Dieta de Informação'", description: "Limite a pesquisa de sintomas online a ZERO. Se a preocupação persistir por mais de 48h, anote o sintoma objetivamente e, se necessário, marque uma consulta com um médico de confiança." },
+                    { title: "Desafio de Exposição: Tolerando Sensações", description: "Perceba que sensações corporais são normais. Pratique atividades que geram sensações físicas para aprender a não temê-las.", example: "Semana 1: Suba escadas até sentir o coração acelerar e apenas observe a sensação. → Semana 2: Gire numa cadeira para sentir tontura e veja que ela passa. → Semana 3: Faça exercícios de respiração que causem um leve formigamento." }
+                ]
+            },
+            traumas: {
+                emoji: "👻", title: "Traumas Passados", description: "Experiências difíceis do passado continuam ativas, influenciando suas reações e emoções no presente. **Atenção: este gatilho beneficia-se enormemente de ajuda profissional.**",
+                plan: [
+                    { title: "Ação Imediata: Técnica de 'Aterramento'", description: "Quando uma memória ou gatilho surgir, segure um objeto (uma chave, uma pedra) e descreva-o em detalhes: sua textura, temperatura, peso. Isso ancora você firmemente no presente e na segurança do agora." },
+                    { title: "Exercício de Reforço: Criando um 'Santuário Mental'", description: "Visualize em detalhes um lugar real ou imaginário onde você se sente 100% seguro e calmo. Pratique 'visitar' este lugar mentalmente por 5 minutos todos os dias para fortalecê-lo como um recurso interno." },
+                    { title: "Desafio de Exposição: **(Com Cautela)**", description: "O processamento de trauma deve ser feito com cuidado. A ajuda de um psicólogo (especialista em EMDR ou TCC) é fundamental.", example: "Passo 1: Escreva sobre o trauma por 15 minutos, mas focando nos fatos, como um relatório. Não se force a reviver as emoções. → Passo 2: Apenas com um terapeuta, comece a processar o evento em um ambiente seguro." }
+                ]
+            },
+            financeiro: {
+                emoji: "💰", title: "Insegurança Financeira", description: "A preocupação com dinheiro, dívidas e a falta de estabilidade econômica é uma fonte constante de estresse e ansiedade.",
+                plan: [
+                    { title: "Ação Imediata: Foco no Controlável", description: "A ansiedade financeira vem do futuro incerto. Pergunte-se: 'Qual a MENOR ação que posso tomar HOJE para melhorar minha situação?' Pode ser tão simples quanto anotar um gasto ou cancelar uma assinatura que não usa." },
+                    { title: "Exercício de Reforço: 'Raio-X' Financeiro", description: "Encare os números de frente, mas de forma organizada. Reserve 30 minutos na semana para olhar extratos e faturas. Ter clareza, mesmo que os números não sejam ideais, é menos assustador do que a incerteza." },
+                    { title: "Desafio de Exposição: Automatizando a Segurança", description: "A automação reduz a carga mental da preocupação diária.", example: "Semana 1: Crie uma transferência automática de R$ 20 por mês para uma poupança. → Semana 2: Coloque uma conta pequena em débito automático. → Semana 3: Comece a usar um app de controle financeiro para registrar os gastos." }
+                ]
+            },
+            mudancas: {
+                emoji: "📦", title: "Mudanças Significativas", description: "Transições na vida, mesmo as positivas como um novo emprego ou casamento, geram uma intensa ansiedade pela perda do que é familiar e previsível.",
+                plan: [
+                    { title: "Ação Imediata: Encontre uma 'Âncora'", description: "Durante uma grande mudança, mantenha uma pequena rotina diária exatamente igual. Pode ser tomar o mesmo café da manhã, ouvir o mesmo podcast ou fazer 10 minutos de alongamento. Isso cria uma sensação de estabilidade em meio ao caos." },
+                    { title: "Exercício de Reforço: Mapeando a Mudança", description: "Em uma folha, desenhe duas colunas: 'O que eu perco com essa mudança?' e 'O que eu ganho com essa mudança?'. Reconhecer as perdas é válido, mas focar nos ganhos ajuda a construir uma narrativa mais positiva." },
+                    { title: "Desafio de Exposição: 'Micro-mudanças' Voluntárias", description: "Treine seu cérebro para se adaptar melhor fazendo pequenas mudanças propositais na sua rotina.", example: "Semana 1: Faça um caminho diferente para o trabalho. → Semana 2: Experimente um gênero de música que você nunca ouve. → Semana 3: Mude a ordem das suas tarefas matinais." }
+                ]
+            },
+            perfeccionismo: {
+                emoji: "🔍", title: "Perfeccionismo", description: "A necessidade de fazer tudo de forma impecável e o medo paralisante de cometer erros geram procrastinação, autocrítica e ansiedade constante.",
+                plan: [
+                    { title: "Ação Imediata: A Regra do 'Bom o Suficiente'", description: "Para uma tarefa que está te paralisando, defina um cronômetro (ex: 45 minutos) e se comprometa a entregá-la ou finalizá-la quando o tempo acabar, não importa o quão 'imperfeita' esteja. O objetivo é 'concluir', não 'aperfeiçoar'." },
+                    { title: "Exercício de Reforço: Crie um 'Cemitério de Erros'", description: "Anote todos os dias um pequeno erro que você cometeu e qual foi a consequência real (na maioria das vezes, nenhuma). Isso prova para o seu cérebro que errar não é o fim do mundo." },
+                    { title: "Desafio de Exposição: Imperfeição Proposital", description: "Realize pequenas e seguras 'falhas' de propósito para diminuir o medo.", example: "Semana 1: Envie um e-mail para um amigo com um erro de digitação proposital. → Semana 2: Entregue um trabalho 10 minutos antes do prazo, resistindo à vontade de fazer uma última revisão. → Semana 3: Dê uma opinião em uma reunião mesmo que não tenha 100% de certeza sobre ela." }
+                ]
+            },
+            eventos: {
+                emoji: "⚡", title: "Eventos Traumáticos Recentes", description: "Você vivenciou recentemente situações de alto impacto que abalaram sua sensação de segurança. **Priorize o autocuidado e considere fortemente o apoio profissional.**",
+                plan: [
+                    { title: "Ação Imediata: Foco na Segurança Básica", description: "Sua prioridade número um é restabelecer a sensação de segurança. Foque no básico: mantenha uma rotina de sono, alimente-se em horários regulares e evite o isolamento. O básico é fundamental agora." },
+                    { title: "Exercício de Reforço: Diário de Regulação", description: "Anote diariamente uma pequena coisa que fez você se sentir um pouco melhor ou mais calmo. Pode ser um chá quente, uma música, um abraço. Isso ajuda a reconhecer que você ainda tem capacidade de se acalmar." },
+                    { title: "Desafio de Exposição: **(Apenas com Ajuda Profissional)**", description: "Não se force a 'superar' rapidamente. A melhor ação agora é buscar um psicólogo especializado em trauma. O plano é este:", example: "Passo 1: Pesquisar por psicólogos com especialização em TCC ou EMDR. → Passo 2: Agendar uma primeira conversa. → Passo 3: Comprometer-se com o processo terapêutico, que é o ambiente mais seguro para processar o que aconteceu." }
+                ]
+            },
+            biologico: {
+                emoji: "🧬", title: "Fatores Biológicos", description: "Sua ansiedade pode ter um componente físico ou genético significativo, relacionado a hormônios, histórico familiar ou outras condições médicas.",
+                plan: [
+                    { title: "Ação Imediata: Movimento Consciente", description: "Quando sentir a ansiedade crescendo, faça uma atividade física leve por 10 minutos. Uma caminhada rápida, polichinelos ou dançar uma música. Isso ajuda a queimar o excesso de adrenalina no corpo." },
+                    { title: "Exercício de Reforço: 'Checklist' do Corpo", description: "Revise seus hábitos básicos de saúde. Você está dormindo o suficiente? Está se hidratando? Consumindo muita cafeína, açúcar ou álcool? Pequenos ajustes nesses pilares podem ter um impacto gigante na sua química cerebral." },
+                    { title: "Desafio de Exposição: Buscando Aliados de Saúde", description: "Aceitar o componente biológico significa usar todas as ferramentas disponíveis para cuidar do seu corpo.", example: "Passo 1: Marque um check-up completo com um clínico geral para investigar questões hormonais (ex: tireoide). → Passo 2: Converse abertamente com um psiquiatra sobre as opções de tratamento. → Passo 3: Incorpore uma prática regular (yoga, corrida, meditação) na sua semana." }
+                ]
+            }
+        };
+
+
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function() {
+                const questionCard = this.closest('.question-card');
+                questionCard.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+                this.classList.add('selected');
+                
+                const trigger = this.dataset.trigger;
+                const value = parseInt(this.dataset.value);
+                scores[trigger] = value;
+            });
+        });
+
+        function updateProgressBar() {
+            const progress = ((currentQuestion - 1) / totalQuestions) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function nextQuestion() {
+            const currentCard = document.querySelector(`.question-card[data-question="${currentQuestion}"]`);
+            const selected = currentCard.querySelector('.option.selected');
+            
+            if (!selected) {
+                alert('Por favor, selecione uma opção antes de continuar.');
+                return;
+            }
+
+            if (currentQuestion < totalQuestions) {
+                currentCard.classList.remove('active');
+                currentQuestion++;
+                document.querySelector(`.question-card[data-question="${currentQuestion}"]`).classList.add('active');
+                updateProgressBar();
+                document.getElementById('prevBtn').style.display = 'block';
+                if (currentQuestion === totalQuestions) {
+                    document.getElementById('nextBtn').textContent = 'Ver Resultados';
+                }
+            } else {
+                showResults();
+            }
+        }
+
+        function previousQuestion() {
+            if (currentQuestion > 1) {
+                document.querySelector(`.question-card[data-question="${currentQuestion}"]`).classList.remove('active');
+                currentQuestion--;
+                document.querySelector(`.question-card[data-question="${currentQuestion}"]`).classList.add('active');
+                updateProgressBar();
+                document.getElementById('nextBtn').textContent = 'Próxima';
+                if (currentQuestion === 1) {
+                    document.getElementById('prevBtn').style.display = 'none';
+                }
+            }
+        }
+
+        function showResults() {
+            document.getElementById('quizContainer').style.display = 'none';
+            document.querySelector('.navigation').style.display = 'none';
+            document.querySelector('.progress-bar').style.display = 'none';
+            
+            const sortedTriggers = Object.entries(scores)
+                .sort((a, b) => b[1] - a[1])
+                .filter(([_, score]) => score > 0)
+                .slice(0, 3);
+
+            let resultsHTML = `
+                <div class="results-header">
+                    <div class="results-title">📊 Seus Principais Gatilhos de Ansiedade</div>
+                    <div class="results-subtitle">Identificamos os 3 gatilhos mais relevantes para você. Veja abaixo seu plano de ação prático e personalizado.</div>
+                </div>
+            `;
+
+            if (sortedTriggers.length === 0) {
+                resultsHTML += `
+                    <div class="trigger-card">
+                        <div class="trigger-title">🎉 Ótimas notícias!</div>
+                        <div class="trigger-description">
+                            Com base em suas respostas, você parece estar gerenciando bem os principais gatilhos de ansiedade. 
+                            Continue mantendo hábitos saudáveis e esteja atento a possíveis mudanças no futuro.
+                        </div>
+                    </div>
+                `;
+            } else {
+                sortedTriggers.forEach(([trigger, score]) => {
+                    const info = triggerInfo[trigger];
+                    resultsHTML += `
+                        <div class="trigger-card">
+                            <div class="trigger-title">${info.emoji} ${info.title}</div>
+                            <div class="trigger-description">${info.description}</div>
+                            
+                            <div class="action-plan">
+                                <div class="action-title">🎯 Seu Plano de Ação Personalizado</div>
+                                ${info.plan.map((step, index) => `
+                                    <div class="action-step">
+                                        <div class="step-subtitle">${index + 1}. ${step.title}</div>
+                                        <div class="step-description">${step.description}</div>
+                                        ${step.example ? `<div class="step-example">${step.example}</div>` : ''}
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    `;
+                });
+            }
+
+            resultsHTML += `
+                <div class="general-tips">
+                    <div class="tips-title">💡 Dicas de Ouro para Todos os Gatilhos</div>
+                    <ul class="tips-list">
+                        <li><strong>Comece pequeno, vença sempre:</strong> Escolha a ação mais fácil do seu plano e comece por ela. O objetivo é criar um histórico de vitórias.</li>
+                        <li><strong>Consistência supera intensidade:</strong> É melhor praticar por 5 minutos todos os dias do que por 1 hora uma vez por semana.</li>
+                        <li><strong>Ansiedade não é sua inimiga:</strong> O objetivo não é nunca sentir ansiedade, mas aprender a continuar agindo mesmo com ela presente. Ela é apenas uma emoção, ela vai passar.</li>
+                        <li><strong>Seja seu próprio cientista:</strong> Anote o que funciona e o que não funciona para você. Seu plano é um guia, não uma regra rígida. Adapte-o!</li>
+                        <li><strong>Recaídas são parte do processo:</strong> Se tiver um dia ruim, não desista. Apenas volte ao plano no dia seguinte. O progresso não é uma linha reta.</li>
+                        <li><strong>Procure ajuda:</strong> Este quiz é uma ferramenta de autoconhecimento, não um substituto para terapia. Um psicólogo pode te ajudar a acelerar e aprofundar seu progresso.</li>
+                    </ul>
+                </div>
+
+                <div class="restart-btn">
+                    <button class="btn btn-primary" onclick="restartQuiz()">🔄 Refazer Quiz</button>
+                </div>
+            `;
+
+            document.getElementById('results').innerHTML = resultsHTML;
+            document.getElementById('results').classList.add('active');
+            window.scrollTo(0, 0);
+        }
+
+        function restartQuiz() {
+            currentQuestion = 1;
+            Object.keys(scores).forEach(key => scores[key] = 0);
+            document.querySelectorAll('.option').forEach(opt => opt.classList.remove('selected'));
+            document.querySelectorAll('.question-card').forEach(card => card.classList.remove('active'));
+            document.querySelector('.question-card[data-question="1"]').classList.add('active');
+            document.getElementById('quizContainer').style.display = 'block';
+            document.querySelector('.navigation').style.display = 'flex';
+            document.querySelector('.progress-bar').style.display = 'block';
+            document.getElementById('results').classList.remove('active');
+            document.getElementById('prevBtn').style.display = 'none';
+            document.getElementById('nextBtn').textContent = 'Próxima';
+            updateProgressBar();
+            window.scrollTo(0, 0);
+        }
+
+        updateProgressBar();
+    </script>
+</body>
+</html>
