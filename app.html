@@ -114,6 +114,7 @@
         let currentUser = null;
         let modulesMap = new Map();
         let subModulesMap = new Map();
+        let contentsMap = new Map(); // Cache para os conteúdos
         let profilesMap = new Map();
         let currentAudio = null;
         
@@ -125,43 +126,36 @@
             }
             currentUser = session.user;
 
-            const [profileRes, authorizedUserRes, allProfilesRes] = await Promise.all([
+            // Carrega todos os dados iniciais em paralelo
+            const [profileRes, authorizedUserRes, allProfilesRes, contentsRes] = await Promise.all([
                 supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
-                supabase.from('authorized_users').select('purchased_products').eq('email', currentUser.email).single(),
-                supabase.from('profiles').select('id, name, email, avatar_url')
+                supabase.from('authorized_users').select('purchased_products').eq('user_id', currentUser.id).single(),
+                supabase.from('profiles').select('id, name, email, avatar_url'),
+                supabase.from('contents').select('*').eq('active', true) // Carrega todos os conteúdos ativos
             ]);
 
-            if (profileRes.error || authorizedUserRes.error) {
-                console.error("Erro ao procurar dados do utilizador:", profileRes.error || authorizedUserRes.error);
+            // Tratamento de erro
+            if (profileRes.error || (authorizedUserRes.error && authorizedUserRes.error.code !== 'PGRST116')) {
+                console.error("Erro ao carregar dados do utilizador:", profileRes.error || authorizedUserRes.error);
                 document.body.innerHTML = "Erro ao carregar os seus dados. Por favor, tente novamente.";
                 return;
             }
 
-            currentUser.profile = profileRes.data;
-            currentUser.accessLevels = authorizedUserRes.data ? authorizedUserRes.data.purchased_products : [];
+            // Popula os dados do utilizador
+            currentUser.profile = profileRes.data || {};
+            currentUser.purchasedProducts = authorizedUserRes.data ? authorizedUserRes.data.purchased_products : [];
             
-            if(allProfilesRes.data){
-                allProfilesRes.data.forEach(p => {
-                    profilesMap.set(p.id, {
-                        name: p.name || p.email.split('@')[0],
-                        avatar_url: p.avatar_url 
-                    });
-                });
-            }
+            // Popula o cache de perfis e conteúdos
+            if(allProfilesRes.data) allProfilesRes.data.forEach(p => profilesMap.set(p.id, { name: p.name || p.email.split('@')[0], avatar_url: p.avatar_url }));
+            if(contentsRes.data) contentsRes.data.forEach(c => contentsMap.set(c.id, c));
 
+            // Inicia a UI
             updateTime();
             updateDate();
             updateGreeting();
-
-            // --- NOVIDADE: Gestão do Histórico ---
-            // Define o estado inicial como 'home'
             history.replaceState({ view: 'home' }, '', '#home');
-            // Carrega a 'home' sem adicionar um novo estado de histórico
             loadHomeModules(false); 
-            // Adiciona o listener para o botão "voltar" nativo
             window.addEventListener('popstate', handlePopState);
-            // -------------------------------------
-
             setInterval(updateTime, 60000);
         }
 
@@ -174,79 +168,39 @@
             document.getElementById('greeting').innerHTML = `${greeting}, ${name}!`;
         }
         
-        // --- NOVIDADE: Função para gerir o clique no "voltar" nativo ---
         function handlePopState(event) {
-            if (currentAudio) { currentAudio.pause(); currentAudio = null; } // Pára qualquer áudio
-
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
             if (event.state) {
                 const state = event.state;
-                // Carrega a view correspondente ao estado, sem adicionar novo histórico (push = false)
                 switch(state.view) {
-                    case 'home':
-                        setActiveNav('home');
-                        loadHomeModules(false);
-                        break;
-                    case 'feed':
-                        setActiveNav('feed');
-                        loadFeed(false);
-                        break;
-                    case 'community':
-                        setActiveNav('community');
-                        loadCommunity(false);
-                        break;
-                    case 'profile':
-                        setActiveNav('profile');
-                        loadProfile(false);
-                        break;
-                    case 'subModule':
-                        setActiveNav('home'); // A 'home' continua a ser o item ativo na nav-bar
-                        loadSubModules(state.key, false);
-                        break;
-                    case 'contentList':
-                        setActiveNav('home');
-                        loadModuleContents(state.id, false);
-                        break;
-                    case 'content':
-                        setActiveNav('home');
-                        openContent(state.content, false);
-                        break;
-                    default:
-                        setActiveNav('home');
-                        loadHomeModules(false);
+                    case 'home': setActiveNav('home'); loadHomeModules(false); break;
+                    case 'feed': setActiveNav('feed'); loadFeed(false); break;
+                    case 'community': setActiveNav('community'); loadCommunity(false); break;
+                    case 'profile': setActiveNav('profile'); loadProfile(false); break;
+                    case 'subModule': setActiveNav('home'); loadSubModules(state.key, false); break;
+                    case 'contentList': setActiveNav('home'); loadModuleContents(state.id, false); break;
+                    case 'content': setActiveNav('home'); openContent(state.id, false); break;
+                    default: setActiveNav('home'); loadHomeModules(false);
                 }
             } else {
-                // Fallback se o estado for nulo
                 setActiveNav('home');
                 loadHomeModules(false);
             }
         }
 
-        // --- NOVIDADE: Helper para atualizar a UI da navegação ---
         function setActiveNav(view) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.nav === view));
-            
-            // Define quais 'views' mostram o cabeçalho principal
             const isHomeScreen = ['home', 'subModule', 'contentList', 'content'].includes(view);
             document.getElementById('mainHeader').style.display = isHomeScreen ? 'block' : 'none';
             document.getElementById('titleBar').style.display = isHomeScreen ? 'block' : 'none';
         }
 
-        // --- ALTERADO: Gestão de clique na nav-bar ---
         function handleNavClick(view) {
             if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-
-            // Verifica o estado atual para evitar navegação duplicada
             const currentState = history.state || { view: 'home' };
-            
-            // Caso especial: se estiver num submódulo e clicar em 'home', deve navegar
-            if (view === 'home' && (currentState.view === 'subModule' || currentState.view === 'contentList' || currentState.view === 'content')) {
-                 // Permite a navegação
-            } else if (currentState.view === view) {
-                return; // Já está nesta view, não faz nada
-            }
-            
+            if (view === 'home' && ['subModule', 'contentList', 'content'].includes(currentState.view)) {} 
+            else if (currentState.view === view) return;
             switch(view) {
-                // As funções de load agora gerem o histórico (push=true por defeito)
                 case 'home': loadHomeModules(); break;
                 case 'feed': loadFeed(); break;
                 case 'community': loadCommunity(); break;
@@ -254,13 +208,9 @@
             }
         }
 
-        // --- ALTERADO: Adicionado 'push' e 'setActiveNav' ---
         async function loadHomeModules(push = true) {
-            const currentState = history.state || {};
-            if (push && currentState.view !== 'home') {
-                history.pushState({ view: 'home' }, '', '#home');
-            }
-            setActiveNav('home'); // Atualiza a UI
+            if (push && (history.state?.view !== 'home')) history.pushState({ view: 'home' }, '', '#home');
+            setActiveNav('home');
 
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading active">A carregar módulos...</div>';
@@ -268,26 +218,24 @@
             const { data: modules, error } = await supabase.from('modules').select('*').order('order_position');
             if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar módulos. <br><small>${error.message}</small></div>`;
             
+            modulesMap.clear();
             modules.forEach(m => modulesMap.set(m.key, m));
             
             mainContent.innerHTML = '';
             modules.forEach(mod => {
-                const hasAccess = currentUser.accessLevels.includes(mod.access_level);
+                const hasAccess = currentUser.purchasedProducts.includes(mod.product_id);
                 const card = document.createElement('div');
                 card.className = `card ${!hasAccess ? 'locked' : ''}`;
                 card.innerHTML = `<div class="card-image" style="background-image: url('${mod.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}')"></div><span class="card-title">${mod.name}</span>`;
-                if (hasAccess) card.onclick = () => loadSubModules(mod.key); // push=true por defeito
-                else card.onclick = () => alert('Você precisa de adquirir um plano superior para aceder a este módulo.');
+                if (hasAccess) card.onclick = () => loadSubModules(mod.key);
+                else card.onclick = () => alert('Você precisa de adquirir este módulo para o poder aceder.');
                 mainContent.appendChild(card);
             });
         }
 
-        // --- ALTERADO: Adicionado 'push', 'history.back()' e botão duplicado ---
         async function loadSubModules(moduleKey, push = true) {
-            if (push) {
-                history.pushState({ view: 'subModule', key: moduleKey }, '', `#submodule/${moduleKey}`);
-            }
-            setActiveNav('subModule'); // Atualiza UI (mostra cabeçalho, mas nav 'home' fica ativa)
+            if (push) history.pushState({ view: 'subModule', key: moduleKey }, '', `#submodule/${moduleKey}`);
+            setActiveNav('subModule');
 
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading active">A carregar...</div>';
@@ -296,9 +244,7 @@
             if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar. <br><small>${error.message}</small></div>`;
 
             const parentModule = modulesMap.get(moduleKey);
-            // Botão voltar agora usa history.back()
             const backButtonHtml = `<button class="back-button" onclick="history.back()">← Voltar aos Módulos</button>`;
-            
             mainContent.innerHTML = `${backButtonHtml}<h2 class="module-title">${parentModule.name}</h2>`;
 
             if (subModules.length === 0) {
@@ -312,26 +258,25 @@
                     card.onclick = () => loadModuleContents(sm.id);
                     mainContent.appendChild(card);
                 });
-                // Adiciona o botão voltar no final
                 mainContent.insertAdjacentHTML('beforeend', backButtonHtml);
             }
         }
 
-        // --- ALTERADO: Adicionado 'push', 'history.back()' e botão duplicado ---
+        // --- FUNÇÃO ATUALIZADA COM LÓGICA DE BLOQUEIO DE CONTEÚDO ---
         async function loadModuleContents(subModuleId, push = true) {
             const subModule = subModulesMap.get(subModuleId);
             if (!subModule) return mainContent.innerHTML = '<div class="empty-state">Sub-módulo não encontrado.</div>';
 
-            if (push) {
-                history.pushState({ view: 'contentList', id: subModuleId }, '', `#contentlist/${subModuleId}`);
-            }
+            if (push) history.pushState({ view: 'contentList', id: subModuleId }, '', `#contentlist/${subModuleId}`);
             setActiveNav('contentList');
 
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading active">A carregar conteúdos...</div>';
             
-            const { data: contents, error } = await supabase.from('contents').select('*').eq('sub_module_id', subModuleId).eq('active', true).order('order_position');
-            if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar os conteúdos. <br><small>${error.message}</small></div>`;
+            // Filtra os conteúdos do cache em vez de ir à BD
+            const contents = Array.from(contentsMap.values())
+                .filter(c => c.sub_module_id === subModuleId)
+                .sort((a, b) => a.order_position - b.order_position);
             
             const backButtonHtml = `<button class="back-button" onclick="history.back()">← Voltar</button>`;
             mainContent.innerHTML = `${backButtonHtml}<h2 class="module-title">${subModule.name}</h2>`;
@@ -340,73 +285,57 @@
                 mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível ainda.</div>';
             } else {
                 contents.forEach(content => {
+                    // VERIFICAÇÃO DE ACESSO AO CONTEÚDO
+                    let hasAccess = true;
+                    if (content.product_id) { // Se o conteúdo tem um produto específico
+                        hasAccess = currentUser.purchasedProducts.includes(content.product_id);
+                    }
+
                     const card = document.createElement('div');
-                    card.className = 'card';
+                    card.className = `card ${!hasAccess ? 'locked' : ''}`;
                     card.innerHTML = `<div class="card-image" style="background-image: url('${content.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${content.title}</span>`;
-                    card.onclick = () => openContent(content);
+                    
+                    if(hasAccess) {
+                        card.onclick = () => openContent(content.id);
+                    } else {
+                        card.onclick = () => alert('Você precisa de adquirir este conteúdo para o poder aceder.');
+                    }
                     mainContent.appendChild(card);
                 });
-                // Adiciona o botão voltar no final
                 mainContent.insertAdjacentHTML('beforeend', backButtonHtml);
             }
         }
 
-        // --- ALTERADO: Adicionado 'push' ---
-        function openContent(content, push = true) {
-            if (push) {
-                // Guarda o objeto 'content' inteiro no estado para não ter que o ir buscar à BD
-                history.pushState({ view: 'content', content: content }, '', `#content/${content.id}`);
-            }
+        function openContent(contentId, push = true) {
+            const content = contentsMap.get(contentId);
+            if (!content) return;
+            if (push) history.pushState({ view: 'content', id: contentId }, '', `#content/${contentId}`);
             setActiveNav('content');
-
             if (content.content_type === 'audio') showAudioPlayer(content);
             else showGenericContent(content);
         }
         
-        // --- ALTERADO: 'history.back()' e botão duplicado ---
         function showGenericContent(content) {
             const mainContent = document.getElementById('mainContent');
             const backButtonHtml = `<button class="back-button" onclick="history.back()">← Voltar</button>`;
-            
             let contentHtml = '';
             if (content.content_type === 'iframe' && content.content_url) {
                 contentHtml = `<div class="iframe-container"><iframe src="${content.content_url}" style="width: 100%; height: 100%; border: none; border-radius: 10px;" frameborder="0" allowfullscreen></iframe></div>`;
             } else if (content.content_type === 'html') {
                 contentHtml = `<div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px;">${content.content_html || '<p>Conteúdo não disponível</p>'}</div>`;
             }
-
             mainContent.innerHTML = `${backButtonHtml}<h2 class="module-title">${content.title}</h2>${contentHtml}${backButtonHtml}`;
         }
 
-        // --- ALTERADO: 'goBackFromPlayer()' e botão duplicado ---
         function showAudioPlayer(content) {
             const mainContent = document.getElementById('mainContent');
-            // O botão chama goBackFromPlayer para garantir que o áudio pára
             const backButtonHtml = `<button class="back-button" onclick="goBackFromPlayer()">← Voltar</button>`;
-
-            mainContent.innerHTML = `
-                ${backButtonHtml}
-                <div class="audio-player-view">
-                    <div class="player-art"><img src="${content.image_url || 'https://placehold.co/220x220/667eea/ffffff?text=Audio'}" class="player-art-image"></div>
-                    <div class="player-info"><h2 class="player-title">${content.title}</h2></div>
-                    <div class="player-progress-container">
-                        <div class="progress-time"><span id="currentTime">0:00</span><span id="totalDuration">0:00</span></div>
-                        <input type="range" id="progressBar" class="progress-bar" value="0" step="1">
-                    </div>
-                    <div class="player-controls">
-                        <button class="control-btn" id="rewindBtn">⏮️</button>
-                        <button class="control-btn play-pause-btn" id="playPauseBtn">▶️</button>
-                        <button class="control-btn" id="forwardBtn">⏭️</button>
-                    </div>
-                </div>
-                ${backButtonHtml}`; // Botão duplicado
-
+            mainContent.innerHTML = `${backButtonHtml}<div class="audio-player-view"><div class="player-art"><img src="${content.image_url || 'https://placehold.co/220x220/667eea/ffffff?text=Audio'}" class="player-art-image"></div><div class="player-info"><h2 class="player-title">${content.title}</h2></div><div class="player-progress-container"><div class="progress-time"><span id="currentTime">0:00</span><span id="totalDuration">0:00</span></div><input type="range" id="progressBar" class="progress-bar" value="0" step="1"></div><div class="player-controls"><button class="control-btn" id="rewindBtn">⏮️</button><button class="control-btn play-pause-btn" id="playPauseBtn">▶️</button><button class="control-btn" id="forwardBtn">⏭️</button></div></div>${backButtonHtml}`;
             const audio = new Audio(content.content_url);
             currentAudio = audio;
             const playPauseBtn = document.getElementById('playPauseBtn');
             const progressBar = document.getElementById('progressBar');
             const formatTime = (s) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-
             audio.onloadedmetadata = () => { progressBar.max = audio.duration; document.getElementById('totalDuration').textContent = formatTime(audio.duration); };
             audio.ontimeupdate = () => { progressBar.value = audio.currentTime; document.getElementById('currentTime').textContent = formatTime(audio.currentTime); };
             audio.onended = () => playPauseBtn.innerHTML = '▶️';
@@ -416,78 +345,33 @@
             document.getElementById('forwardBtn').onclick = () => audio.currentTime += 10;
         }
 
-        // --- ALTERADO: Função simplificada para parar o áudio e voltar ---
         function goBackFromPlayer() {
-            if (currentAudio) {
-                currentAudio.pause();
-                currentAudio = null;
-            }
-            history.back(); // Deixa o handlePopState tratar da navegação
+            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
+            history.back();
         }
 
-        // --- ALTERADO: Adicionado 'push' e 'setActiveNav' ---
         async function loadFeed(push = true) {
-            const currentState = history.state || {};
-            if (push && currentState.view !== 'feed') {
-                history.pushState({ view: 'feed' }, '', '#feed');
-            }
+            if (push && (history.state?.view !== 'feed')) history.pushState({ view: 'feed' }, '', '#feed');
             setActiveNav('feed');
-
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading active">A carregar feed...</div>';
             const { data, error } = await supabase.from('feed_posts').select('*').eq('active', true).order('created_at', { ascending: false });
             if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar o feed. <br><small>${error.message}</small></div>`;
             if (data.length === 0) return mainContent.innerHTML = '<div class="empty-state">Nenhuma postagem no feed ainda.</div>';
-            
             mainContent.innerHTML = '<div class="feed-container"></div>';
-            mainContent.querySelector('.feed-container').innerHTML = data.map(post => `
-                <div class="feed-post">
-                    <div class="feed-post-header">
-                        <div class="feed-author-avatar">🛡️</div>
-                        <div class="feed-author-info">
-                            <div class="feed-author-name">${post.title}</div>
-                            <div class="feed-post-time">${new Date(post.created_at).toLocaleDateString('pt-BR')}</div>
-                        </div>
-                    </div>
-                    <div class="feed-post-content">${post.content}</div>
-                    ${post.image_url ? `<img src="${post.image_url}" class="feed-post-image">` : ''}
-                </div>`).join('');
+            mainContent.querySelector('.feed-container').innerHTML = data.map(post => `<div class="feed-post"><div class="feed-post-header"><div class="feed-author-avatar">🛡️</div><div class="feed-author-info"><div class="feed-author-name">${post.title}</div><div class="feed-post-time">${new Date(post.created_at).toLocaleDateString('pt-BR')}</div></div></div><div class="feed-post-content">${post.content}</div>${post.image_url ? `<img src="${post.image_url}" class="feed-post-image">` : ''}</div>`).join('');
         }
 
-        // --- ALTERADO: Adicionado 'push' e 'setActiveNav' ---
         async function loadCommunity(push = true) {
-            const currentState = history.state || {};
-            if (push && currentState.view !== 'community') {
-                history.pushState({ view: 'community' }, '', '#community');
-            }
+            if (push && (history.state?.view !== 'community')) history.pushState({ view: 'community' }, '', '#community');
             setActiveNav('community');
-
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = `<div class="community-container">
-                <div class="community-input-box">
-                    <textarea class="community-input" id="communityMessage" placeholder="Partilhe a sua experiência..."></textarea>
-                    <button class="community-submit-btn" onclick="sendCommunityMessage()">Enviar Mensagem</button>
-                    <p style="font-size: 12px; color: #999; margin-top: 10px;">* As mensagens serão revistas antes de aparecerem</p>
-                </div>
-                <div id="communityMessagesList"><div class="loading active">A carregar mensagens...</div></div>
-            </div>`;
+            mainContent.innerHTML = `<div class="community-container"><div class="community-input-box"><textarea class="community-input" id="communityMessage" placeholder="Partilhe a sua experiência..."></textarea><button class="community-submit-btn" onclick="sendCommunityMessage()">Enviar Mensagem</button><p style="font-size: 12px; color: #999; margin-top: 10px;">* As mensagens serão revistas antes de aparecerem</p></div><div id="communityMessagesList"><div class="loading active">A carregar mensagens...</div></div></div>`;
             const { data, error } = await supabase.from('community_posts').select('*').eq('status', 'approved').order('created_at', { ascending: false });
             const messagesListEl = document.getElementById('communityMessagesList');
             if (error) return messagesListEl.innerHTML = `<div class="empty-state">Erro ao carregar as mensagens. <br><small>${error.message}</small></div>`;
             if (data.length === 0) return messagesListEl.innerHTML = '<div class="empty-state">Seja o primeiro a partilhar!</div>';
-            
-            messagesListEl.innerHTML = data.map(msg => {
-                const author = profilesMap.get(msg.user_id) || { name: 'Anónimo', avatar_url: null };
-                return `
-                <div class="community-message">
-                    <div class="community-message-header">
-                        <div class="community-avatar">${author.avatar_url ? `<img src="${author.avatar_url}" alt="${author.name}">` : author.name.charAt(0).toUpperCase()}</div>
-                        <div class="community-author">${author.name}</div>
-                        <div class="community-time">${new Date(msg.created_at).toLocaleDateString('pt-BR')}</div>
-                    </div>
-                    <div class="community-text">${msg.content}</div>
-                </div>`;
-            }).join('');
+            messagesListEl.innerHTML = data.map(msg => { const author = profilesMap.get(msg.user_id) || { name: 'Anónimo', avatar_url: null }; return `<div class="community-message"><div class="community-message-header"><div class="community-avatar">${author.avatar_url ? `<img src="${author.avatar_url}" alt="${author.name}">` : author.name.charAt(0).toUpperCase()}</div><div class="community-author">${author.name}</div><div class="community-time">${new Date(msg.created_at).toLocaleDateString('pt-BR')}</div></div><div class="community-text">${msg.content}</div></div>`; }).join('');
         }
 
         async function sendCommunityMessage() {
@@ -496,43 +380,16 @@
             if (!message) return alert('Por favor, escreva uma mensagem.');
             const { error } = await supabase.from('community_posts').insert([{ user_id: currentUser.id, content: message, status: 'pending' }]);
             if (error) alert(`Erro ao enviar mensagem: ${error.message}`);
-            else {
-                alert('Mensagem enviada! Aguarde a aprovação.');
-                messageInput.value = '';
-            }
+            else { alert('Mensagem enviada! Aguarde a aprovação.'); messageInput.value = ''; }
         }
 
-        // --- ALTERADO: Adicionado 'push' e 'setActiveNav' ---
         function loadProfile(push = true) {
-            const currentState = history.state || {};
-            if (push && currentState.view !== 'profile') {
-                history.pushState({ view: 'profile' }, '', '#profile');
-            }
+            if (push && (history.state?.view !== 'profile')) history.pushState({ view: 'profile' }, '', '#profile');
             setActiveNav('profile');
-
             const mainContent = document.getElementById('mainContent');
             const profile = currentUser.profile || {};
             const initial = (profile.name || currentUser.email || 'U').charAt(0).toUpperCase();
-            mainContent.innerHTML = `
-                <div class="profile-container">
-                    <div class="profile-header">
-                         <h2 class="module-title" style="margin-bottom: 20px;">Seu Perfil</h2>
-                        <div class="profile-avatar" onclick="document.getElementById('avatarFile').click()">
-                            ${profile.avatar_url ? `<img src="${profile.avatar_url}" alt="Avatar">` : initial}
-                            <div class="profile-avatar-edit">📷</div>
-                            <input type="file" id="avatarFile" accept="image/*" style="display: none;" onchange="uploadAvatar(event)">
-                        </div>
-                        <p class="profile-tip">Clique no ícone para alterar a sua foto</p>
-                    </div>
-                    <div class="profile-form">
-                         <label for="profileName">Nome</label>
-                        <input type="text" class="profile-input" id="profileName" placeholder="O seu nome" value="${profile.name || ''}">
-                        <label for="profileEmail">Email (não pode ser alterado)</label>
-                        <input type="email" class="profile-input" id="profileEmail" value="${currentUser.email}" disabled>
-                        <button class="profile-save-btn" onclick="saveProfile()">Guardar Alterações</button>
-                    </div>
-                    <button class="logout-btn" onclick="logout()">Sair do App</button>
-                </div>`;
+            mainContent.innerHTML = `<div class="profile-container"><div class="profile-header"><h2 class="module-title" style="margin-bottom: 20px;">Seu Perfil</h2><div class="profile-avatar" onclick="document.getElementById('avatarFile').click()">${profile.avatar_url ? `<img src="${profile.avatar_url}" alt="Avatar">` : initial}<div class="profile-avatar-edit">📷</div><input type="file" id="avatarFile" accept="image/*" style="display: none;" onchange="uploadAvatar(event)"></div><p class="profile-tip">Clique no ícone para alterar a sua foto</p></div><div class="profile-form"><label for="profileName">Nome</label><input type="text" class="profile-input" id="profileName" placeholder="O seu nome" value="${profile.name || ''}"><label for="profileEmail">Email (não pode ser alterado)</label><input type="email" class="profile-input" id="profileEmail" value="${currentUser.email}" disabled><button class="profile-save-btn" onclick="saveProfile()">Guardar Alterações</button></div><button class="logout-btn" onclick="logout()">Sair do App</button></div>`;
         }
         
         async function saveProfile() {
@@ -540,13 +397,7 @@
             if (!name) return alert('O nome não pode ficar em branco.');
             const { error } = await supabase.from('profiles').update({ name: name, updated_at: new Date() }).eq('id', currentUser.id);
             if (error) alert(`Erro ao atualizar o perfil: ${error.message}`);
-            else {
-                alert('Perfil atualizado com sucesso!');
-                currentUser.profile.name = name; 
-                profilesMap.set(currentUser.id, { ...profilesMap.get(currentUser.id), name: name }); 
-                updateGreeting();
-                loadProfile(false); // Recarrega o perfil sem adicionar ao histórico
-            }
+            else { alert('Perfil atualizado com sucesso!'); currentUser.profile.name = name; profilesMap.set(currentUser.id, { ...profilesMap.get(currentUser.id), name: name }); updateGreeting(); loadProfile(false); }
         }
         
         async function uploadAvatar(event) {
@@ -555,15 +406,10 @@
             const filePath = `${currentUser.id}/${Date.now()}.${file.name.split('.').pop()}`;
             let { error: uploadError } = await supabase.storage.from('avatars').upload(filePath, file, { upsert: true });
             if (uploadError) return alert(`Erro ao carregar a imagem: ${uploadError.message}`);
-            
             const { data } = supabase.storage.from('avatars').getPublicUrl(filePath);
             let { error: updateError } = await supabase.from('profiles').update({ avatar_url: data.publicUrl, updated_at: new Date() }).eq('id', currentUser.id);
             if (updateError) alert(`Erro ao guardar a URL do avatar: ${updateError.message}`);
-            else {
-                currentUser.profile.avatar_url = data.publicUrl;
-                profilesMap.set(currentUser.id, { ...profilesMap.get(currentUser.id), avatar_url: data.publicUrl });
-                loadProfile(false); // Recarrega o perfil sem adicionar ao histórico
-            }
+            else { currentUser.profile.avatar_url = data.publicUrl; profilesMap.set(currentUser.id, { ...profilesMap.get(currentUser.id), avatar_url: data.publicUrl }); loadProfile(false); }
         }
         
         async function logout() {
@@ -571,12 +417,10 @@
             window.location.href = `${window.location.origin}/index.html`;
         }
 
-        // Garante que as funções chamadas pelo HTML estão disponíveis globalmente
         Object.assign(window, { handleNavClick, loadModuleContents, openContent, sendCommunityMessage, logout, saveProfile, uploadAvatar, goBackFromPlayer, loadSubModules });
         
-        // Esta linha é crucial! Ela garante que a função 'init' só seja chamada
-        // depois que todo o HTML (incluindo o <div id="time">) for carregado.
         document.addEventListener('DOMContentLoaded', init);
     </script>
 </body>
 </html>
+

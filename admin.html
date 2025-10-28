@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Painel Admin - Mente Blindada</title>
+    <title>Painel Admin - VivaMente</title>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -11,7 +11,7 @@
         #loading-view { text-align: center; padding-top: 100px; color: #666; }
         .admin-container { max-width: 1200px; margin: 0 auto; background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); position: relative; }
         h1 { color: #333; margin-bottom: 30px; text-align: center; font-size: 32px; font-weight: 800; }
-        h2 { margin-bottom: 20px; font-weight: 700; }
+        h2, h3 { margin-bottom: 20px; font-weight: 700; }
         .tabs { display: flex; gap: 10px; margin-bottom: 30px; border-bottom: 2px solid #e0e0e0; flex-wrap: wrap; }
         .tab { padding: 15px 25px; background: none; border: none; color: #666; font-weight: 600; cursor: pointer; transition: all 0.3s ease; border-bottom: 3px solid transparent; margin-bottom: -2px; }
         .tab.active { color: #4169E1; border-bottom-color: #4169E1; }
@@ -53,6 +53,7 @@
         .image-preview { margin-top: 10px; }
         .image-preview img { max-width: 100px; max-height: 100px; border-radius: 5px; border: 1px solid #ddd; }
         .image-preview span { font-size: 12px; color: #666; }
+        hr { margin: 40px 0; border: none; border-top: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -67,10 +68,12 @@
             <button class="tab" onclick="switchTab('list')">Listar Conteúdos</button>
             <button class="tab" onclick="switchTab('submodules')">Gerir Sub-Módulos</button>
             <button class="tab" onclick="switchTab('modules')">Gerir Módulos</button>
+            <button class="tab" onclick="switchTab('products')">Gerir Produtos</button>
             <button class="tab" onclick="switchTab('feed')">Gerir Feed</button>
             <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
 
+        <!-- Secção Adicionar Conteúdo -->
         <div id="add-section" class="content-section">
             <h2>Adicionar ou Editar Conteúdo</h2>
             <form id="contentForm">
@@ -78,122 +81,55 @@
                 <div class="form-group"><label for="module">Módulo</label><select id="module" onchange="updateSubModuleSelect(this.value)" required></select></div>
                 <div class="form-group"><label for="subModule">Sub-Módulo</label><select id="subModule" required><option value="">Primeiro, selecione um módulo</option></select></div>
                 <div class="form-group"><label for="title">Título do Conteúdo</label><input type="text" id="title" required></div>
-                <div class="form-group">
-                    <label for="contentImageFile">Imagem de Capa/Banner</label>
-                    <input type="file" id="contentImageFile" accept="image/*">
-                    <div class="image-preview" id="contentImagePreview"></div>
-                </div>
-                <div class="form-group">
-                    <label for="contentType">Tipo de Conteúdo</label>
-                    <select id="contentType" onchange="toggleContentInput()">
-                        <option value="iframe">iFrame (Gamma, etc.)</option>
-                        <option value="html">Código HTML</option>
-                        <option value="audio">Áudio (Upload MP3)</option>
-                    </select>
-                </div>
+                <div class="form-group"><label for="contentImageFile">Imagem de Capa/Banner</label><input type="file" id="contentImageFile" accept="image/*"><div class="image-preview" id="contentImagePreview"></div></div>
+                <div class="form-group"><label for="contentType">Tipo de Conteúdo</label><select id="contentType" onchange="toggleContentInput()"><option value="iframe">iFrame (Gamma, etc.)</option><option value="html">Código HTML</option><option value="audio">Áudio (Upload MP3)</option></select></div>
                 <div class="form-group" id="urlInput"><label for="contentUrl">URL (iFrame)</label><input type="url" id="contentUrl"></div>
                 <div class="form-group" id="htmlInput" style="display: none;"><label for="contentHtml">Código HTML</label><textarea id="contentHtml"></textarea></div>
-                <div class="form-group" id="audioUploadInput" style="display: none;">
-                    <label for="audioFile">Ficheiro de Áudio (MP3)</label>
-                    <input type="file" id="audioFile" accept="audio/*">
-                    <div class="image-preview" id="audioFilePreview"></div>
-                    <input type="hidden" id="contentAudioUrl">
-                </div>
+                <div class="form-group" id="audioUploadInput" style="display: none;"><label for="audioFile">Ficheiro de Áudio (MP3)</label><input type="file" id="audioFile" accept="audio/*"><div class="image-preview" id="audioFilePreview"></div><input type="hidden" id="contentAudioUrl"></div>
+                <div class="form-group"><label for="contentProduct">Produto Requerido (Opcional)</label><select id="contentProduct"></select></div>
                 <div class="form-group"><label for="orderPosition">Ordem</label><input type="number" id="orderPosition" value="1" min="1"></div>
                 <div class="form-group"><label><input type="checkbox" id="isActive" checked> Conteúdo Ativo</label></div>
-                <div class="button-group">
-                    <button type="submit" class="btn" id="saveContentBtn">💾 Guardar Conteúdo</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetContentForm()">Limpar</button>
-                </div>
+                <div class="button-group"><button type="submit" class="btn" id="saveContentBtn">💾 Guardar Conteúdo</button><button type="button" class="btn btn-secondary" onclick="resetContentForm()">Limpar</button></div>
             </form>
         </div>
         
-        <div id="list-section" class="content-section">
-            <h2>Listagem de Conteúdos</h2>
-            <div class="form-group"><label for="filterModule">Filtrar por Módulo</label><select id="filterModule" onchange="loadContents()"></select></div>
-            <div class="content-list" id="contentList"></div>
-        </div>
+        <!-- Secção Listar Conteúdos -->
+        <div id="list-section" class="content-section"><h2>Listagem de Conteúdos</h2><div class="form-group"><label for="filterModule">Filtrar por Módulo</label><select id="filterModule" onchange="loadContents()"></select></div><div class="content-list" id="contentList"></div></div>
 
-        <div id="submodules-section" class="content-section">
-            <h2>Adicionar ou Editar Sub-Módulos</h2>
-            <form id="subModuleForm">
-                <input type="hidden" id="editSubModuleId"><input type="hidden" id="subModuleImageUrl">
-                <div class="form-group"><label for="parentModuleKey">Módulo Pai</label><select id="parentModuleKey" required></select></div>
-                <div class="form-group"><label for="subModuleName">Nome do Sub-Módulo</label><input type="text" id="subModuleName" required></div>
-                <div class="form-group">
-                    <label for="subModuleImageFile">Imagem</label>
-                    <input type="file" id="subModuleImageFile" accept="image/*">
-                    <div class="image-preview" id="subModuleImagePreview"></div>
-                </div>
-                <div class="form-group"><label for="subModuleOrder">Ordem</label><input type="number" id="subModuleOrder" value="1" min="1" required></div>
-                <div class="button-group">
-                    <button type="submit" class="btn" id="saveSubModuleBtn">Adicionar Sub-Módulo</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetSubModuleForm()">Limpar</button>
-                </div>
-            </form>
-            <hr style="margin: 40px 0; border: 1px solid #eee;">
-            <h3>Sub-Módulos Atuais</h3>
-            <div class="content-list" id="subModuleList"></div>
-        </div>
+        <!-- Secção Gerir Sub-Módulos -->
+        <div id="submodules-section" class="content-section"><h2>Adicionar ou Editar Sub-Módulos</h2><form id="subModuleForm"><input type="hidden" id="editSubModuleId"><input type="hidden" id="subModuleImageUrl"><div class="form-group"><label for="parentModuleKey">Módulo Pai</label><select id="parentModuleKey" required></select></div><div class="form-group"><label for="subModuleName">Nome do Sub-Módulo</label><input type="text" id="subModuleName" required></div><div class="form-group"><label for="subModuleImageFile">Imagem</label><input type="file" id="subModuleImageFile" accept="image/*"><div class="image-preview" id="subModuleImagePreview"></div></div><div class="form-group"><label for="subModuleOrder">Ordem</label><input type="number" id="subModuleOrder" value="1" min="1" required></div><div class="button-group"><button type="submit" class="btn" id="saveSubModuleBtn">Adicionar Sub-Módulo</button><button type="button" class="btn btn-secondary" onclick="resetSubModuleForm()">Limpar</button></div></form><hr><h3>Sub-Módulos Atuais</h3><div class="content-list" id="subModuleList"></div></div>
         
-        <div id="modules-section" class="content-section">
-            <h2>Adicionar ou Editar Módulos</h2>
-            <form id="moduleForm">
-                <input type="hidden" id="editModuleKey"><input type="hidden" id="moduleImageUrl">
-                <div class="form-group"><label for="newModuleKey">Chave</label><input type="text" id="newModuleKey" required></div>
-                <div class="form-group"><label for="newModuleName">Nome</label><input type="text" id="newModuleName" required></div>
-                 <div class="form-group">
-                    <label for="moduleImageFile">Imagem</label>
-                    <input type="file" id="moduleImageFile" accept="image/*">
-                    <div class="image-preview" id="moduleImagePreview"></div>
-                </div>
-                <div class="form-group"><label for="newModuleOrder">Ordem</label><input type="number" id="newModuleOrder" value="1" min="1" required></div>
-                <div class="form-group"><label for="newModuleAccess">Nível de Acesso</label><input type="text" id="newModuleAccess" value="basico" required></div>
-                <div class="button-group">
-                    <button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button>
-                </div>
-            </form>
-            <hr style="margin: 40px 0; border: 1px solid #eee;">
-            <h3>Módulos Atuais</h3>
-            <div class="content-list" id="moduleList"></div>
-        </div>
+        <!-- Secção Gerir Módulos -->
+        <div id="modules-section" class="content-section"><h2>Adicionar ou Editar Módulos</h2><form id="moduleForm"><input type="hidden" id="editModuleKey"><input type="hidden" id="moduleImageUrl"><div class="form-group"><label for="newModuleKey">Chave (ID único, sem espaços. Ex: comece_aqui)</label><input type="text" id="newModuleKey" required></div><div class="form-group"><label for="newModuleName">Nome (O que aparece no App)</label><input type="text" id="newModuleName" required></div><div class="form-group"><label for="moduleImageFile">Imagem</label><input type="file" id="moduleImageFile" accept="image/*"><div class="image-preview" id="moduleImagePreview"></div></div><div class="form-group"><label for="newModuleOrder">Ordem</label><input type="number" id="newModuleOrder" value="1" min="1" required></div><div class="form-group"><label for="moduleProduct">Produto Requerido</label><select id="moduleProduct" required></select></div><div class="button-group"><button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button><button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button></div></form><hr><h3>Módulos Atuais</h3><div class="content-list" id="moduleList"></div></div>
 
-        <div id="feed-section" class="content-section">
-            <h2>Adicionar ou Editar Post no Feed</h2>
-            <form id="feedForm" style="margin-bottom: 30px;">
-                <input type="hidden" id="editFeedId">
-                <div class="form-group"><label for="feedTitle">Título do Post</label><input type="text" id="feedTitle" required></div>
-                <div class="form-group"><label for="feedContent">Conteúdo</label><textarea id="feedContent" rows="5" required></textarea></div>
+        <!-- NOVA SECÇÃO: Gerir Produtos -->
+        <div id="products-section" class="content-section">
+            <h2>Gerir Produtos</h2>
+            <form id="productForm">
+                <input type="hidden" id="isEditingProduct">
                 <div class="form-group">
-                    <label for="feedImageFile">Imagem (opcional)</label>
-                    <input type="file" id="feedImageFile" accept="image/*">
-                    <div class="image-preview" id="feedImagePreview"></div>
-                    <input type="hidden" id="feedImageUrl">
+                    <label for="productId">ID do Produto (Ex: PROD_HISTORIA_01)</label>
+                    <input type="text" id="productId" required>
                 </div>
-                <div class="form-group"><label><input type="checkbox" id="feedActive" checked> Post Ativo</label></div>
+                <div class="form-group">
+                    <label for="productName">Nome do Produto (Ex: História "A Casa de Vó")</label>
+                    <input type="text" id="productName" required>
+                </div>
                 <div class="button-group">
-                    <button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button>
+                    <button type="submit" class="btn" id="saveProductBtn">Adicionar Produto</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetProductForm()">Limpar</button>
                 </div>
             </form>
-            <hr style="margin: 40px 0; border: 1px solid #eee;">
-            <h3>Posts Publicados</h3>
-            <div id="feedList" class="content-list"></div>
+            <hr>
+            <h3>Produtos Atuais</h3>
+            <div class="content-list" id="productList"></div>
         </div>
 
-        <div id="community-section" class="content-section">
-            <h2>Moderar Mensagens da Comunidade</h2>
-            <div class="form-group">
-                <label for="filterStatus">Filtrar por Status</label>
-                <select id="filterStatus" onchange="loadCommunityMessages()">
-                    <option value="pending">Pendentes</option>
-                    <option value="approved">Aprovadas</option>
-                    <option value="rejected">Rejeitadas</option>
-                </select>
-            </div>
-            <div id="communityList" class="content-list"></div>
-        </div>
+        <!-- Secção Gerir Feed -->
+        <div id="feed-section" class="content-section"><h2>Adicionar ou Editar Post no Feed</h2><form id="feedForm" style="margin-bottom: 30px;"><input type="hidden" id="editFeedId"><div class="form-group"><label for="feedTitle">Título do Post</label><input type="text" id="feedTitle" required></div><div class="form-group"><label for="feedContent">Conteúdo</label><textarea id="feedContent" rows="5" required></textarea></div><div class="form-group"><label for="feedImageFile">Imagem (opcional)</label><input type="file" id="feedImageFile" accept="image/*"><div class="image-preview" id="feedImagePreview"></div><input type="hidden" id="feedImageUrl"></div><div class="form-group"><label><input type="checkbox" id="feedActive" checked> Post Ativo</label></div><div class="button-group"><button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button><button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button></div></form><hr><h3>Posts Publicados</h3><div id="feedList" class="content-list"></div></div>
+        
+        <!-- Secção Moderar Comunidade -->
+        <div id="community-section" class="content-section"><h2>Moderar Mensagens da Comunidade</h2><div class="form-group"><label for="filterStatus">Filtrar por Status</label><select id="filterStatus" onchange="loadCommunityMessages()"><option value="pending">Pendentes</option><option value="approved">Aprovadas</option><option value="rejected">Rejeitadas</option></select></div><div id="communityList" class="content-list"></div></div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -204,8 +140,8 @@
         let modulesMap = new Map();
         let subModulesMap = new Map();
         let profilesMap = new Map();
+        let products = [];
 
-        // --- FUNÇÕES GLOBAIS E DE INICIALIZAÇÃO ---
         async function init() {
             const loginUrl = `${window.location.origin}/admin-login.html`;
             const { data: { session } } = await supabase.auth.getSession();
@@ -217,26 +153,20 @@
             await loadInitialData();
             switchTab('add');
         }
+
         async function loadInitialData() {
-            const [modulesRes, subModulesRes, profilesRes] = await Promise.all([
+            const [modulesRes, subModulesRes, profilesRes, productsRes] = await Promise.all([
                 supabase.from('modules').select('*').order('order_position'),
                 supabase.from('sub_modules').select('*').order('order_position'),
-                supabase.from('profiles').select('id, name, email')
+                supabase.from('profiles').select('id, name, email'),
+                supabase.from('products').select('*').order('name')
             ]);
-            if (modulesRes.data) {
-                modulesMap.clear();
-                modulesRes.data.forEach(m => modulesMap.set(m.key, m));
-                updateModuleSelects(modulesRes.data);
-            }
-            if (subModulesRes.data) {
-                subModulesMap.clear();
-                subModulesRes.data.forEach(sm => subModulesMap.set(sm.id, sm));
-            }
-            if(profilesRes.data) {
-                profilesMap.clear();
-                profilesRes.data.forEach(p => profilesMap.set(p.id, p.name || p.email.split('@')[0]));
-            }
+            if (modulesRes.data) { modulesMap.clear(); modulesRes.data.forEach(m => modulesMap.set(m.key, m)); updateModuleSelects(modulesRes.data); }
+            if (subModulesRes.data) { subModulesMap.clear(); subModulesRes.data.forEach(sm => subModulesMap.set(sm.id, sm)); }
+            if(profilesRes.data) { profilesMap.clear(); profilesRes.data.forEach(p => profilesMap.set(p.id, p.name || p.email.split('@')[0])); }
+            if(productsRes.data) { products = productsRes.data; updateProductSelects(); }
         }
+
         function switchTab(tab) {
             document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
             document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none' );
@@ -247,6 +177,7 @@
                 if (tab === 'list') loadContents();
                 else if (tab === 'modules') loadModules();
                 else if (tab === 'submodules') loadSubModules();
+                else if (tab === 'products') loadProducts(); // Carrega produtos
                 else if (tab === 'feed') loadFeedPosts();
                 else if (tab === 'community') loadCommunityMessages();
             }
@@ -256,46 +187,39 @@
         function slugify(text) { const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;'; const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------'; const p = new RegExp(a.split('').join('|'), 'g'); return text.toString().toLowerCase().replace(/\s+/g, '-').replace(p, c => b.charAt(a.indexOf(c))).replace(/&/g, '-and-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '') }
         async function uploadFile(fileInput, folder) { const file = fileInput.files[0]; if (!file) return { url: null, error: null }; const originalName = file.name.substring(0, file.name.lastIndexOf('.')); const extension = file.name.substring(file.name.lastIndexOf('.')); const safeName = slugify(originalName) + extension; const filePath = `${folder}/${Date.now()}-${safeName}`; const { error } = await supabase.storage.from('app-uploads').upload(filePath, file); if (error) return { url: null, error: `Erro no upload: ${error.message}` }; const { data } = supabase.storage.from('app-uploads').getPublicUrl(filePath); return { url: data.publicUrl, error: null }; }
 
-        // --- GERENCIAMENTO DE CONTEÚDO ---
-        document.getElementById('contentForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveContentBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('imageUrl').value; if (document.getElementById('contentImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('contentImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } let audioUrl = document.getElementById('contentAudioUrl').value; if (document.getElementById('contentType').value === 'audio' && document.getElementById('audioFile').files.length > 0) { saveBtn.textContent = 'A enviar áudio...'; const { url, error } = await uploadFile(document.getElementById('audioFile'), 'audios'); if (error) throw new Error(error); audioUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editContentId').value; const formData = { sub_module_id: parseInt(document.getElementById('subModule').value), title: document.getElementById('title').value, image_url: imageUrl || null, content_type: document.getElementById('contentType').value, content_url: document.getElementById('contentType').value === 'audio' ? audioUrl : document.getElementById('contentUrl').value, content_html: document.getElementById('contentHtml').value || null, order_position: parseInt(document.getElementById('orderPosition').value), active: document.getElementById('isActive').checked, module_key: document.getElementById('module').value }; const { error } = editId ? await supabase.from('contents').update(formData).eq('id', editId) : await supabase.from('contents').insert([formData]); if (error) throw error; showMessage(`Conteúdo ${editId ? 'atualizado' : 'guardado'}!`, 'success'); resetContentForm(); switchTab('list'); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Conteúdo'; } });
+        document.getElementById('contentForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveContentBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('imageUrl').value; if (document.getElementById('contentImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('contentImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } let audioUrl = document.getElementById('contentAudioUrl').value; if (document.getElementById('contentType').value === 'audio' && document.getElementById('audioFile').files.length > 0) { saveBtn.textContent = 'A enviar áudio...'; const { url, error } = await uploadFile(document.getElementById('audioFile'), 'audios'); if (error) throw new Error(error); audioUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editContentId').value; const contentProduct = document.getElementById('contentProduct').value; const formData = { sub_module_id: parseInt(document.getElementById('subModule').value), title: document.getElementById('title').value, image_url: imageUrl || null, content_type: document.getElementById('contentType').value, content_url: document.getElementById('contentType').value === 'audio' ? audioUrl : document.getElementById('contentUrl').value, content_html: document.getElementById('contentHtml').value || null, order_position: parseInt(document.getElementById('orderPosition').value), active: document.getElementById('isActive').checked, module_key: document.getElementById('module').value, product_id: contentProduct || null }; const { error } = editId ? await supabase.from('contents').update(formData).eq('id', editId) : await supabase.from('contents').insert([formData]); if (error) throw error; showMessage(`Conteúdo ${editId ? 'atualizado' : 'guardado'}!`, 'success'); resetContentForm(); switchTab('list'); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Conteúdo'; } });
         function resetContentForm() { document.getElementById('contentForm').reset(); document.getElementById('editContentId').value = ''; document.getElementById('imageUrl').value = ''; document.getElementById('contentAudioUrl').value = ''; document.getElementById('contentImagePreview').innerHTML = ''; document.getElementById('audioFilePreview').innerHTML = ''; toggleContentInput(); updateSubModuleSelect(''); }
-        async function editContent(id) { const { data, error } = await supabase.from('contents').select('*').eq('id', id).single(); if (error) return showMessage('Erro ao carregar conteúdo.', 'error'); resetContentForm(); switchTab('add'); document.getElementById('editContentId').value = data.id; document.getElementById('title').value = data.title; document.getElementById('module').value = data.module_key; await updateSubModuleSelect(data.module_key, data.sub_module_id); document.getElementById('contentType').value = data.content_type; document.getElementById('orderPosition').value = data.order_position; document.getElementById('isActive').checked = data.active; document.getElementById('imageUrl').value = data.image_url; if (data.image_url) document.getElementById('contentImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; if (data.content_type === 'audio') { document.getElementById('contentAudioUrl').value = data.content_url; if(data.content_url) document.getElementById('audioFilePreview').innerHTML = `<span>Áudio atual carregado.</span>`; } else { document.getElementById('contentUrl').value = data.content_url; } document.getElementById('contentHtml').value = data.content_html; toggleContentInput(); document.getElementById('saveContentBtn').textContent = '💾 Atualizar Conteúdo'; }
+        async function editContent(id) { const { data, error } = await supabase.from('contents').select('*').eq('id', id).single(); if (error) return showMessage('Erro ao carregar conteúdo.', 'error'); resetContentForm(); switchTab('add'); document.getElementById('editContentId').value = data.id; document.getElementById('title').value = data.title; document.getElementById('module').value = data.module_key; await updateSubModuleSelect(data.module_key, data.sub_module_id); document.getElementById('contentType').value = data.content_type; document.getElementById('orderPosition').value = data.order_position; document.getElementById('isActive').checked = data.active; document.getElementById('imageUrl').value = data.image_url; document.getElementById('contentProduct').value = data.product_id || ''; if (data.image_url) document.getElementById('contentImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; if (data.content_type === 'audio') { document.getElementById('contentAudioUrl').value = data.content_url; if(data.content_url) document.getElementById('audioFilePreview').innerHTML = `<span>Áudio atual carregado.</span>`; } else { document.getElementById('contentUrl').value = data.content_url; } document.getElementById('contentHtml').value = data.content_html; toggleContentInput(); document.getElementById('saveContentBtn').textContent = '💾 Atualizar Conteúdo'; }
         function toggleContentInput() { const type = document.getElementById('contentType').value; document.getElementById('urlInput').style.display = type === 'iframe' ? 'block' : 'none'; document.getElementById('htmlInput').style.display = type === 'html' ? 'block' : 'none'; document.getElementById('audioUploadInput').style.display = type === 'audio' ? 'block' : 'none'; }
         function updateModuleSelects(modules) { const selects = document.querySelectorAll('#module, #filterModule, #parentModuleKey'); selects.forEach(select => { const currentVal = select.value; let placeholder = select.id === 'filterModule' ? 'Todos os Módulos' : 'Selecione...'; select.innerHTML = `<option value="">${placeholder}</option>`; (modules || []).forEach(mod => select.innerHTML += `<option value="${mod.key}">${mod.name}</option>`); select.value = currentVal; }); }
         async function updateSubModuleSelect(moduleKey, selectedId = null) { const subModuleSelect = document.getElementById('subModule'); subModuleSelect.innerHTML = '<option value="">A carregar...</option>'; if (!moduleKey) { subModuleSelect.innerHTML = '<option value="">Selecione um módulo</option>'; return; } const { data } = await supabase.from('sub_modules').select('id, name').eq('module_key', moduleKey).order('order_position'); subModuleSelect.innerHTML = '<option value="">Selecione o sub-módulo</option>'; data.forEach(sm => subModuleSelect.innerHTML += `<option value="${sm.id}">${sm.name}</option>`); if(selectedId) subModuleSelect.value = selectedId; }
-        async function loadContents() { const listEl = document.getElementById('contentList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; let query = supabase.from('contents').select('*').order('order_position'); const filterModule = document.getElementById('filterModule').value; if (filterModule) query = query.eq('module_key', filterModule); const { data, error } = await query; if (error) return; displayContents(data); }
-        function displayContents(contents) { const listEl = document.getElementById('contentList'); if (!contents || contents.length === 0) { listEl.innerHTML = '<p>Nenhum conteúdo encontrado.</p>'; return; } listEl.innerHTML = contents.map(c => { const sm = subModulesMap.get(c.sub_module_id); const m = modulesMap.get(c.module_key); return `<div class="content-item"><div class="content-image" style="background-image: url('${c.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${c.title} <span class="status-badge ${c.active ? 'status-active' : 'status-inactive'}">${c.active ? 'Ativo' : 'Inativo'}</span></div><div class="content-module">${m?.name || '...'} → ${sm?.name || '...'}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editContent('${c.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteContent('${c.id}')">Excluir</button></div></div>`}).join(''); }
+        async function loadContents() { const listEl = document.getElementById('contentList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; let query = supabase.from('contents').select('*').order('order_position'); const filterModule = document.getElementById('filterModule').value; if (filterModule) query = query.eq('module_key', filterModule); const { data, error } = await query; if (error) return showMessage(`Erro ao carregar conteúdos: ${error.message}`, 'error'); displayContents(data); }
+        function displayContents(contents) { const listEl = document.getElementById('contentList'); if (!contents || contents.length === 0) { listEl.innerHTML = '<p>Nenhum conteúdo encontrado.</p>'; return; } listEl.innerHTML = contents.map(c => { const sm = subModulesMap.get(c.sub_module_id); const m = modulesMap.get(c.module_key); const p = products.find(prod => prod.id === c.product_id); return `<div class="content-item"><div class="content-image" style="background-image: url('${c.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${c.title} <span class="status-badge ${c.active ? 'status-active' : 'status-inactive'}">${c.active ? 'Ativo' : 'Inativo'}</span></div><div class="content-module">${m?.name || '...'} → ${sm?.name || '...'}</div>${p ? `<div class="content-module">Produto: <strong>${p.name}</strong></div>` : ''}</div><div class="content-actions"><button class="btn btn-small" onclick="editContent('${c.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteContent('${c.id}')">Excluir</button></div></div>`}).join(''); }
         async function deleteContent(id) { if (!confirm('Tem a certeza que deseja excluir este conteúdo?')) return; const { error } = await supabase.from('contents').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Conteúdo excluído com sucesso!', 'success'); loadContents(); }}
 
-        // --- GERENCIAMENTO DE SUB-MÓDULOS (COM CORREÇÃO) ---
         document.getElementById('subModuleForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveSubModuleBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('subModuleImageUrl').value; if (document.getElementById('subModuleImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('subModuleImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editSubModuleId').value; const formData = { module_key: document.getElementById('parentModuleKey').value, name: document.getElementById('subModuleName').value, image_url: imageUrl || null, order_position: parseInt(document.getElementById('subModuleOrder').value) }; const { error } = editId ? await supabase.from('sub_modules').update(formData).eq('id', editId) : await supabase.from('sub_modules').insert([formData]); if (error) throw error; showMessage(`Sub-módulo ${editId ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetSubModuleForm(); loadSubModules(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = document.getElementById('editSubModuleId').value ? 'Atualizar Sub-Módulo' : 'Adicionar Sub-Módulo'; } });
         function resetSubModuleForm() { document.getElementById('subModuleForm').reset(); document.getElementById('editSubModuleId').value = ''; document.getElementById('subModuleImageUrl').value = ''; document.getElementById('subModuleImagePreview').innerHTML = ''; document.getElementById('saveSubModuleBtn').textContent = 'Adicionar Sub-Módulo';}
-        function editSubModule(id) {
-            const sm = subModulesMap.get(parseInt(id)); // CORREÇÃO APLICADA AQUI
-            if (!sm) { console.error(`Sub-módulo com ID ${id} não encontrado no map.`); return; }
-            resetSubModuleForm(); 
-            document.getElementById('editSubModuleId').value = sm.id; 
-            document.getElementById('parentModuleKey').value = sm.module_key; 
-            document.getElementById('subModuleName').value = sm.name; 
-            document.getElementById('subModuleOrder').value = sm.order_position; 
-            document.getElementById('subModuleImageUrl').value = sm.image_url; 
-            if(sm.image_url) document.getElementById('subModuleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${sm.image_url}" alt="Preview">`; 
-            document.getElementById('saveSubModuleBtn').textContent = 'Atualizar Sub-Módulo'; 
-            window.scrollTo(0, 0); 
-        }
+        function editSubModule(id) { const sm = subModulesMap.get(parseInt(id)); if (!sm) { console.error(`Sub-módulo com ID ${id} não encontrado no map.`); return; } resetSubModuleForm(); document.getElementById('editSubModuleId').value = sm.id; document.getElementById('parentModuleKey').value = sm.module_key; document.getElementById('subModuleName').value = sm.name; document.getElementById('subModuleOrder').value = sm.order_position; document.getElementById('subModuleImageUrl').value = sm.image_url; if(sm.image_url) document.getElementById('subModuleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${sm.image_url}" alt="Preview">`; document.getElementById('saveSubModuleBtn').textContent = 'Atualizar Sub-Módulo'; window.scrollTo(0, 0); }
         async function loadSubModules() { const listEl = document.getElementById('subModuleList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const { data, error } = await supabase.from('sub_modules').select('*').order('order_position'); if (error) return; displaySubModules(data); }
         function displaySubModules(subModules) { const listEl = document.getElementById('subModuleList'); if (!subModules || subModules.length === 0) { listEl.innerHTML = '<p>Nenhum sub-módulo.</p>'; return; } listEl.innerHTML = subModules.map(sm => { const m = modulesMap.get(sm.module_key); return `<div class="content-item"><div class="content-image" style="background-image: url('${sm.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${sm.name}</div><div class="content-module">${m?.name || '...'}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editSubModule('${sm.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteSubModule('${sm.id}')">Excluir</button></div></div>`}).join(''); }
         async function deleteSubModule(id) { if (!confirm('Excluir sub-módulo irá apagar todos os conteúdos dentro dele. Continuar?')) return; const { error } = await supabase.from('sub_modules').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Sub-módulo excluído com sucesso!', 'success'); await loadInitialData(); loadSubModules(); }}
         
-        // --- GERENCIAMENTO DE MÓDULOS ---
-        document.getElementById('moduleForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveModuleBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('moduleImageUrl').value; if (document.getElementById('moduleImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('moduleImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editKey = document.getElementById('editModuleKey').value; const formData = { key: document.getElementById('newModuleKey').value, name: document.getElementById('newModuleName').value, image_url: imageUrl || null, order_position: parseInt(document.getElementById('newModuleOrder').value), access_level: document.getElementById('newModuleAccess').value }; const { error } = editKey ? await supabase.from('modules').update(formData).eq('key', editKey) : await supabase.from('modules').insert([formData]); if (error) throw error; showMessage(`Módulo ${editKey ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetModuleForm(); loadModules(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = document.getElementById('editModuleKey').value ? 'Atualizar Módulo' : 'Adicionar Módulo'; } });
+        function updateProductSelects() { const selects = document.querySelectorAll('#moduleProduct, #contentProduct'); selects.forEach(select => { let placeholder = select.id === 'contentProduct' ? 'Herdar do Módulo' : 'Selecione um produto'; select.innerHTML = `<option value="">${placeholder}</option>`; products.forEach(p => { select.innerHTML += `<option value="${p.id}">${p.name}</option>`; }); }); }
+        document.getElementById('moduleForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveModuleBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('moduleImageUrl').value; if (document.getElementById('moduleImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('moduleImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editKey = document.getElementById('editModuleKey').value; const formData = { key: document.getElementById('newModuleKey').value, name: document.getElementById('newModuleName').value, image_url: imageUrl || null, order_position: parseInt(document.getElementById('newModuleOrder').value), product_id: document.getElementById('moduleProduct').value }; const { error } = editKey ? await supabase.from('modules').update(formData).eq('key', editKey) : await supabase.from('modules').insert([formData]); if (error) throw error; showMessage(`Módulo ${editKey ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetModuleForm(); loadModules(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = document.getElementById('editModuleKey').value ? 'Atualizar Módulo' : 'Adicionar Módulo'; } });
         function resetModuleForm() { document.getElementById('moduleForm').reset(); document.getElementById('editModuleKey').value = ''; document.getElementById('moduleImageUrl').value = ''; document.getElementById('newModuleKey').disabled = false; document.getElementById('moduleImagePreview').innerHTML = ''; document.getElementById('saveModuleBtn').textContent = 'Adicionar Módulo';}
-        function editModule(key) { const mod = modulesMap.get(key); if (!mod) return; resetModuleForm(); document.getElementById('editModuleKey').value = mod.key; document.getElementById('newModuleKey').value = mod.key; document.getElementById('newModuleKey').disabled = true; document.getElementById('newModuleName').value = mod.name; document.getElementById('newModuleOrder').value = mod.order_position; document.getElementById('newModuleAccess').value = mod.access_level; document.getElementById('moduleImageUrl').value = mod.image_url; if(mod.image_url) document.getElementById('moduleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${mod.image_url}" alt="Preview">`; document.getElementById('saveModuleBtn').textContent = 'Atualizar Módulo'; window.scrollTo(0, 0); }
+        function editModule(key) { const mod = modulesMap.get(key); if (!mod) return; resetModuleForm(); document.getElementById('editModuleKey').value = mod.key; document.getElementById('newModuleKey').value = mod.key; document.getElementById('newModuleKey').disabled = true; document.getElementById('newModuleName').value = mod.name; document.getElementById('newModuleOrder').value = mod.order_position; document.getElementById('moduleProduct').value = mod.product_id; document.getElementById('moduleImageUrl').value = mod.image_url; if(mod.image_url) document.getElementById('moduleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${mod.image_url}" alt="Preview">`; document.getElementById('saveModuleBtn').textContent = 'Atualizar Módulo'; window.scrollTo(0, 0); }
         async function loadModules() { const listEl = document.getElementById('moduleList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const modules = Array.from(modulesMap.values()).sort((a, b) => a.order_position - b.order_position); displayModules(modules); }
-        function displayModules(modules) { const listEl = document.getElementById('moduleList'); if (!modules || modules.length === 0) { listEl.innerHTML = '<p>Nenhum módulo.</p>'; return; } listEl.innerHTML = modules.map(mod => `<div class="content-item"><div class="content-image" style="background-image: url('${mod.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${mod.name}</div><div class="content-module">${mod.key}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editModule('${mod.key}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">Excluir</button></div></div>`).join(''); }
+        function displayModules(modules) { const listEl = document.getElementById('moduleList'); if (!modules || modules.length === 0) { listEl.innerHTML = '<p>Nenhum módulo.</p>'; return; } listEl.innerHTML = modules.map(mod => { const product = products.find(p => p.id === mod.product_id); return `<div class="content-item"><div class="content-image" style="background-image: url('${mod.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${mod.name}</div><div class="content-module">Produto: <strong>${product ? product.name : 'N/D'}</strong></div></div><div class="content-actions"><button class="btn btn-small" onclick="editModule('${mod.key}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">Excluir</button></div></div>`}).join(''); }
         async function deleteModule(key) { if (!confirm('TEM A CERTEZA? Excluir um módulo irá apagar todos os seus sub-módulos e conteúdos.')) return; const { error } = await supabase.from('modules').delete().eq('key', key); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Módulo excluído com sucesso!', 'success'); await loadInitialData(); loadModules(); }}
 
-        // --- GERENCIAMENTO DE FEED ---
+        // --- LÓGICA PARA GERIR PRODUTOS ---
+        document.getElementById('productForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveProductBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { const isEditing = document.getElementById('isEditingProduct').value; const productId = document.getElementById('productId').value; const productName = document.getElementById('productName').value; const { error } = await supabase.from('products').upsert({ id: productId, name: productName }); if (error) throw error; showMessage(`Produto ${isEditing ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetProductForm(); loadProducts(); } catch(error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = 'Adicionar Produto'; }});
+        function resetProductForm() { document.getElementById('productForm').reset(); document.getElementById('isEditingProduct').value = ''; document.getElementById('productId').disabled = false; document.getElementById('saveProductBtn').textContent = 'Adicionar Produto'; }
+        function editProduct(id) { const product = products.find(p => p.id === id); if(!product) return; resetProductForm(); document.getElementById('isEditingProduct').value = 'true'; document.getElementById('productId').value = product.id; document.getElementById('productId').disabled = true; document.getElementById('productName').value = product.name; document.getElementById('saveProductBtn').textContent = 'Atualizar Produto'; window.scrollTo(0, 0); }
+        async function loadProducts() { const listEl = document.getElementById('productList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; displayProducts(); }
+        function displayProducts() { const listEl = document.getElementById('productList'); if (products.length === 0) { listEl.innerHTML = '<p>Nenhum produto cadastrado.</p>'; return; } listEl.innerHTML = products.map(p => `<div class="content-item"><div class="content-info"><div class="content-title">${p.name}</div><div class="content-module">ID: ${p.id}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editProduct('${p.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">Excluir</button></div></div>`).join(''); }
+        async function deleteProduct(id) { if (!confirm('Tem a certeza? Se este produto estiver em uso por algum módulo ou conteúdo, poderá causar problemas de acesso.')) return; const { error } = await supabase.from('products').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Produto excluído!', 'success'); await loadInitialData(); loadProducts(); } }
+
         document.getElementById('feedForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveFeedBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('feedImageUrl').value; if (document.getElementById('feedImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('feedImageFile'), 'feed'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editFeedId').value; const formData = { title: document.getElementById('feedTitle').value, content: document.getElementById('feedContent').value, image_url: imageUrl || null, active: document.getElementById('feedActive').checked }; const { error } = editId ? await supabase.from('feed_posts').update(formData).eq('id', editId) : await supabase.from('feed_posts').insert([formData]); if (error) throw error; showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success'); resetFeedForm(); loadFeedPosts(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Publicar Post'; } });
         async function loadFeedPosts() { const listEl = document.getElementById('feedList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const { data, error } = await supabase.from('feed_posts').select('*').order('created_at', { ascending: false }); if (error) { listEl.innerHTML = `<p style="color:red">Erro: ${error.message}</p>`; return; } displayFeedPosts(data); }
         function displayFeedPosts(posts) { const listEl = document.getElementById('feedList'); if (!posts || posts.length === 0) { listEl.innerHTML = '<p>Nenhum post no feed ainda.</p>'; return; } listEl.innerHTML = posts.map(post => `<div class="content-item">${post.image_url ? `<div class="content-image" style="background-image: url('${post.image_url}')"></div>` : ''}<div class="content-info"><div class="content-title">${post.title} <span class="status-badge ${post.active ? 'status-active' : 'status-inactive'}">${post.active ? 'Ativo' : 'Inativo'}</span></div><div class="content-module">Publicado em: ${new Date(post.created_at).toLocaleDateString('pt-BR')}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editFeedPost('${post.id}')">✏️ Editar</button><button class="btn btn-small btn-danger" onclick="deleteFeedPost('${post.id}')">🗑️ Excluir</button></div></div>`).join(''); }
@@ -303,13 +227,11 @@
         function resetFeedForm() { document.getElementById('feedForm').reset(); document.getElementById('editFeedId').value = ''; document.getElementById('feedImageUrl').value = ''; document.getElementById('feedImagePreview').innerHTML = ''; document.getElementById('saveFeedBtn').textContent = '💾 Publicar Post'; }
         async function deleteFeedPost(id) { if (!confirm('Tem a certeza que deseja excluir este post?')) return; const { error } = await supabase.from('feed_posts').delete().eq('id', id); if (error) showMessage('Erro ao excluir: ' + error.message, 'error'); else { showMessage('Post excluído com sucesso!', 'success'); loadFeedPosts(); } }
 
-        // --- MODERAÇÃO DE COMUNIDADE ---
         async function loadCommunityMessages() { const listEl = document.getElementById('communityList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const filter = document.getElementById('filterStatus').value; const { data, error } = await supabase.from('community_posts').select('*').eq('status', filter).order('created_at', { ascending: false }); if (error) { listEl.innerHTML = `<p style="color:red;">Erro: ${error.message}</p>`; return; } displayCommunityMessages(data); }
         function displayCommunityMessages(messages) { const listEl = document.getElementById('communityList'); if (!messages || messages.length === 0) { listEl.innerHTML = '<p>Nenhuma mensagem encontrada para este status.</p>'; return; } listEl.innerHTML = messages.map(msg => { const author = profilesMap.get(msg.user_id) || 'Anónimo'; const statusClass = { pending: 'status-pending', approved: 'status-approved', rejected: 'status-rejected'}[msg.status]; return `<div class="content-item"><div class="content-info"><div class="content-title">${author} <span class="status-badge ${statusClass}">${msg.status}</span></div><p style="margin: 10px 0; background: #fff; border-radius: 5px; border: 1px solid #ddd; padding: 10px;">${msg.content}</p><div class="content-module">Data: ${new Date(msg.created_at).toLocaleString('pt-BR')}</div></div><div class="content-actions">${msg.status !== 'approved' ? `<button class="btn btn-small" onclick="updateMessageStatus('${msg.id}', 'approved')">✅ Aprovar</button>` : ''}${msg.status !== 'rejected' ? `<button class="btn btn-small btn-danger" onclick="updateMessageStatus('${msg.id}', 'rejected')">❌ Rejeitar</button>` : ''}<button class="btn btn-small btn-danger" style="margin-left: 10px;" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button></div></div>`}).join(''); }
         async function updateMessageStatus(id, status) { const { error } = await supabase.from('community_posts').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id); if (error) showMessage('Erro ao atualizar status: ' + error.message, 'error'); else { showMessage(`Mensagem ${status === 'approved' ? 'aprovada' : 'rejeitada'}!`, 'success'); loadCommunityMessages(); } }
         async function deleteMessage(id) { if (!confirm('Tem a certeza que deseja excluir esta mensagem permanentemente?')) return; const { error } = await supabase.from('community_posts').delete().eq('id', id); if (error) showMessage('Erro ao excluir: ' + error.message, 'error'); else { showMessage('Mensagem excluída com sucesso!', 'success'); loadCommunityMessages(); } }
 
-        // --- EVENT LISTENERS E INICIALIZAÇÃO ---
         document.addEventListener('DOMContentLoaded', init);
         Object.assign(window, { 
             logout, switchTab, updateModuleSelects, updateSubModuleSelect, toggleContentInput, 
@@ -318,7 +240,8 @@
             resetModuleForm, editModule, deleteModule,
             loadContents, loadModules, loadSubModules,
             loadFeedPosts, resetFeedForm, editFeedPost, deleteFeedPost,
-            loadCommunityMessages, updateMessageStatus, deleteMessage
+            loadCommunityMessages, updateMessageStatus, deleteMessage,
+            resetProductForm, editProduct, deleteProduct, loadProducts
         });
     </script>
 </body>

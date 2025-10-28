@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guia Prático: 5 Táticas para Romper com a Ansiedade</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #f472b6; /* Rosa principal */
+            --light-pink-bg: #fdf2f8; /* Fundo muito claro */
+            --dark-pink-text: #831843; /* Texto rosa escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #fbcfe8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente rosa */
+            background: linear-gradient(135deg, var(--dark-pink-text), var(--primary-pink));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-pink-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-pink-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-pink);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-pink-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-pink);
+            padding-left: 10px;
+        }
+        .container > p {
+             font-size: 1rem;
+             line-height: 1.6;
+             margin-bottom: 1.5rem;
+             color: var(--text-color);
+        }
+
+        /* --- Estilo do Acordeão (Táticas) --- */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header {
+            background-color: var(--light-pink-bg);
+            color: var(--dark-pink-text);
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .accordion-header:hover {
+            background-color: #fce7f3;
+        }
+        .accordion-header .icon {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+            color: var(--primary-pink);
+        }
+        .accordion-header-title {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .accordion-chevron {
+            font-size: 1rem;
+            transition: transform 0.3s ease-out;
+            color: var(--primary-pink);
+        }
+
+        .accordion-content {
+            background-color: #fffbff; /* Um pouco diferente do bg claro */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+        }
+        .accordion-content-inner {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .accordion-content strong {
+            color: var(--dark-pink-text);
+        }
+        .accordion-content ul, .accordion-content ol {
+            padding-left: 20px;
+            margin-top: 0.5rem;
+            margin-bottom: 0;
+        }
+         .accordion-content li {
+             margin-bottom: 0.5rem;
+         }
+        .script-box {
+            background-color: #fdf2f8;
+            border: 1px dashed var(--primary-pink);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+
+        /* Lógica de Abertura do Acordeão */
+        .accordion-item.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 800px; /* altura máx. de segurança */
+        }
+        .accordion-item.active .accordion-header {
+            background-color: #fce7f3;
+        }
+
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-toolbox"></i>Guia de Sobrevivência: 5 Táticas</h1>
+        <p>Um guia interativo com ações rápidas para interromper o ciclo da ansiedade no momento em que ele começa.</p>
+    </header>
+
+    <h2><i class="fas fa-hammer"></i> Suas Ferramentas de Ação Rápida</h2>
+    <p>Explore cada tática clicando nela. Escolha uma ou duas para praticar hoje mesmo.</p>
+
+    <div class="accordion">
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-tag"></i> 1. Tática do Nome</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Objetivo:</strong> Separar você do pensamento ansioso.
+                    <p>A ansiedade adora se passar por você ("Eu sou incompetente"). Nomeá-la quebra essa fusão.</p>
+                    <strong>Como fazer:</strong>
+                    <ol>
+                        <li>Reconheça o pensamento ou a sensação física.</li>
+                        <li>Diga (em voz alta ou mentalmente) o script:</li>
+                    </ol>
+                    <div class="script-box">
+                       "Ok, percebi. Isto é <strong>a Ansiedade</strong> falando (ou se mostrando no corpo), não é a realidade. Eu não sou [o pensamento negativo], estou sentindo medo/preocupação, e isso vai passar."
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-compass"></i> 2. Redirecionar Foco (5-4-3-2-1)</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Objetivo:</strong> Trazer sua mente de volta para o presente, usando os sentidos.
+                    <p>A ansiedade vive no futuro imaginário. Esta técnica te ancora no aqui e agora.</p>
+                    <strong>Como fazer:</strong>
+                    <p>Olhe ao redor e nomeie mentalmente (descrevendo detalhes):</p>
+                    <ul>
+                        <li><strong>5</strong> coisas que você pode <strong>ver</strong> (cores, formas).</li>
+                        <li><strong>4</strong> coisas que você pode <strong>tocar</strong> (texturas, temperaturas).</li>
+                        <li><strong>3</strong> coisas que você pode <strong>ouvir</strong> (sons próximos e distantes).</li>
+                        <li><strong>2</strong> coisas que você pode <strong>cheirar</strong> (aromas no ambiente).</li>
+                        <li><strong>1</strong> coisa que você pode <strong>saborear</strong> (ou a sensação na sua boca).</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-stopwatch"></i> 3. Cronômetro de Limite</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                   <strong>Objetivo:</strong> Conter a ruminação, dando um tempo definido para ela.
+                    <p>Em vez de lutar contra a preocupação o dia todo, agende um "encontro" com ela.</p>
+                    <strong>Como fazer:</strong>
+                    <ol>
+                        <li>Quando a preocupação surgir fora de hora, diga: "Agora não. Te dou atenção às [defina um horário, ex: 17h]".</li>
+                        <li>No horário marcado, ative um cronômetro por <strong>5 a 10 minutos</strong>.</li>
+                        <li>Nesse tempo, permita-se pensar na preocupação (ou escrevê-la).</li>
+                        <li>Quando o timer tocar, <strong>pare</strong>. Diga: "Ok, por hoje chega." e mude o foco para outra atividade.</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-running"></i> 4. Corredor de Emergência (Corpo)</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Objetivo:</strong> Usar sensações físicas para acalmar o sistema nervoso rapidamente.
+                    <p>Quando a mente está em looping, o corpo pode ser a saída mais rápida.</p>
+                    <strong>Como fazer (escolha 1 ou 2):</strong>
+                    <ul>
+                        <li>💧 <strong>Água Fria:</strong> Jogue água fria no rosto e na nuca por 30 segundos.</li>
+                        <li>🧊 <strong>Gelo:</strong> Segure cubos de gelo nas mãos ou passe nos pulsos.</li>
+                        <li>🚶‍♀️ <strong>Caminhada Consciente:</strong> Ande por 2 minutos prestando atenção total nas solas dos pés tocando o chão.</li>
+                        <li>🌬️ <strong>Respiração 4-7-8:</strong> Inspire pelo nariz contando até 4, segure o ar contando até 7, expire pela boca contando até 8. Repita 4 vezes.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-balance-scale"></i> 5. Evidência Concreta</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Objetivo:</strong> Desafiar a narrativa da ansiedade com fatos reais.
+                    <p>A ansiedade adora generalizar e focar no negativo. Seja seu próprio "advogado(a) de defesa".</p>
+                    <strong>Como fazer:</strong>
+                    <ol>
+                        <li><strong>Identifique o Pensamento:</strong> Qual é a frase exata que a ansiedade está te dizendo? (Ex: "Vou falhar terrivelmente.")</li>
+                        <li><strong>Procure Fatos Contra:</strong> Liste 3 a 5 evidências reais do seu passado que mostram que esse pensamento não é 100% verdade. (Ex: "Já fiz apresentações que correram bem", "Recebi feedback positivo em X", "Superei desafio Y").</li>
+                        <li><strong>Crie a Alternativa Realista:</strong> Escreva uma frase mais equilibrada, baseada nos fatos. (Ex: "Posso sentir medo, mas tenho evidências de que sou capaz. Vou me preparar e fazer o meu melhor, o resultado não define meu valor.")</li>
+                    </ol>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="cta-box">
+        <h2><i class="fas fa-award"></i>A Prática Leva à Maestria</h2>
+        <p>Essas táticas são como músculos: quanto mais você usa, mais fortes elas ficam. Escolha uma para experimentar hoje. A cada pequena vitória contra o ciclo da ansiedade, você retoma o controle.</p>
+    </div>
+</div>
+
+<script>
+    // --- Lógica para o Acordeão (Abrir/Fechar) ---
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+
+            // Comportamento de "acordeão" (fecha os outros)
+            document.querySelectorAll('.accordion-item').forEach(i => {
+                if (i !== item && i.classList.contains('active')) {
+                    i.classList.remove('active');
+                    i.querySelector('.accordion-content').style.maxHeight = null;
+                }
+            });
+
+            // Abre ou fecha o item clicado
+            item.classList.toggle('active');
+            if (item.classList.contains('active')) {
+                // Ajusta a altura máxima dinamicamente
+                // Adiciona um pequeno buffer (ex: 20px) para garantir
+                content.style.maxHeight = (content.scrollHeight + 20) + 'px';
+            } else {
+                content.style.maxHeight = null;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

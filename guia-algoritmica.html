@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ansiedade Algorítmica: O Guia Prático</title>
+    <!-- Importando a biblioteca de ícones Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            --primary-purple: #6a11cb;
+            --secondary-blue: #2575fc;
+            --white: #ffffff;
+            --light-gray: #f7f8fa;
+            --text-color: #333;
+            --subtle-text: #555;
+            --sos-red: #fff5f5;
+            --sos-red-border: #f5c6cb;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, var(--primary-purple), var(--secondary-blue));
+            color: var(--text-color);
+            margin: 0;
+            padding: 2rem 1rem;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 800px;
+            background: var(--white);
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+            overflow: hidden;
+        }
+
+        header {
+            padding: 2rem 2.5rem 1.5rem 2.5rem;
+            text-align: center;
+            background-color: #fcfcff;
+            border-bottom: 1px solid #eee;
+        }
+
+        header h1 {
+            color: var(--primary-purple);
+            margin: 0 0 0.5rem 0;
+            font-size: 1.8rem;
+        }
+
+        header .subtitle {
+            font-size: 1rem;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        .accordion-container {
+            padding: 1.5rem;
+        }
+
+        .accordion-card {
+            border-radius: 12px;
+            margin-bottom: 1rem;
+            border: 1px solid #e0e0e0;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-card:last-child {
+            margin-bottom: 0;
+        }
+
+        .card-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            background-color: var(--white);
+            transition: background-color 0.2s ease;
+        }
+        
+        .accordion-card:not(.active):hover .card-header {
+            background-color: var(--light-gray);
+        }
+
+        .card-header .icon {
+            font-size: 1.25rem;
+            color: var(--primary-purple);
+            width: 24px;
+            text-align: center;
+        }
+
+        .card-header h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            flex-grow: 1;
+        }
+
+        .card-header .chevron {
+            font-size: 1rem;
+            color: var(--subtle-text);
+            transition: transform 0.3s ease-in-out;
+        }
+
+        .card-body {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+            background-color: var(--light-gray);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        
+        .card-body-content {
+             padding: 1rem 1.5rem 1.5rem 1.5rem;
+        }
+        
+        .card-body h4 {
+            margin-top: 1.2rem;
+            margin-bottom: 0.8rem;
+            color: var(--primary-purple);
+            font-weight: 700;
+        }
+        .card-body h4:first-child {
+            margin-top: 0;
+        }
+        
+        .card-body ul, .card-body ol {
+            padding-left: 20px;
+            margin: 0;
+        }
+        .card-body li {
+            margin-bottom: 0.5rem;
+        }
+        
+        .card-body strong {
+            color: #444;
+        }
+
+        /* Estilos de Abertura */
+        .accordion-card.active .card-header {
+             background-color: #f8f7ff;
+        }
+        .accordion-card.active .chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-card.active .card-body {
+            /* Valor de "auto" - ajuste conforme necessário */
+            max-height: 2000px; 
+        }
+
+        /* Destaques Especiais */
+        .sos-card .card-header {
+            background-color: var(--sos-red);
+            border-bottom: 1px solid var(--sos-red-border);
+        }
+        .sos-card .icon {
+            color: #d9534f;
+        }
+        .sos-card.active .card-body {
+             background-color: #fffbfa;
+        }
+        
+        .copy-box {
+            background-color: #eee;
+            border: 1px dashed #ccc;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+            font-family: monospace, monospace;
+            font-size: 0.9rem;
+            position: relative;
+        }
+        
+        .checklist ol {
+            list-style-type: none;
+            padding-left: 10px;
+        }
+        .checklist li {
+            position: relative;
+            padding-left: 25px;
+            margin-bottom: 0.8rem;
+        }
+        .checklist li strong {
+            color: var(--primary-purple);
+            font-size: 1rem;
+        }
+        .checklist li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            top: 2px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            color: var(--primary-purple);
+        }
+        
+        .final-note {
+            text-align: center;
+            padding: 1.5rem;
+            font-size: 0.9rem;
+            color: var(--subtle-text);
+        }
+
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <h1>Dicas Práticas para Diminuir a Ansiedade Algorítmica</h1>
+            <p class="subtitle">Zero teoria. Só passos simples que você aplica hoje.</p>
+        </header>
+
+        <main class="accordion-container">
+            <!-- Card 1: Como Usar (Aberto por padrão) -->
+            <div class="accordion-card active">
+                <div class="card-header">
+                    <i class="icon fas fa-book-open"></i>
+                    <h3>Como usar este manual</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <ul>
+                            <li><strong>Escolha 3 ações</strong> e aplique por <strong>7 dias</strong>.</li>
+                            <li>Volte e <strong>adicione mais 1–2</strong> por semana.</li>
+                            <li>Se escorregar, use o <strong>Plano SOS de 15 minutos</strong>.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 2: Check-in -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-stopwatch"></i>
+                    <h3>Check-in de 60 segundos (faça agora)</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <ol>
+                            <li><strong>Por que</strong> vou abrir a rede social?</li>
+                            <li><strong>Para quê</strong> (tarefa específica)?</li>
+                            <li><strong>Por quanto tempo</strong> (defina minutos)?</li>
+                            <li><strong>O que faço depois</strong> (próxima ação offline)?</li>
+                        </ol>
+                        <p style="margin-top: 1rem;"><strong>Se não souber responder, NÃO ABRA.</strong> Respire 5 vezes, levante, beba água.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 3: Ajustes no Celular -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-mobile-alt"></i>
+                    <h3>1) Ajustes no celular</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <small>Reserve 15 minutos para fazer isso, vale por meses.</small>
+                        <h4>A. Tela inicial minimalista</h4>
+                        <ul>
+                            <li>Deixe <strong>só 1 tela</strong>.</li>
+                            <li><strong>Dock</strong>: Telefone, Mensagens, Câmera e 1 app útil (Calendário/Notas).</li>
+                            <li>Crie a pasta <strong>“Atrito”</strong> e mova para a última página: redes sociais, jogos, etc.</li>
+                            <li>Remova widgets chamativos da home.</li>
+                        </ul>
+                        <h4>B. Notificações que importam</h4>
+                        <ul>
+                            <li>Desligue tudo de redes sociais, lojas e notícias.</li>
+                            <li>Mantenha <strong>apenas pessoas</strong> (ligações/DMs), banco e entregas.</li>
+                            <li>Grupos de WhatsApp: <strong>silenciar por 1 ano</strong> e <strong>arquivar</strong>.</li>
+                        </ul>
+                        <h4>C. Foco automático</h4>
+                        <ul>
+                            <li>Use <strong>Modo Foco/Não Perturbe</strong> com horários: trabalho, estudo, sono.</li>
+                        </ul>
+                         <h4>D. Limites visuais e de tempo</h4>
+                        <ul>
+                            <li>Ative <strong>escala de cinza</strong> à noite (reduz o “puxão” visual).</li>
+                            <li><strong>Tempo de Uso/Bem-estar Digital</strong>: limite 20–30 min/dia por app social.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 4: Higiene de Feed -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-filter"></i>
+                    <h3>2) Higiene de feed (você treina o algoritmo)</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <h4>A. Dieta de conteúdo em 3 passos</h4>
+                        <ol>
+                            <li><strong>Mute/Deixar de seguir</strong>: tudo que te acelera, irrita ou compara.</li>
+                            <li><strong>Siga “contas vitamina”</strong>: poucas, úteis, calmas.</li>
+                            <li><strong>Ensine o app</strong>: toque em <strong>“não tenho interesse”</strong> em 20 posts seguidos que são isca.</li>
+                        </ol>
+                        <h4>B. Autoplay & Recomendações</h4>
+                         <ul>
+                            <li>YouTube: <strong>desative Autoplay</strong>.</li>
+                            <li>Sempre assista por <strong>listas/assinaturas</strong>, nunca por "Para você".</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 5: Uso Intencional -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-bullseye"></i>
+                    <h3>3) Uso intencional (micro-hábitos)</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <ul>
+                            <li><strong>Âncoras de horário</strong>: redes sociais só <strong>após</strong> concluir uma tarefa (ex.: depois do café).</li>
+                            <li><strong>Pomodoro social</strong>: 25 min de foco → 5 min de checagem <strong>máximo</strong>.</li>
+                            <li><strong>Regra 3-2-1 Sono</strong>: 3h sem refeições pesadas, 2h sem trabalho, <strong>1h sem tela</strong>.</li>
+                            <li><strong>Fechamento consciente</strong>: ao encerrar, diga em voz baixa: “Pronto. Próxima ação é ___”.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 6: Mensagens -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-comments"></i>
+                    <h3>4) Mensagens, grupos e e-mail (sem caos)</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <ul>
+                            <li><strong>Caixa de entrada em lote</strong>: checar <strong>2x ao dia</strong> (ex: 11h e 16h). Fora desses horários, fechado.</li>
+                            <li><strong>Grupos grandes</strong>: silenciar + arquivar.</li>
+                            <li><strong>Respostas rápidas</strong> (use atalhos):</li>
+                        </ul>
+                        <div class="copy-box">“Já vi aqui. Volto até **:** com uma resposta.”</div>
+                        <div class="copy-box">“Consigo ver isso amanhã de manhã. Algo urgente mesmo?”</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 7: Rotinas -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-clock"></i>
+                    <h3>5) Rotinas que baixam a ansiedade</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <h4>Manhã (10 min)</h4>
+                        <ol>
+                            <li>2 copos d’água.</li>
+                            <li>5 respirações profundas na janela.</li>
+                            <li>1 pergunta no papel: <strong>“Qual é a tarefa que, se feita, deixa meu dia leve?”</strong></li>
+                            <li>Só depois abra o celular.</li>
+                        </ol>
+                        <h4>Trabalho/Estudo</h4>
+                        <ul>
+                            <li>Abra redes <strong>apenas</strong> em intervalos planejados.</li>
+                            <li>Coloque o celular <strong>longe do alcance do braço</strong>.</li>
+                        </ul>
+                        <h4>Noite</h4>
+                         <ul>
+                            <li>Carregador <strong>fora do quarto</strong>.</li>
+                            <li>Leitura leve de 10 min no papel.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 8: Plano SOS (DESTAQUE) -->
+            <div class="accordion-card sos-card">
+                <div class="card-header">
+                    <i class="icon fas fa-life-ring"></i>
+                    <h3>🚨 6) Plano SOS de 15 minutos</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <p>Quando bate o turbilhão, siga estes passos:</p>
+                        <ol>
+                            <li><strong>Desconecta</strong>: Ative Não Perturbe por 15 min.</li>
+                            <li><strong>Respira (4-7-8)</strong>: 4s entra, 7s segura, 8s solta (4 ciclos).</li>
+                            <li><strong>Pé no chão</strong>: sinta 5 coisas que vê, 4 que toca, 3 que ouve...</li>
+                            <li><strong>Passo físico</strong>: 10 agachamentos lentos ou 15 polichinelos.</li>
+                            <li><strong>Reset (Escreva)</strong>: "O que me disparou? O que realmente preciso? Qual o primeiro passo de 2 min agora?"</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 9: Desafio 7 Dias -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-calendar-alt"></i>
+                    <h3>7) Desafio de 7 dias (roteiro pronto)</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content checklist">
+                        <ol>
+                            <li><strong>Dia 1 – Limpeza:</strong> tela inicial mínima + pasta Atrito + limites de tempo.</li>
+                            <li><strong>Dia 2 – Notificações:</strong> só pessoas, banco, entregas. Resumo 2x/dia.</li>
+                            <li><strong>Dia 3 – Feed:</strong> 20 "não tenho interesse" + seguir 5 contas vitamina.</li>
+                            <li><strong>Dia 4 – Rotina:</strong> Pomodoro social + celular fora do alcance.</li>
+                            <li><strong>Dia 5 – Sono:</strong> 1h sem tela + escala de cinza à noite.</li>
+                            <li><strong>Dia 6 – Mensagens:</strong> lotes 11h/16h + respostas rápidas prontas.</li>
+                            <li><strong>Dia 7 – Revisão:</strong> o que funcionou? Mantenha 3 hábitos.</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 10: Scripts Prontos -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-clipboard"></i>
+                    <h3>8) Scripts prontos (copie e cole)</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <h4>Para amigos:</h4>
+                        <div class="copy-box">“Tô reduzindo notificações para focar. Se for urgente, me liga. Respondo msgs às 11h e 16h.”</div>
+                        <h4>Para grupos:</h4>
+                        <div class="copy-box">“Vou silenciar para reduzir ansiedade. Se eu for necessário, me marquem com @.”</div>
+                         <h4>Para você mesmo (nota fixa):</h4>
+                        <div class="copy-box">“Antes de abrir: por quê, para quê, quanto tempo, e depois?”</div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 11: Ferramentas -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-tools"></i>
+                    <h3>9) Ferramentas simples que ajudam</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <ul>
+                            <li>Timer físico (para o Pomodoro).</li>
+                            <li>Lista de papel colada no monitor.</li>
+                            <li>Fones de ouvido (para sinalizar concentração).</li>
+                            <li>Playlist curta (2 músicas) para iniciar tarefas.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 12: Manutenção -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-sync-alt"></i>
+                    <h3>10) Manutenção mensal</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                         <p>Reserve 30-60 minutos todo mês para:</p>
+                        <ul>
+                            <li><strong>Resetar feeds</strong>: mais 20 "não tenho interesse".</li>
+                            <li><strong>Desinstalar/reinstalar</strong> 1 app que te prende.</li>
+                            <li><strong>Rever limites</strong> de tempo e horários de foco.</li>
+                            <li><strong>Limpar grupos</strong>: saia de 2 que não agregam.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+             <!-- Card 13: Escorregar -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-undo"></i>
+                    <h3>11) Quando escorregar</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <p>É normal. <strong>Sem culpa.</strong></p>
+                        <p>Volte ao <strong>Plano SOS de 15 min</strong> e ao <strong>Check-in de 60s</strong>.</p>
+                        <p>Ajuste 1 coisa: aumente o atrito, reduza notificações ou mova o carregador de lugar.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Card 14: Lembrete -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-flag-checkered"></i>
+                    <h3>12) Lembrete final</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <p style="font-size: 1.1rem; text-align:center; font-weight: 600; color: var(--primary-purple);">
+                            Você treina seu ambiente. Pequenas alavancas, repetidas, mudam seu dia.
+                        </p>
+                        <p style="font-size: 1rem; text-align:center; margin-top:0.5rem;">Escolha 3 agora e comece.</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Card 15: Anexo -->
+            <div class="accordion-card">
+                <div class="card-header">
+                    <i class="icon fas fa-paperclip"></i>
+                    <h3>Anexo: Checklist por Plataforma</h3>
+                    <i class="fas fa-chevron-down chevron"></i>
+                </div>
+                <div class="card-body">
+                    <div class="card-body-content">
+                        <h4>YouTube</h4>
+                        <ul>
+                            <li>Autoplay <strong>OFF</strong>.</li>
+                            <li>Ocultar miniaturas (recomendações) com extensões de navegador.</li>
+                            <li>Usar apenas a aba <strong>Inscrições</strong> ou Playlists salvas.</li>
+                        </ul>
+                         <h4>WhatsApp</h4>
+                        <ul>
+                            <li>Notificações <strong>silenciosas</strong>.</li>
+                            <li>Mutar grupos por 1 ano.</li>
+                            <li><strong>Arquivar</strong> todas as conversas/grupos que não são urgentes.</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+        </main>
+        
+        <footer class="final-note">
+            <p>Este material é prático e complementar. Se a ansiedade estiver pesada, procure um profissional de saúde.</p>
+        </footer>
+    </div>
+
+    <script>
+        const accordionCards = document.querySelectorAll('.accordion-card');
+
+        accordionCards.forEach(card => {
+            const header = card.querySelector('.card-header');
+            
+            header.addEventListener('click', () => {
+                const wasActive = card.classList.contains('active');
+
+                // Fecha todos os cards
+                accordionCards.forEach(c => {
+                    c.classList.remove('active');
+                });
+
+                // Se o card clicado não estava ativo, abre ele
+                if (!wasActive) {
+                    card.classList.add('active');
+                }
+                // Se já estava ativo, o loop acima já o fechou.
+            });
+        });
+    </script>
+</body>
+</html>

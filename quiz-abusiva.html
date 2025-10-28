@@ -1,0 +1,488 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Sua Relação com a Ansiedade</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #a855f7; /* Violeta principal */
+            --light-purple-bg: #f5f3ff; /* Fundo muito claro */
+            --dark-purple-text: #581c87; /* Texto roxo escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #e9d5ff;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente lilás/violeta */
+            background: linear-gradient(135deg, var(--dark-purple-text), var(--primary-purple));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            overflow: hidden; /* Para as animações */
+        }
+
+        /* --- Telas (Start, Quiz, Result) --- */
+        .quiz-screen {
+            display: none; /* Escondido por padrão */
+            animation: fadeIn 0.5s ease-out;
+        }
+        .quiz-screen.active {
+            display: block;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Header / Tela Inicial --- */
+        .header {
+            text-align: center;
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-purple-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 2.5rem;
+            margin-bottom: 1rem;
+            color: var(--primary-purple);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+        .btn {
+            display: inline-block;
+            background-color: var(--primary-purple);
+            color: var(--white);
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            border: none;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, background-color 0.2s;
+            margin-top: 1.5rem;
+            width: 100%;
+        }
+        .btn:hover {
+            transform: translateY(-3px);
+            background-color: var(--dark-purple-text);
+        }
+
+        /* --- Tela do Quiz --- */
+        #progress-bar-container {
+            width: 100%;
+            background-color: #eee;
+            border-radius: 8px;
+            height: 12px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(90deg, var(--primary-purple), #c084fc);
+            transition: width 0.4s ease;
+        }
+        #question-counter {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--subtle-text);
+            text-align: center;
+            margin-bottom: 0.5rem;
+        }
+        #question-text {
+            font-size: 1.3rem;
+            font-weight: 600;
+            color: var(--dark-purple-text);
+            text-align: center;
+            min-height: 80px; /* Evita pulos de layout */
+            margin-bottom: 1.5rem;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 0.75rem;
+        }
+        .option-card {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            color: var(--text-color);
+            padding: 1rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            text-align: left;
+            transition: all 0.2s ease-out;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        .option-card:hover {
+            border-color: var(--primary-purple);
+            transform: translateX(5px);
+        }
+        .option-card.selected {
+            border-color: var(--primary-purple);
+            background-color: var(--light-purple-bg);
+            color: var(--dark-purple-text);
+            font-weight: 600;
+        }
+        .option-card::before { /* Círculo customizado */
+            content: '';
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid var(--border-color);
+            background: var(--white);
+            flex-shrink: 0;
+            transition: all 0.2s ease;
+        }
+        .option-card.selected::before {
+            background-color: var(--primary-purple);
+            border-color: var(--primary-purple);
+            box-shadow: 0 0 0 3px var(--white) inset;
+        }
+        
+        #prev-btn {
+            background: none;
+            border: none;
+            color: var(--subtle-text);
+            cursor: pointer;
+            margin-top: 1.5rem;
+            font-size: 0.9rem;
+        }
+        #prev-btn:hover {
+            color: var(--primary-purple);
+        }
+
+        /* --- Tela de Resultado --- */
+        .result-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+        #result-title {
+            font-size: 1.8rem;
+            margin-bottom: 0.5rem;
+        }
+        #result-text {
+            font-size: 1.1rem;
+            color: var(--subtle-text);
+            line-height: 1.6;
+            margin-bottom: 2rem;
+        }
+        /* Cores do Resultado */
+        .result-success { color: var(--success); }
+        .result-warning { color: var(--warning); }
+        .result-danger { color: var(--danger); }
+        
+        /* --- Seção "Próximos Passos" --- */
+        h2 {
+            color: var(--dark-purple-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-purple);
+            padding-left: 10px;
+            text-align: left;
+        }
+        .steps-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+            margin-top: 1.5rem;
+            text-align: left;
+        }
+        @media (min-width: 600px) {
+            .steps-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        .step-card {
+            background: var(--light-purple-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .step-card .icon {
+            font-size: 2rem;
+            color: var(--primary-purple);
+            margin-bottom: 1rem;
+        }
+        .step-card h3 {
+            margin: 0 0 0.5rem 0;
+            font-size: 1.1rem;
+            color: var(--dark-purple-text);
+        }
+        .step-card p {
+            font-size: 0.9rem;
+            color: var(--subtle-text);
+            margin: 0;
+            line-height: 1.5;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+
+    <div id="start-screen" class="quiz-screen active">
+        <header class="header">
+            <i class="icon fas fa-heart-crack"></i>
+            <h1>Você está em um Relacionamento Abusivo com a Ansiedade?</h1>
+            <p>A ansiedade deveria ser um alarme, mas às vezes ela se torna uma parceira tóxica. Ela mente, isola você e começa a ditar as regras da sua vida. Será que sua relação com ela passou dos limites? Esta autoavaliação te ajuda a reconhecer os sinais.</p>
+            <button id="start-btn" class="btn">Descobrir Agora</button>
+            </header>
+    </div>
+
+    <div id="quiz-screen" class="quiz-screen">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        <p id="question-counter">Pergunta 1 de 18</p>
+        <p id="question-text">Carregando...</p>
+        
+        <div id="options-container" class="options-grid">
+            </div>
+        
+        <button id="prev-btn"><i class="fas fa-arrow-left"></i> Voltar</button>
+    </div>
+
+    <div id="result-screen" class="quiz-screen">
+        <header class="header">
+            <i id="result-icon" class="result-icon"></i>
+            <h1 id="result-title"></h1>
+            <p id="result-text"></p>
+        </header>
+
+        <h2><i class="fas fa-key"></i>Iniciando o "Divórcio": 3 Passos Práticos</h2>
+        <div class="steps-grid">
+            <div class="step-card">
+                <i class="icon fas fa-brain"></i>
+                <h3>1. Nomeie (Autoanálise)</h3>
+                <p>Quando o pensamento vier, rotule-o. "Isso não sou eu, é a Ansiedade mentindo." Dar um nome tira o poder do pensamento.</p>
+            </div>
+            <div class="step-card">
+                <i class="icon fas fa-pause-circle"></i>
+                <h3>2. Pause (Autocontrole)</h3>
+                <p>Use a Técnica PARE. Crie um segundo de espaço entre o gatilho ansioso e sua reação. Respire. Esse segundo é onde sua liberdade começa.</p>
+            </div>
+            <div class="step-card">
+                <i class="icon fas fa-leaf"></i>
+                <h3>3. Reconecte (Autocura)</h3>
+                <p>Ligue para uma amiga. Faça uma caminhada de 5 minutos. Beba um copo d'água. Faça uma ação pequena e real que prove à ansiedade que ela não manda em você.</p>
+            </div>
+        </div>
+        
+        <button id="restart-btn" class="btn">Refazer Quiz</button>
+    </div>
+
+</div>
+
+<script>
+    // --- TEXTO DAS PERGUNTAS ALTERADO ---
+    const QUESTIONS = [
+        {id:1, text:'Você evita convites, eventos ou oportunidades por medo do que pode acontecer?'},
+        {id:2, text:'Quando você erra, sua autocrítica se transforma em um ataque pessoal ("sou incompetente")?'},
+        {id:3, text:'Você sente seu corpo em alerta (coração acelerado, tensão) com frequência?'},
+        {id:4, text:'Você fica presa(o) em pensamentos repetitivos, tentando prever todos os cenários?'},
+        {id:5, text:'Você pensa no pior cenário possível automaticamente (catastrofização)?'},
+        {id:6, text:'Você tem dificuldade de “desligar” à noite, resultando em sono agitado ou insônia?'},
+        {id:7, text:'Você inventa desculpas para não sair de casa e depois se arrepende?'},
+        {id:8, text:'Você se compara de forma injusta com os outros e conclui que "não é boa o suficiente"?'},
+        {id:9, text:'Você interpreta sinais físicos (como coração acelerado) como um perigo iminente (ex: "vou infartar")?'},
+        {id:10, text:'Você sente que precisa checar ou confirmar as coisas excessivamente para se sentir segura?'},
+        {id:11, text:'Você tenta adivinhar o que os outros estão pensando de você (leitura mental)?'},
+        {id:12, text:'Seu trabalho ou estudos invadem seus horários e espaços de descanso com frequência?'},
+        {id:13, text:'Você se sente isolada(o) e sente que está perdendo contato com pessoas importantes?'},
+        {id:14, text:'Você sente culpa ou ansiedade ao tentar descansar ou tirar férias?'},
+        {id:15, text:'Você tem crises intensas de ansiedade ou pânico que parecem surgir "do nada"?'},
+        {id:16, text:'Você adia decisões simples (como o que comer ou vestir) com medo de "escolher errado"?'},
+        {id:17, text:'Você costuma pensar em termos de "tudo ou nada" (se não for perfeito, é um fracasso total)?'},
+        {id:18, text:'Você tem dificuldade em estabelecer limites claros para seu tempo e sua energia (dizer "não")?'}
+    ];
+    // --- FIM DA ALTERAÇÃO ---
+
+    const SCALE_OPTIONS = [
+        {text:'Nunca', points:0},
+        {text:'Às vezes', points:1},
+        {text:'Frequentemente', points:2},
+        {text:'Quase sempre', points:3}
+    ];
+    
+    const MAX_SCORE = QUESTIONS.length * 3; // 18 * 3 = 54
+
+    // --- Elementos do DOM ---
+    const startScreen = document.getElementById('start-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    
+    const startBtn = document.getElementById('start-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const prevBtn = document.getElementById('prev-btn');
+    
+    const progressBar = document.getElementById('progress-bar');
+    const questionCounter = document.getElementById('question-counter');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+
+    const resultIcon = document.getElementById('result-icon');
+    const resultTitle = document.getElementById('result-title');
+    const resultText = document.getElementById('result-text');
+
+    // --- Estado do Quiz ---
+    let currentQuestionIndex = 0;
+    let answers = {}; // {1: 3, 2: 1, ...}
+
+    // --- Funções do Quiz ---
+    function startQuiz() {
+        currentQuestionIndex = 0;
+        answers = {};
+        startScreen.classList.remove('active');
+        resultScreen.classList.remove('active');
+        quizScreen.classList.add('active');
+        showQuestion();
+    }
+    
+    function showQuestion() {
+        if(currentQuestionIndex < 0 || currentQuestionIndex >= QUESTIONS.length) return;
+
+        const question = QUESTIONS[currentQuestionIndex];
+        
+        // Atualiza UI
+        questionText.textContent = question.text;
+        questionCounter.textContent = `Pergunta ${currentQuestionIndex + 1} de ${QUESTIONS.length}`;
+        progressBar.style.width = `${((currentQuestionIndex + 1) / QUESTIONS.length) * 100}%`;
+        
+        // Cria opções
+        optionsContainer.innerHTML = '';
+        SCALE_OPTIONS.forEach(option => {
+            const card = document.createElement('div');
+            card.className = 'option-card';
+            card.textContent = option.text;
+            
+            // Marca como selecionada se já houver resposta
+            if (answers[question.id] === option.points) {
+                card.classList.add('selected');
+            }
+            
+            // Adiciona evento
+            card.addEventListener('click', () => selectAnswer(question.id, option.points));
+            optionsContainer.appendChild(card);
+        });
+        
+        // Controla botão "Voltar"
+        prevBtn.style.display = (currentQuestionIndex === 0) ? 'none' : 'inline-block';
+    }
+
+    function selectAnswer(questionId, points) {
+        answers[questionId] = points;
+        
+        // Atualiza visualmente
+        const allCards = optionsContainer.querySelectorAll('.option-card');
+        allCards.forEach((card, index) => {
+            if (SCALE_OPTIONS[index].points === points) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+
+        // Atraso para o usuário ver o clique e avançar
+        setTimeout(() => {
+            if (currentQuestionIndex < QUESTIONS.length - 1) {
+                currentQuestionIndex++;
+                showQuestion();
+            } else {
+                showResult();
+            }
+        }, 400);
+    }
+    
+    function prevQuestion() {
+        if (currentQuestionIndex > 0) {
+            currentQuestionIndex--;
+            showQuestion();
+        }
+    }
+    
+    function showResult() {
+        quizScreen.classList.remove('active');
+        resultScreen.classList.add('active');
+        
+        let totalScore = 0;
+        for(let id in answers) {
+            totalScore += answers[id];
+        }
+        
+        const percentage = Math.round((totalScore / MAX_SCORE) * 100);
+        
+        let level;
+        if (percentage < 30) {
+            level = {
+                icon: 'fas fa-shield-alt result-success',
+                title: 'Influência Baixa',
+                text: 'Você parece manter uma boa autonomia diante da ansiedade, com sinais controláveis. Use as ferramentas para manter sua resiliência.'
+            };
+        } else if (percentage < 60) {
+            level = {
+                icon: 'fas fa-exclamation-triangle result-warning',
+                title: 'Influência Moderada',
+                text: 'A ansiedade parece interferir em algumas áreas da sua vida. Há um espaço claro para ganhos ao aplicar as técnicas de Autoanálise e Autocontrole.'
+            };
+        } else {
+            level = {
+                icon: 'fas fa-flag result-danger',
+                title: 'Influência Elevada',
+                text: 'A ansiedade parece exercer um controle significativo na sua rotina. Reconhecer isso é o primeiro e mais corajoso passo. Comece com ações pequenas e consistentes.'
+            };
+        }
+        
+        resultIcon.className = level.icon;
+        resultTitle.textContent = level.title;
+        resultText.textContent = level.text;
+    }
+
+    // --- Event Listeners ---
+    startBtn.addEventListener('click', startQuiz);
+    restartBtn.addEventListener('click', startQuiz);
+    prevBtn.addEventListener('click', prevQuestion);
+    
+</script>
+
+</body>
+</html>

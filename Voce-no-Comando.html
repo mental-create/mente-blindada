@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Você no Comando: Autocontrole</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-pink: #ec4899; /* Rosa/Magenta principal */
+            --light-pink-bg: #fdf2f8; /* Fundo muito claro */
+            --dark-pink-text: #9d174d; /* Texto rosa escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #fbcfe8;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente rosa/magenta */
+            background: linear-gradient(135deg, var(--dark-pink-text), var(--primary-pink));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-pink-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-pink-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-pink);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-pink-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-pink);
+            padding-left: 10px;
+        }
+
+        /* --- Ferramenta PARE (Interativa) --- */
+        .pare-tool {
+            background-color: var(--light-pink-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem 2rem 2rem 2rem;
+            overflow: hidden;
+        }
+        
+        .step-indicator {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--subtle-text);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .step-content {
+            min-height: 180px; /* Evita "pulos" de layout */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .step-content.is-changing {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .step-content-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .step-content-header .icon {
+            font-size: 1.5rem;
+            color: var(--primary-pink);
+            width: 30px;
+            height: 30px;
+            text-align: center;
+        }
+        .step-content-header h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--dark-pink-text);
+        }
+        .step-content p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+        
+        .nav-btn {
+            background-color: var(--primary-pink);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover {
+            background-color: var(--dark-pink-text);
+        }
+        #prevBtn {
+            background-color: #fff;
+            color: var(--text-color);
+            border: 1px solid #ccc;
+        }
+        #prevBtn:hover {
+            background-color: #f4f4f4;
+        }
+        
+        /* --- Kit de Emergência (Tabs) --- */
+        .kit-container {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--light-pink-bg);
+        }
+        .tab-nav {
+            display: flex;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--subtle-text);
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn:hover {
+            background-color: var(--light-pink-bg);
+        }
+        .tab-btn.active {
+            color: var(--dark-pink-text);
+            border-bottom: 3px solid var(--primary-pink);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active {
+            display: block;
+        }
+        
+        .kit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .kit-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+        .kit-item .icon {
+            font-size: 1rem;
+            color: var(--primary-pink);
+        }
+
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-hand-paper"></i>3º A: Autocontrole</h1>
+        <p>Autocontrole não é reprimir emoções, mas gerenciá-las. É a capacidade de inserir uma <strong>pausa</strong> entre o estímulo e a sua reação. Você é o comandante das suas respostas.</p>
+    </header>
+
+    <h2><i class="fas fa-pause-circle"></i>A Ferramenta da Pausa: PARE</h2>
+    <p>Use esta técnica no momento exato em que sentir a emoção forte surgindo. Siga os passos para interromper o piloto automático:</p>
+
+    <div class="pare-tool">
+        <div id="stepIndicator" class="step-indicator">Passo 1 de 4</div>
+        
+        <div id="stepContent" class="step-content">
+            </div>
+
+        <div class="step-navigation">
+            <button id="prevBtn" class="nav-btn">Anterior</button>
+            <button id="nextBtn" class="nav-btn">Próximo</button>
+        </div>
+    </div>
+    
+    <h2><i class="fas fa-first-aid"></i>Seu Kit de Emergência Pessoal</h2>
+    <p>Em momentos de ansiedade aguda, você precisa de um "kit de resgate" imediato. Escolha a ferramenta certa para o momento:</p>
+
+    <div class="kit-container">
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('tab1')">🧘‍♀️ Regulação (1-2 min)</button>
+            <button class="tab-btn" onclick="showTab('tab2')">🏃‍♂️ Distração (5-15 min)</button>
+            <button class="tab-btn" onclick="showTab('tab3')">🛡️ Blindagem (Longo Prazo)</button>
+        </nav>
+        
+        <div id="tab1" class="tab-content active">
+            <ul class="kit-list">
+                <li class="kit-item"><i class="icon fas fa-wind"></i> <strong>Respiração 4-7-8:</strong> Inspire por 4s, segure por 7s, expire por 8s.</li>
+                <li class="kit-item"><i class="icon fas fa-hand-rock"></i> <strong>Grounding (5-4-3-2-1):</strong> Identifique 5 coisas que vê, 4 que toca, etc. (Use o áudio do App!)</li>
+                <li class="kit-item"><i class="icon fas fa-arrows-alt-v"></i> <strong>Contagem Regressiva:</strong> Conte de 10 a 1 em voz alta, focando no som.</li>
+                <li class="kit-item"><i class="icon fas fa-snowflake"></i> <strong>Água Fria:</strong> Jogue água fria no rosto e na nuca para um "reset" sensorial.</li>
+            </ul>
+        </div>
+        
+        <div id="tab2" class="tab-content">
+            <ul class="kit-list">
+                <li class="kit-item"><i class="icon fas fa-walking"></i> <strong>Mudar de Ambiente:</strong> Levante-se e vá para outro cômodo ou tome ar fresco.</li>
+                <li class="kit-item"><i class="icon fas fa-music"></i> <strong>Playlist de Resgate:</strong> Ouça 3 minutos de música que mude seu humor.</li>
+                <li class="kit-item"><i class="icon fas fa-dumbbell"></i> <strong>Movimento Rápido:</strong> Faça 10 polichinelos ou um alongamento intenso.</li>
+                <li class="kit-item"><i class="icon fas fa-puzzle-piece"></i> <strong>Foco Externo:</strong> Organize algo simples (mesa, gaveta) por 5 minutos.</li>
+            </ul>
+        </div>
+        
+        <div id="tab3" class="tab-content">
+            <ul class="kit-list">
+                <li class="kit-item"><i class="icon fas fa-moon"></i> <strong>Higiene do Sono:</strong> Durma 7-8 horas. Cérebro cansado = menos autocontrole.</li>
+                <li class="kit-item"><i class="icon fas fa-running"></i> <strong>Exercício Físico:</strong> A melhor ferramenta de longo prazo para "queimar" o cortisol.</li>
+                <li class="kit-item"><i class="icon fas fa-users"></i> <strong>Conexão Social:</strong> Converse com alguém de confiança sobre algo *diferente* do problema.</li>
+                <li class="kit-item"><i class="icon fas fa-book-open"></i> <strong>Hobby Offline:</strong> Tenha uma atividade que te dê prazer sem telas (ler, tocar, cozinhar).</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="cta-box">
+        <h2><i class="fas fa-link"></i>Conectando os Pilares</h2>
+        <p>O Autocontrole liga tudo. Se no passo <strong>A (Acalme-se)</strong> você precisar de ajuda, use o <strong>Kit de Regulação</strong>. No passo <strong>R (Reavalie)</strong>, lembre-se das distorções que aprendeu no <strong>2º A: Autoanálise</strong>. A prática constante é o que constrói sua resiliência.</p>
+    </div>
+</div>
+
+<script>
+    // --- Dados para a Ferramenta PARE ---
+    const stepData = [
+        {
+            icon: "fas fa-pause",
+            title: "P: Pare.",
+            text: "Interrompa a espiral de pensamentos. Se estiver conversando, diga: 'Preciso de um momento.' Você está literalmente apertando o botão de pausa do piloto automático."
+        },
+        {
+            icon: "fas fa-lungs",
+            title: "A: Acalme-se.",
+            text: "Use sua fisiologia. Inspire lentamente (conte até 4) e expire ainda mais devagar (conte até 6). Isso envia um sinal de segurança imediato ao seu sistema nervoso."
+        },
+        {
+            icon: "fas fa-brain",
+            title: "R: Reavalie.",
+            text: "Use sua Autoanálise (o 2º A). Pergunte: 'Qual emoção estou sentindo?' e 'Qual é o FATO por trás disso, e qual é a minha INTERPRETAÇÃO (distorção)?'"
+        },
+        {
+            icon: "fas fa-check",
+            title: "E: Escolha a Ação.",
+            text: "Decida conscientemente como responder, em vez de reagir por impulso. A resposta pode ser: falar, esperar, ou usar uma ferramenta do seu Kit de Emergência."
+        }
+    ];
+
+    // --- Lógica da Ferramenta PARE ---
+    let currentStep = 1;
+    const totalSteps = stepData.length;
+
+    const stepIndicator = document.getElementById('stepIndicator');
+    const stepContent = document.getElementById('stepContent');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function showStep(stepIndex) {
+        const step = stepData[stepIndex - 1]; // stepIndex é 1-based
+
+        stepContent.innerHTML = `
+            <div class="step-content-header">
+                <i class="icon ${step.icon}"></i>
+                <h3>${step.title}</h3>
+            </div>
+            <p>${step.text}</p>
+        `;
+        
+        stepIndicator.textContent = `Passo ${stepIndex} de ${totalSteps}`;
+
+        // Atualiza botões
+        prevBtn.style.display = (stepIndex === 1) ? 'none' : 'inline-block';
+        nextBtn.textContent = (stepIndex === totalSteps) ? 'Refazer' : 'Próximo';
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+        } else {
+            // "Refazer"
+            currentStep = 1;
+        }
+        
+        stepContent.classList.add('is-changing');
+        setTimeout(() => {
+            showStep(currentStep);
+            stepContent.classList.remove('is-changing');
+        }, 300); // Duração da animação
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            stepContent.classList.add('is-changing');
+            setTimeout(() => {
+                showStep(currentStep);
+                stepContent.classList.remove('is-changing');
+            }, 300); // Duração da animação
+        }
+    });
+
+    // Inicializa no primeiro passo
+    showStep(1);
+
+    // --- Lógica das Abas (Kit de Emergência) ---
+    function showTab(tabId) {
+        // Esconde todos os conteúdos
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        // Desativa todos os botões
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        // Mostra o conteúdo e ativa o botão selecionado
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`).classList.add('active');
+    }
+
+</script>
+
+</body>
+</html>

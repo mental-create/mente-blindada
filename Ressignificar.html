@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ressignificar para Libertar: Autocura</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-purple: #c026d3; /* Magenta/Roxo principal */
+            --light-purple-bg: #fdf4ff; /* Fundo muito claro */
+            --dark-purple-text: #701a75; /* Texto roxo escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #f5d0fe;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente roxo/magenta */
+            background: linear-gradient(135deg, var(--dark-purple-text), var(--primary-purple));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-purple-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-purple-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-purple);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-purple-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-purple);
+            padding-left: 10px;
+        }
+        
+        .container > p {
+             font-size: 1rem;
+             line-height: 1.6;
+             margin-bottom: 1.5rem;
+             color: var(--text-color);
+        }
+
+        /* --- Ferramenta de Ressignificação (Passo a Passo) --- */
+        .step-tool {
+            background-color: var(--light-purple-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem 2rem 2rem 2rem;
+            overflow: hidden;
+            margin-top: 1.5rem;
+        }
+        
+        .step-indicator {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--subtle-text);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .step-content {
+            min-height: 180px; /* Evita "pulos" de layout */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .step-content.is-changing {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .step-content-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .step-content-header .icon {
+            font-size: 1.5rem;
+            color: var(--primary-purple);
+            width: 30px;
+            height: 30px;
+            text-align: center;
+        }
+        .step-content-header h3 {
+            margin: 0;
+            font-size: 1.4rem;
+            color: var(--dark-purple-text);
+        }
+        .step-content p {
+            font-size: 1rem;
+            line-height: 1.6;
+            margin: 0;
+        }
+        
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+        
+        .nav-btn {
+            background-color: var(--primary-purple);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover {
+            background-color: var(--dark-purple-text);
+        }
+        #prevBtn {
+            background-color: #fff;
+            color: var(--text-color);
+            border: 1px solid #ccc;
+        }
+        #prevBtn:hover {
+            background-color: #f4f4f4;
+        }
+
+        /* --- Ferramenta Carta de Perdão --- */
+        .forgiveness-tool {
+            background-color: var(--light-purple-bg);
+            border: 1px solid var(--border-color);
+            padding: 1.5rem;
+            border-radius: 12px;
+        }
+        .prompt-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+        }
+        .prompt-btn {
+            background: none;
+            border: 1px dashed var(--primary-purple);
+            color: var(--primary-purple);
+            padding: 0.5rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .prompt-btn:hover {
+            background-color: var(--white);
+            color: var(--dark-purple-text);
+        }
+        
+        #forgivenessTextarea {
+            width: 100%;
+            min-height: 150px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            font-family: 'Inter', sans-serif;
+            font-size: 1rem;
+            line-height: 1.6;
+            box-sizing: border-box; /* Importante para o padding */
+            transition: all 1s ease-out;
+        }
+        
+        #releaseBtn {
+            width: 100%;
+            margin-top: 1rem;
+            background-color: var(--primary-purple);
+            color: white;
+        }
+        
+        #forgivenessTextarea.is-releasing {
+            opacity: 0;
+            transform: scale(0.9) rotate(-3deg);
+            height: 0;
+            min-height: 0;
+            margin: 0;
+            padding: 0;
+            border: none;
+        }
+        
+        #releaseConfirmation {
+            display: none;
+            text-align: center;
+            padding: 2rem 1rem;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--dark-purple-text);
+            animation: fadeIn 0.5s ease;
+        }
+
+        /* --- Kit de Autocuidado (Tabs) --- */
+        .care-container {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+            background-color: var(--light-purple-bg);
+        }
+        .tab-nav {
+            display: flex;
+            background-color: #fff;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 1rem;
+            border: none;
+            background: none;
+            cursor: pointer;
+            font-size: 0.95rem;
+            font-weight: 600;
+            color: var(--subtle-text);
+            transition: all 0.2s ease;
+            border-bottom: 3px solid transparent;
+        }
+        .tab-btn:hover {
+            background-color: var(--light-purple-bg);
+        }
+        .tab-btn.active {
+            color: var(--dark-purple-text);
+            border-bottom: 3px solid var(--primary-purple);
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 1.5rem;
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .tab-content.active {
+            display: block;
+        }
+        
+        .kit-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .kit-item {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 0.75rem;
+            background-color: #fff;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            margin-bottom: 0.75rem;
+            font-size: 0.95rem;
+        }
+        .kit-item .icon {
+            font-size: 1rem;
+            color: var(--primary-purple);
+        }
+
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-purple), var(--dark-purple-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-dove"></i>4º A: Autocura</h1>
+        <p>A Autocura é o momento de cicatrizar as feridas, perdoar e construir sua nova base emocional. A cura não é apagar a dor, mas transformar o sofrimento em aprendizado.</p>
+    </header>
+
+    <h2><i class="fas fa-sync-alt"></i>1. Ressignificando a Dor (Transformação)</h2>
+    <p>A experiência dolorosa não pode ser apagada, mas o significado que damos a ela pode. Escolha um evento difícil e siga estes passos de reflexão:</p>
+    
+    <div class="step-tool">
+        <div id="stepIndicator" class="step-indicator">Passo 1 de 3</div>
+        
+        <div id="stepContent" class="step-content">
+            </div>
+
+        <div class="step-navigation">
+            <button id="prevBtn" class="nav-btn">Anterior</button>
+            <button id="nextBtn" class="nav-btn">Próximo</button>
+        </div>
+    </div>
+
+    <h2><i class="fas fa-feather-alt"></i>2. Ação Prática: A Carta de Liberação</h2>
+    <p>Perdoar é um ato de autocura. Você se liberta do peso emocional. Use esta ferramenta para escrever sua carta (para quem te feriu ou para si mesmo). <strong>Você não precisa enviá-la.</strong></p>
+
+    <div class="forgiveness-tool">
+        <div class="prompt-buttons">
+            <button class="prompt-btn" data-prompt="[Eu me sinto... (com raiva, triste, frustrado/a)] ...porque...&#10;&#10;">+ Adicionar Emoção</button>
+            <button class="prompt-btn" data-prompt="[A parte que mais me doeu foi quando..._]&#10;&#10;">+ Adicionar a Dor</button>
+            <button class="prompt-btn" data-prompt="[Eu escolho te perdoar (ou me perdoar) não por você, mas por mim. Eu escolho me libertar desse peso hoje.]&#10;">+ Adicionar Liberação</button>
+        </div>
+        <textarea id="forgivenessTextarea" placeholder="Comece a escrever aqui... Use os botões acima como guia se precisar."></textarea>
+        <button id="releaseBtn" class="nav-btn">Liberar (Descartar Carta)</button>
+        
+        <div id="releaseConfirmation">
+            <i class="fas fa-check-circle" style="font-size: 2rem; color: var(--primary-purple); margin-bottom: 1rem;"></i>
+            <p>Carta descartada. Peso liberado.<br>Você completou o ritual.</p>
+        </div>
+    </div>
+
+    <h2><i class="fas fa-leaf"></i>3. Cultivando a Cura: Seu Ritual de Autocuidado</h2>
+    <p>A Autocura exige rotinas diárias que reabastecem sua energia. Crie seu <strong>Kit de Autocuidado</strong>. Escolha uma ideia de cada categoria e torne-a sagrada:</p>
+
+    <div class="care-container">
+        <nav class="tab-nav">
+            <button class="tab-btn active" onclick="showTab('tab1')">💖 Emocional</button>
+            <button class="tab-btn" onclick="showTab('tab2')">🧘‍♀️ Físico/Sensorial</button>
+            <button class="tab-btn" onclick="showTab('tab3')">🤝 Social/Espiritual</button>
+        </nav>
+        
+        <div id="tab1" class="tab-content active">
+            <ul class="kit-list">
+                <li class="kit-item"><i class="icon fas fa-pen-fancy"></i> <strong>Escrita Livre (Fluxo de Pensamentos):</strong> 5 min de escrita sem filtro.</li>
+                <li class="kit-item"><i class="icon fas fa-grin-stars"></i> <strong>Diário de Gratidão:</strong> Anote 3 coisas simples que deram certo hoje.</li>
+                <li class="kit-item"><i class="icon fas fa-child"></i> <strong>Meditação do Abraço:</strong> Abrace-se literalmente por 30 segundos.</li>
+            </ul>
+        </div>
+        
+        <div id="tab2" class="tab-content">
+            <ul class="kit-list">
+                <li class="kit-item"><i class="icon fas fa-tree"></i> <strong>Conexão com a Natureza:</strong> 10 min de caminhada ou apenas sentir o sol.</li>
+                <li class="kit-item"><i class="icon fas fa-bath"></i> <strong>Ritual Sensorial:</strong> Um banho relaxante, aromaterapia ou uma bebida quente.</li>
+                <li class="kit-item"><i class="icon fas fa-bicycle"></i> <strong>Movimento Consciente:</strong> Ioga, dançar sua música favorita ou alongar.</li>
+            </ul>
+        </div>
+        
+        <div id="tab3" class="tab-content">
+            <ul class="kit-list">
+                <li class="kit-item"><i class="icon fas fa-comments"></i> <strong>Conexão Positiva:</strong> Envie uma mensagem de "oi" para um amigo querido.</li>
+                <li class="kit-item"><i class="icon fas fa-gamepad"></i> <strong>Hobby Offline:</strong> 20 min de uma atividade que você ama (sem telas).</li>
+                <li class="kit-item"><i class="icon fas fa-heart"></i> <strong>Ato de Gentileza:</strong> Faça algo pequeno e gentil por outra pessoa.</li>
+            </ul>
+        </div>
+    </div>
+
+    <div class="cta-box">
+        <h2><i class="fas fa-award"></i>O Fim do Protocolo é o Começo</h2>
+        <p>Você completou os 4 A's! A Autocura não é um destino, é uma prática. Combine este módulo com momentos de meditação ou visualização (como a do "Encontro com a Criança Interior"). A consistência no seu Ritual de Autocuidado é a chave para a paz duradoura.</p>
+    </div>
+</div>
+
+<script>
+    // --- Dados para a Ferramenta de Ressignificação ---
+    const stepData = [
+        {
+            icon: "fas fa-heart-broken",
+            title: "Passo 1: Reconhecer o Fato e a Dor",
+            text: "Acolha a emoção sem tentar minimizá-la ou fugir dela. Diga a si mesmo: 'Eu sinto muito que isso tenha acontecido. A dor foi real e é válido senti-la.'"
+        },
+        {
+            icon: "fas fa-lightbulb",
+            title: "Passo 2: O Que Você Aprendeu?",
+            text: "Pergunte-se: 'O que essa experiência me ensinou sobre mim? O que ela me mostrou sobre meus limites? De que forma (mesmo que pequena) isso me tornou mais resiliente?'"
+        },
+        {
+            icon: "fas fa-book",
+            title: "Passo 3: A Nova Narrativa",
+            text: "Mude o foco da história. 'Antes, isso era um trauma que me definia. Hoje, é a minha prova de resiliência.' Transforme a dor em uma parte da sua história de superação."
+        }
+    ];
+
+    // --- Lógica da Ferramenta de Ressignificação ---
+    let currentStep = 1;
+    const totalSteps = stepData.length;
+
+    const stepIndicator = document.getElementById('stepIndicator');
+    const stepContent = document.getElementById('stepContent');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function showStep(stepIndex) {
+        const step = stepData[stepIndex - 1]; // stepIndex é 1-based
+
+        stepContent.innerHTML = `
+            <div class="step-content-header">
+                <i class="icon ${step.icon}"></i>
+                <h3>${step.title}</h3>
+            </div>
+            <p>${step.text}</p>
+        `;
+        
+        stepIndicator.textContent = `Passo ${stepIndex} de ${totalSteps}`;
+
+        // Atualiza botões
+        prevBtn.style.display = (stepIndex === 1) ? 'none' : 'inline-block';
+        nextBtn.textContent = (stepIndex === totalSteps) ? 'Finalizar' : 'Próximo';
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+        } else {
+            // "Finalizar" -> Volta ao início
+            currentStep = 1;
+        }
+        
+        stepContent.classList.add('is-changing');
+        setTimeout(() => {
+            showStep(currentStep);
+            stepContent.classList.remove('is-changing');
+        }, 300); // Duração da animação
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            stepContent.classList.add('is-changing');
+            setTimeout(() => {
+                showStep(currentStep);
+                stepContent.classList.remove('is-changing');
+            }, 300); // Duração da animação
+        }
+    });
+
+    // Inicializa no primeiro passo
+    showStep(1);
+    
+    // --- Lógica da Carta de Perdão ---
+    const textarea = document.getElementById('forgivenessTextarea');
+    const releaseBtn = document.getElementById('releaseBtn');
+    const confirmation = document.getElementById('releaseConfirmation');
+    const promptBtns = document.querySelectorAll('.prompt-btn');
+
+    promptBtns.forEach(btn => {
+        btn.addEventListener('click', () => {
+            const promptText = btn.dataset.prompt;
+            textarea.value += promptText;
+            textarea.focus();
+        });
+    });
+
+    releaseBtn.addEventListener('click', () => {
+        // Aplica a classe de animação
+        textarea.classList.add('is-releasing');
+        releaseBtn.style.display = 'none';
+        document.querySelector('.prompt-buttons').style.display = 'none';
+        
+        // Após a animação (1s), esconde o textarea e mostra a confirmação
+        setTimeout(() => {
+            textarea.style.display = 'none';
+            confirmation.style.display = 'block';
+            
+            // Reseta para uma nova carta após 3s
+            setTimeout(() => {
+                confirmation.style.display = 'none';
+                textarea.style.display = 'block';
+                textarea.classList.remove('is-releasing');
+                textarea.value = '';
+                releaseBtn.style.display = 'block';
+                document.querySelector('.prompt-buttons').style.display = 'flex';
+            }, 3000);
+        }, 1000);
+    });
+
+    // --- Lógica das Abas (Kit de Autocuidado) ---
+    function showTab(tabId) {
+        document.querySelectorAll('.tab-content').forEach(content => {
+            content.classList.remove('active');
+        });
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+        });
+        
+        document.getElementById(tabId).classList.add('active');
+        document.querySelector(`.tab-btn[onclick="showTab('${tabId}')"]`).classList.add('active');
+    }
+
+</script>
+
+</body>
+</html>

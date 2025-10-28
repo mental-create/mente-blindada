@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>O Detetive da Mente: Quebrando Pensamentos</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-orange: #f97316; /* Laranja principal */
+            --light-orange-bg: #fff7ed; /* Fundo muito claro */
+            --dark-orange-text: #9a3412; /* Texto laranja escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #fee2e2;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente laranja/vermelho */
+            background: linear-gradient(135deg, var(--dark-orange-text), var(--primary-orange));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-orange-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-orange-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-orange);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-orange-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-orange);
+            padding-left: 10px;
+        }
+
+        /* --- Galeria de Distorções (Suspeitos) --- */
+        .distortion-gallery-container {
+            position: relative;
+            overflow-x: auto;
+            padding: 1rem 0 1.5rem 0;
+            /* Efeito de fade nas bordas para indicar scroll */
+            -webkit-mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+            mask-image: linear-gradient(to right, transparent 0%, black 5%, black 95%, transparent 100%);
+        }
+        .distortion-gallery {
+            display: flex;
+            gap: 1rem;
+            width: max-content;
+            padding: 0 1rem;
+        }
+        .distortion-card {
+            background-color: var(--light-orange-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1.5rem;
+            width: 250px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.03);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .distortion-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0,0,0,0.07);
+        }
+        .card-icon {
+            font-size: 1.5rem;
+            color: var(--primary-orange);
+            margin-bottom: 0.75rem;
+        }
+        .distortion-card strong {
+            display: block;
+            font-size: 1.1rem;
+            color: var(--dark-orange-text);
+            margin-bottom: 0.5rem;
+        }
+        .distortion-card .catchphrase {
+            font-style: italic;
+            font-size: 0.9rem;
+            color: var(--subtle-text);
+            margin-bottom: 0.75rem;
+        }
+        .distortion-card .example {
+            font-size: 0.9rem;
+            color: var(--text-color);
+        }
+
+        /* --- Ferramenta do Detetive (Interativa) --- */
+        .detective-tool {
+            background-color: var(--light-orange-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 16px;
+            padding: 1.5rem 2rem 2rem 2rem;
+            overflow: hidden;
+        }
+        
+        .step-indicator {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: var(--subtle-text);
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+        
+        .step-content {
+            min-height: 200px; /* Evita "pulos" de layout */
+            transition: opacity 0.3s ease, transform 0.3s ease;
+        }
+        .step-content.is-changing {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+        .step-content-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .step-content-header .icon {
+            font-size: 1.25rem;
+            color: var(--primary-orange);
+        }
+        .step-content-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+            color: var(--dark-orange-text);
+        }
+        .step-content p {
+            font-size: 1rem;
+            line-height: 1.6;
+        }
+        .example-thought {
+            background-color: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+        
+        .step-navigation {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+        
+        .nav-btn {
+            background-color: var(--primary-orange);
+            color: var(--white);
+            border: none;
+            border-radius: 8px;
+            padding: 0.75rem 1.5rem;
+            font-size: 0.95rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .nav-btn:hover {
+            background-color: var(--dark-orange-text);
+        }
+        #prevBtn {
+            background-color: #fff;
+            color: var(--text-color);
+            border: 1px solid #ccc;
+        }
+        #prevBtn:hover {
+            background-color: #f4f4f4;
+        }
+        
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-orange), var(--dark-orange-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-search"></i>2º A: Autoanálise</h1>
+        <p>Você será o detetive 🕵️‍♂️ da sua própria mente, investigando a veracidade e a origem dos pensamentos que geram desconforto. Isso é o coração do Protocolo 4A's.</p>
+    </header>
+
+    <h2><i class="fas fa-skull-crossbones"></i> Galeria de Suspeitos: Os Vilões da Mente</h2>
+    <div class="distortion-gallery-container">
+        <div class="distortion-gallery">
+            <div class="distortion-card">
+                <i class="card-icon fas fa-bomb"></i>
+                <strong>Catastrofização</strong>
+                <p class="catchphrase">"Tudo vai dar errado!"</p>
+                <p class="example">"Se eu falhar na apresentação, serei demitido e nunca mais conseguirei um emprego."</p>
+            </div>
+            <div class="distortion-card">
+                <i class="card-icon fas fa-user-secret"></i>
+                <strong>Leitura Mental</strong>
+                <p class="catchphrase">"Eu sei o que você está pensando..."</p>
+                <p class="example">"Ele não me ligou, então *com certeza* está chateado comigo."</p>
+            </div>
+            <div class="distortion-card">
+                <i class="card-icon fas fa-infinity"></i>
+                <strong>Generalização Excessiva</strong>
+                <p class="catchphrase">"Sempre / Nunca"</p>
+                <p class="example">"Eu errei neste projeto, **sempre** estrago tudo o que tento."</p>
+            </div>
+            <div class="distortion-card">
+                <i class="card-icon fas fa-filter"></i>
+                <strong>Filtro Mental</strong>
+                <p class="catchphrase">"Só o negativo importa."</p>
+                <p class="example">"Recebi 10 elogios e 1 crítica. Adivinha em qual eu não paro de pensar?"</p>
+            </div>
+            <div class="distortion-card">
+                <i class="card-icon fas fa-toggle-off"></i>
+                <strong>Tudo ou Nada</strong>
+                <p class="catchphrase">"Perfeito ou um fracasso."</p>
+                <p class="example">"Se meu relacionamento não for perfeito, então ele é um fracasso total."</p>
+            </div>
+            <div class="distortion-card">
+                <i class="card-icon fas fa-tag"></i>
+                <strong>Rotulação</strong>
+                <p class="catchphrase">"Eu sou..."</p>
+                <p class="example">"Eu errei. Portanto, 'Eu SOU um fracasso'." (Em vez de "Eu FIZ algo errado").</p>
+            </div>
+        </div>
+    </div>
+    
+    <h2><i class="fas fa-lightbulb"></i> A Ferramenta do Detetive (Sua Vez!)</h2>
+    <p>Use este fluxo de investigação para quebrar qualquer um dos "vilões" acima. Vamos usar um exemplo prático para te guiar.</p>
+
+    <div class="detective-tool">
+        <div id="stepIndicator" class="step-indicator">Passo 1 de 5</div>
+        
+        <div id="stepContent" class="step-content">
+            </div>
+
+        <div class="step-navigation">
+            <button id="prevBtn" class="nav-btn">Anterior</button>
+            <button id="nextBtn" class="nav-btn">Próximo</button>
+        </div>
+    </div>
+    
+    <div class="cta-box">
+        <h2><i class="fas fa-clipboard-check"></i> Próxima Missão: O Caderno de Sentenças</h2>
+        <p>Pegue um bloco de notas. Toda vez que sentir uma emoção forte (ansiedade, raiva), anote a "sentença" que sua mente declarou. Depois, use a técnica do Detetive para reescrevê-la, baseada em fatos. Isso constrói o seu músculo de Autoanálise.</p>
+    </div>
+</div>
+
+<script>
+    // --- Dados para a Ferramenta Interativa ---
+    const stepData = [
+        {
+            icon: "fas fa-exclamation-triangle",
+            title: "Passo 1: O Pensamento Automático (O Suspeito)",
+            text: "Primeiro, identifique a crença limitante ou o pensamento negativo que está ativando suas emoções. É o 'vilão' que aparece sem ser convidado.",
+            example: 'Exemplo: "Eu nunca serei bom o suficiente." <br>(Distorção: Generalização Excessiva e Rotulação)'
+        },
+        {
+            icon: "fas fa-search",
+            title: "Passo 2: O Questionamento (A Investigação)",
+            text: "Seja o advogado de defesa de si mesmo. Questione a validade desse pensamento. Ele é 100% verdade, 100% do tempo? Existe alguma exceção?",
+            example: 'Pergunta-chave: "Nunca? Nem mesmo em UMA área? Qual o impacto real desse pensamento na minha vida? (R: Me faz sentir paralisado)." '
+        },
+        {
+            icon: "fas fa-file-alt",
+            title: "Passo 3: As Evidências (Os Fatos)",
+            text: "Procure fatos concretos que provam o contrário do pensamento. Não procure sentimentos, procure ações e resultados reais do seu passado.",
+            example: "<strong>Evidência Contra:</strong> Fui elogiado pelo meu esforço semana passada.<br><strong>Evidência Contra:</strong> Eu consegui terminar um curso difícil.<br><strong>Evidência Contra:</strong> Meus amigos confiam em mim para pedir ajuda."
+        },
+        {
+            icon: "fas fa-gavel",
+            title: "Passo 4: O Veredito (O Pensamento Alternativo)",
+            text: "Crie uma declaração mais justa, equilibrada e funcional, baseada nas suas evidências. Esta é a sua nova 'sentença', a realidade.",
+            example: 'Veredito: "Eu sou um trabalho em progresso. Tenho pontos fortes e áreas que estou melhorando. Meu valor não está na perfeição, mas no meu esforço e crescimento."'
+        },
+        {
+            icon: "fas fa-check-circle",
+            title: "Análise Concluída!",
+            text: "Parabéns! Você aplicou a Autoanálise e transformou uma crença limitante em uma visão mais realista e empoderadora. Você está no comando da sua mente.",
+            example: "Use este poder! Você acabou de provar que pensamentos são apenas pensamentos, não fatos. Repita isso sempre que um 'vilão' aparecer."
+        }
+    ];
+
+    // --- Lógica da Ferramenta ---
+    let currentStep = 1;
+    const totalSteps = stepData.length;
+
+    const stepIndicator = document.getElementById('stepIndicator');
+    const stepContent = document.getElementById('stepContent');
+    const prevBtn = document.getElementById('prevBtn');
+    const nextBtn = document.getElementById('nextBtn');
+
+    function showStep(stepIndex) {
+        const step = stepData[stepIndex - 1]; // stepIndex é 1-based
+
+        stepContent.innerHTML = `
+            <div class="step-content-header">
+                <i class="icon ${step.icon}"></i>
+                <h3>${step.title}</h3>
+            </div>
+            <p>${step.text}</p>
+            <div class="example-thought">${step.example}</div>
+        `;
+        
+        stepIndicator.textContent = `Passo ${stepIndex} de ${totalSteps}`;
+
+        // Atualiza botões
+        prevBtn.style.display = (stepIndex === 1) ? 'none' : 'inline-block';
+        nextBtn.textContent = (stepIndex === totalSteps) ? 'Refazer' : 'Próximo';
+    }
+
+    nextBtn.addEventListener('click', () => {
+        if (currentStep < totalSteps) {
+            currentStep++;
+        } else {
+            // "Refazer"
+            currentStep = 1;
+        }
+        
+        stepContent.classList.add('is-changing');
+        setTimeout(() => {
+            showStep(currentStep);
+            stepContent.classList.remove('is-changing');
+        }, 300); // Duração da animação
+    });
+
+    prevBtn.addEventListener('click', () => {
+        if (currentStep > 1) {
+            currentStep--;
+            stepContent.classList.add('is-changing');
+            setTimeout(() => {
+                showStep(currentStep);
+                stepContent.classList.remove('is-changing');
+            }, 300); // Duração da animação
+        }
+    });
+
+    // Inicializa no primeiro passo
+    showStep(1);
+
+</script>
+
+</body>
+</html>

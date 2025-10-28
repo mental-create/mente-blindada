@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cronômetro da Preocupação: Limites com Hora Marcada</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-rose: #f43f5e; /* Rosé/Vermelho Claro principal */
+            --light-rose-bg: #fff1f2; /* Fundo muito claro */
+            --dark-rose-text: #881337; /* Texto vermelho escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #fecdd3;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente rosé */
+            background: linear-gradient(135deg, var(--dark-rose-text), var(--primary-rose));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-rose-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-rose-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-rose);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-rose-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-rose);
+            padding-left: 10px;
+        }
+        .container > p {
+             font-size: 1rem;
+             line-height: 1.6;
+             margin-bottom: 1.5rem;
+             color: var(--text-color);
+        }
+
+        /* --- Estilo do Acordeão --- */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header {
+            background-color: var(--light-rose-bg);
+            color: var(--dark-rose-text);
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .accordion-header:hover {
+            background-color: #ffe4e6;
+        }
+        .accordion-header .icon {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+            color: var(--primary-rose);
+        }
+        .accordion-header-title {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .accordion-chevron {
+            font-size: 1rem;
+            transition: transform 0.3s ease-out;
+            color: var(--primary-rose);
+        }
+
+        .accordion-content {
+            background-color: #fffbfa; /* Levemente diferente do bg claro */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+        }
+        .accordion-content-inner {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .accordion-content strong {
+            color: var(--dark-rose-text);
+        }
+        .accordion-content ol {
+             padding-left: 20px;
+             margin-top: 0.5rem;
+             margin-bottom: 0;
+         }
+         .accordion-content li {
+             margin-bottom: 0.5rem;
+         }
+         .script-box {
+            background-color: var(--light-rose-bg);
+            border: 1px dashed var(--primary-rose);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            font-style: italic;
+        }
+        .example-list {
+            list-style: none;
+            padding-left: 0;
+        }
+        .example-list li::before {
+             content: '📌'; /* Tachinha */
+             margin-right: 8px;
+         }
+
+        /* Lógica de Abertura do Acordeão */
+        .accordion-item.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 800px; /* altura máx. de segurança */
+        }
+        .accordion-item.active .accordion-header {
+            background-color: #ffe4e6;
+        }
+
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-rose), var(--dark-rose-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-hourglass-half"></i>Cronômetro da Preocupação</h1>
+        <p>Transforme a ruminação sem fim em uma tarefa com hora marcada. Recupere o controle do seu tempo mental.</p>
+    </header>
+
+    <h2><i class="fas fa-info-circle"></i> Como Usar Esta Técnica</h2>
+    <p>A ansiedade adora roubar seu tempo com preocupações repetitivas. Esta técnica te ensina a dar limites claros para ela. Explore os passos:</p>
+
+    <div class="accordion">
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-bullseye"></i> O Que é e Por Quê Funciona?</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>O que é:</strong> Uma técnica onde você agenda um horário específico e limitado (ex: 5-10 minutos) por dia para se dedicar *intencionalmente* às suas preocupações. Fora desse horário, você "adia" a preocupação.
+                    <br><br>
+                    <strong>Por quê funciona:</strong>
+                    <ul>
+                        <li><strong>Quebra a Ruminação:</strong> Interrompe o ciclo de pensar repetidamente no problema sem chegar a uma solução.</li>
+                        <li><strong>Ensina Limites:</strong> Mostra à sua mente que a preocupação tem hora e lugar, não pode dominar seu dia inteiro.</li>
+                        <li><strong>Reduz a Urgência Falsa:</strong> Muitas preocupações parecem urgentes, mas ao adiá-las, você percebe que a maioria pode esperar.</li>
+                        <li><strong>Cria Foco:</strong> Na "hora da preocupação", você pode focar em resolver (se possível) em vez de apenas sentir.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-calendar-alt"></i> Passo 1: Agende Seu Horário</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Escolha um horário fixo e uma duração curta.</strong>
+                    <ul>
+                        <li><strong>Horário:</strong> Escolha um momento do dia em que você geralmente tem um tempo livre, mas que NÃO seja perto da hora de dormir (ex: 17:30, 19:00).</li>
+                        <li><strong>Duração:</strong> Comece com <strong>5 a 10 minutos</strong>. É surpreendente o quanto você pode processar nesse tempo focado.</li>
+                        <li><strong>Local:</strong> Se possível, tenha um local específico para isso (uma cadeira, um canto da sala).</li>
+                    </ul>
+                    <p><strong>Exemplo:</strong> "Minha Hora da Preocupação será todo dia às 17:30, por 10 minutos, na poltrona da sala."</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-parking"></i> Passo 2: Estacione as Preocupações</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Quando uma preocupação surgir fora do horário agendado:</strong>
+                    <ol>
+                        <li><strong>Reconheça:</strong> Note o pensamento ("Ok, estou preocupada com X").</li>
+                        <li><strong>Adie (Use o Script):</strong> Diga a si mesma (veja a dica bônus abaixo) que agora não é a hora, mas que você dará atenção no horário marcado.</li>
+                        <li><strong>Anote (Opcional, mas útil):</strong> Tenha um "caderno de estacionamento" ou use o bloco de notas do celular para anotar a preocupação. Isso "tira" ela da sua cabeça e garante que não será esquecida.</li>
+                    </ol>
+                    <strong>Exemplos do que "estacionar":</strong>
+                    <ul class="example-list">
+                        <li>Lembrar das contas do mês.</li>
+                        <li>Pensar na conversa difícil que precisa ter.</li>
+                        <li>Preocupar-se com um exame médico futuro.</li>
+                        <li>Repassar mentalmente um erro que cometeu.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-stopwatch"></i> Passo 3: A Sessão Cronometrada</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Chegou a hora agendada? Siga estes passos:</strong>
+                    <ol>
+                        <li><strong>Prepare-se:</strong> Vá para o seu local definido. Pegue seu "caderno de estacionamento", se usou.</li>
+                        <li><strong>Ative o Timer:</strong> Use o cronômetro do seu celular ou um timer físico para a duração definida (5-10 min).</li>
+                        <li><strong>Foco Total:</strong> Durante esse tempo, permita-se pensar, sentir ou escrever sobre as preocupações anotadas (ou as que surgirem). Se puder, pense em *um* pequeno passo para resolver algo.</li>
+                        <li><strong>PARE Quando Tocar:</strong> Este é o passo mais importante. Quando o alarme tocar, PARE. Feche o caderno. Levante-se.</li>
+                        <li><strong>Mude o Foco:</strong> Imediatamente engaje em outra atividade (ouvir música, preparar o jantar, conversar com alguém). Dispense a ansiedade até o dia seguinte.</li>
+                    </ol>
+                    <p><strong>A disciplina de PARAR é o que treina seu cérebro.</strong></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-comment-dots"></i> Dica Bônus: O Script de Limite</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Use esta frase (em voz alta ou mentalmente) quando a preocupação aparecer fora de hora:</strong>
+                    <div class="script-box">
+                        "Obrigada pelo alerta, Ansiedade. Percebi sua presença. <strong>Mas agora não é o seu horário.</strong><br>
+                        Às [seu horário agendado, ex: 17:30], eu vou te dar [sua duração, ex: 10 minutos] de atenção total.<br>
+                        Até lá, peço que espere. Agora preciso focar em [o que você estava fazendo]."
+                    </div>
+                    <p>Adaptar a frase com suas palavras pode torná-la mais poderosa para você.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cta-box">
+        <h2><i class="fas fa-clock"></i>Retome o Controle do Seu Tempo</h2>
+        <p>A preocupação não precisa ser uma visitante constante e indesejada. Com o Cronômetro da Preocupação, você define os termos da visita. Pratique essa técnica e observe como seu tempo mental começa a se libertar.</p>
+    </div>
+</div>
+
+<script>
+    // --- Lógica para o Acordeão (Abrir/Fechar) ---
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+
+            // Comportamento de "acordeão" (fecha os outros)
+            document.querySelectorAll('.accordion-item').forEach(i => {
+                if (i !== item && i.classList.contains('active')) {
+                    i.classList.remove('active');
+                    i.querySelector('.accordion-content').style.maxHeight = null;
+                }
+            });
+
+            // Abre ou fecha o item clicado
+            item.classList.toggle('active');
+            if (item.classList.contains('active')) {
+                // Ajusta a altura máxima dinamicamente
+                content.style.maxHeight = (content.scrollHeight + 20) + 'px'; // +20px buffer
+            } else {
+                content.style.maxHeight = null;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

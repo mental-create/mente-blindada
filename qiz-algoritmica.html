@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz: Ansiedade Algorítmica</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+
+        :root {
+            /* Mantive as cores de status para os resultados */
+            --cor-sucesso: #10B981;
+            --cor-alerta: #F59E0B;
+            --cor-perigo: #EF4444;
+            --cor-critico: #B91C1C;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            /* Fundo gradiente azul/roxo, como solicitado */
+            background: linear-gradient(135deg, #1e3a8a 0%, #4c1d95 100%);
+            color: #f9fafb; /* Texto padrão claro */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .quiz-container {
+            /* Efeito "Glassmorphism" */
+            background-color: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px); /* Suporte para Safari */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 20px; /* Cantos mais arredondados */
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            max-width: 600px;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .quiz-header {
+            padding: 40px;
+            text-align: center;
+        }
+
+        .quiz-header h1 {
+            font-size: 2.2em;
+            color: #ffffff;
+            margin-bottom: 10px;
+        }
+
+        .quiz-header p {
+            font-size: 1.1em;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .btn {
+            /* Botão com gradiente moderno */
+            background: linear-gradient(90deg, #ec4899 0%, #d946ef 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 14px 28px;
+            font-size: 1em;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(236, 72, 153, 0.4);
+        }
+
+        #quiz-screen {
+            padding: 40px;
+        }
+
+        #question-text {
+            font-size: 1.5em;
+            font-weight: 600;
+            margin-bottom: 25px;
+            min-height: 70px; /* Mais espaço para o texto */
+            color: #ffffff;
+        }
+
+        /* Botões de opção estilo "glass" */
+        #options-container .option-btn {
+            display: block;
+            width: 100%;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 10px;
+            font-size: 1em;
+            text-align: left;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #ffffff; /* Texto das opções branco */
+        }
+
+        #options-container .option-btn:hover {
+            background-color: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Opção selecionada usa o gradiente de destaque */
+        #options-container .option-btn.selected {
+            background: linear-gradient(90deg, #ec4899 0%, #d946ef 100%);
+            border-color: #ec4899;
+            color: white;
+            font-weight: 600;
+        }
+
+        #options-container .option-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.9;
+        }
+
+        #progress-container {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        #progress-bar-container {
+            /* Fundo da barra de progresso semi-transparente */
+            background-color: rgba(255, 255, 255, 0.2);
+            height: 8px;
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        #progress-bar {
+            /* Preenchimento da barra com o gradiente */
+            background: linear-gradient(90deg, #ec4899 0%, #d946ef 100%);
+            width: 0%;
+            height: 100%;
+            transition: width 0.4s ease;
+        }
+
+        #progress-text {
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .result-card {
+            padding: 40px;
+            text-align: left;
+            animation: fadeIn 0.5s ease;
+            /* Trocado border-top por border-left, mais moderno */
+            border-left-width: 5px;
+            border-left-style: solid;
+        }
+
+        .result-card h2 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .result-card .score-text {
+            font-size: 1.2em;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .result-card .description {
+            font-size: 1em;
+            line-height: 1.6;
+            margin-bottom: 25px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .result-card h3 {
+            font-size: 1.3em;
+            margin-bottom: 15px;
+            color: #ffffff;
+        }
+
+        .result-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .result-card ul li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+            line-height: 1.5;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
+        .result-card ul li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        /* Cores dos Resultados */
+        #result-10 { border-color: var(--cor-sucesso); }
+        #result-10 h2, #result-10 ul li::before { color: var(--cor-sucesso); }
+
+        #result-16 { border-color: var(--cor-alerta); }
+        #result-16 h2, #result-16 ul li::before { color: var(--cor-alerta); }
+
+        #result-26 { border-color: var(--cor-perigo); }
+        #result-26 h2, #result-26 ul li::before { color: var(--cor-perigo); }
+
+        #result-36 { border-color: var(--cor-critico); }
+        #result-36 h2, #result-36 ul li::before { color: var(--cor-critico); }
+
+        #final-message {
+            /* Painel inferior com fundo mais escuro para destacar */
+            background-color: rgba(0, 0, 0, 0.15);
+            padding: 30px 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.2);
+            text-align: center;
+            line-height: 1.6;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="quiz-container">
+
+        <div id="start-screen" class="quiz-header">
+            <h1>🧠</h1>
+            <h1>Você está sofrendo de<br>Ansiedade Algorítmica?</h1>
+            <p>Responda 10 perguntas rápidas para identificar se seus hábitos digitais estão afetando seu bem-estar.</p>
+            <button id="start-btn" class="btn">Começar o Quiz</button>
+        </div>
+
+        <div id="quiz-screen" class="hidden">
+            <h2 id="question-text"></h2>
+            <div id="options-container"></div>
+            
+            <div id="progress-container">
+                <div id="progress-bar-container">
+                    <div id="progress-bar"></div>
+                </div>
+                <p id="progress-text"></p>
+            </div>
+        </div>
+
+        <div id="results-screen" class="hidden">
+            
+            <div id="result-10" class="result-card hidden">
+                <h2>✅ NÍVEL BAIXO: Uso Saudável</h2>
+                <p class="score-text">Sua pontuação: <span></span></p>
+                <p class="description">Parabéns! Você mantém uma relação equilibrada com as redes sociais. Seus hábitos digitais são saudáveis e você estabelece limites claros.</p>
+                <h3>Dicas para manter o equilíbrio:</h3>
+                <ul>
+                    <li>Continue respeitando seus horários de desconexão.</li>
+                    <li>Preserve momentos de privacidade sem necessidade de compartilhar tudo.</li>
+                    <li>Use as redes como ferramenta, não como fonte de validação.</li>
+                </ul>
+            </div>
+
+            <div id="result-16" class="result-card hidden">
+                <h2>⚠️ NÍVEL MODERADO: Atenção Necessária</h2>
+                <p class="score-text">Sua pontuação: <span></span></p>
+                <p class="description">Você apresenta sinais moderados de ansiedade algorítmica. Alguns hábitos estão começando a afetar seu bem-estar. É o momento ideal para fazer ajustes.</p>
+                <h3>Dicas para reduzir a ansiedade:</h3>
+                <ul>
+                    <li>Estabeleça horários específicos para usar as redes.</li>
+                    <li>Desative notificações não essenciais.</li>
+                    <li>Pratique o "detox digital" por algumas horas diárias.</li>
+                    <li>Cultive hobbies e atividades offline.</li>
+                    <li>Questione-se: "Estou usando as redes ou elas estão me usando?"</li>
+                </ul>
+            </div>
+
+            <div id="result-26" class="result-card hidden">
+                <h2>🚩 NÍVEL ALTO: Intervenção Recomendada</h2>
+                <p class="score-text">Sua pontuação: <span></span></p>
+                <p class="description">Seus hábitos digitais estão impactando sua saúde mental e autoestima. É fundamental tomar medidas imediatas para recuperar o controle.</p>
+                <h3>Dicas urgentes para reverter o quadro:</h3>
+                <ul>
+                    <li>Considere buscar ajuda profissional (psicólogo).</li>
+                    <li>Faça um detox digital mais prolongado (ex: 1 fim de semana).</li>
+                    <li>Desinstale temporariamente os aplicativos mais viciantes.</li>
+                    <li>Estabeleça "zonas livres de celular" em casa (quarto, mesa de jantar).</li>
+                    <li>Fortaleça relacionamentos presenciais.</li>
+                </ul>
+            </div>
+
+            <div id="result-36" class="result-card hidden">
+                <h2>🚨 NÍVEL CRÍTICO: Ajuda Profissional Urgente</h2>
+                <p class="score-text">Sua pontuação: <span></span></p>
+                <p class="description">Seus resultados indicam um quadro crítico de dependência digital. Você pode estar experimentando sintomas que comprometem seriamente sua saúde mental e funcionamento diário.</p>
+                <h3>Ações imediatas necessárias:</h3>
+                <ul>
+                    <li>Procure ajuda profissional urgente (psicólogo ou psiquiatra).</li>
+                    <li>Comunique familiares e amigos sobre sua situação para receber suporte.</li>
+                    <li>Faça um detox digital supervisionado, se possível.</li>
+                    <li>Participe de grupos de apoio (online ou presenciais).</li>
+                    <li>Reestruture sua rotina priorizando atividades offline.</li>
+                </ul>
+            </div>
+
+            <div id="final-message">
+                <p>A ansiedade algorítmica é real. Não há vergonha em reconhecer que você está sendo afetado. Sua saúde mental vale mais do que qualquer curtida. Você tem o poder de recuperar o controle.</p>
+                <button id="restart-btn" class="btn">Refazer o Quiz</button>
+            </div>
+
+        </div>
+
+    </div>
+
+    <script>
+        // --- 1. ESTRUTURA DAS PERGUNTAS ---
+        const questions = [
+            {
+                question: "Com que frequência você verifica suas redes sociais assim que acorda?",
+                options: [
+                    { text: "Raramente ou nunca - só verifico depois de algumas horas.", points: 1 },
+                    { text: "Às vezes, mas não é a primeira coisa que faço.", points: 2 },
+                    { text: "Frequentemente - costumo verificar na primeira hora.", points: 3 },
+                    { text: "Sempre - é a primeira coisa que faço antes de sair da cama.", points: 4 }
+                ]
+            },
+            {
+                question: "Como você se sente quando não consegue acessar as redes ou a internet está lenta?",
+                options: [
+                    { text: "Tranquilo, não me incomoda.", points: 1 },
+                    { text: "Um pouco incomodado, mas consigo lidar.", points: 2 },
+                    { text: "Ansioso e irritado, penso no que estou perdendo.", points: 3 },
+                    { text: "Extremamente nervoso, não consigo me concentrar.", points: 4 }
+                ]
+            },
+            {
+                question: "Quantas vezes por hora você verifica suas notificações?",
+                options: [
+                    { text: "Apenas quando ouço o som ou 1-2 vezes.", points: 1 },
+                    { text: "3-5 vezes por hora.", points: 2 },
+                    { text: "6-10 vezes por hora.", points: 3 },
+                    { text: "Mais de 10 vezes - verifico constantemente.", points: 4 }
+                ]
+            },
+            {
+                question: "Como você reage quando suas postagens não recebem curtidas rápidas?",
+                options: [
+                    { text: "Não me importo, posto por prazer pessoal.", points: 1 },
+                    { text: "Fico um pouco desapontado, mas logo esqueço.", points: 2 },
+                    { text: "Ansioso e frustrado, penso no que fiz de errado.", points: 3 },
+                    { text: "Fico muito mal, minha autoestima despenca.", points: 4 }
+                ]
+            },
+            {
+                question: "Você sente que precisa compartilhar momentos da sua vida nas redes?",
+                options: [
+                    { text: "Não, compartilho apenas ocasionalmente.", points: 1 },
+                    { text: "Às vezes sinto vontade, mas não é necessidade.", points: 2 },
+                    { text: "Frequentemente sinto que preciso registrar e postar.", points: 3 },
+                    { text: "Sempre - um momento só é válido se for compartilhado.", points: 4 }
+                ]
+            },
+            {
+                question: "Com que frequência você compara sua vida com a de outros nas redes sociais?",
+                options: [
+                    { text: "Raramente ou nunca.", points: 1 },
+                    { text: "Às vezes faço comparações, mas não me afeta.", points: 2 },
+                    { text: "Frequentemente me comparo e isso me desanima.", points: 3 },
+                    { text: "Constantemente - sinto que a vida dos outros é melhor.", points: 4 }
+                ]
+            },
+            {
+                question: "Você experimenta a 'síndrome da vibração fantasma' (sente o celular vibrar sem ter vibrado)?",
+                options: [
+                    { text: "Nunca aconteceu.", points: 1 },
+                    { text: "Raramente, uma ou duas vezes por mês.", points: 2 },
+                    { text: "Às vezes, algumas vezes por semana.", points: 3 },
+                    { text: "Frequentemente, quase todos os dias.", points: 4 }
+                ]
+            },
+            {
+                question: "Como você se sente em relação ao 'medo de ficar de fora' (FOMO)?",
+                options: [
+                    { text: "Não sinto esse medo - desconecto tranquilamente.", points: 1 },
+                    { text: "Às vezes sinto curiosidade sobre o que está rolando.", points: 2 },
+                    { text: "Frequentemente fico ansioso pensando que estou perdendo algo.", points: 3 },
+                    { text: "Constantemente preocupado - não consigo desconectar.", points: 4 }
+                ]
+            },
+            {
+                question: "Quanto tempo você passa nas redes sociais por dia?",
+                options: [
+                    { text: "Menos de 1 hora.", points: 1 },
+                    { text: "Entre 1-3 horas.", points: 2 },
+                    { text: "Entre 3-6 horas.", points: 3 },
+                    { text: "Mais de 6 horas.", points: 4 }
+                ]
+            },
+            {
+                question: "As redes sociais interferem nas suas atividades diárias (trabalho, estudos, etc.)?",
+                options: [
+                    { text: "Não, consigo separar bem minha vida online e offline.", points: 1 },
+                    { text: "Às vezes atrapalham um pouco.", points: 2 },
+                    { text: "Frequentemente deixo de fazer coisas importantes.", points: 3 },
+                    { text: "Sempre - prefiro interagir online e perco compromissos.", points: 4 }
+                ]
+            }
+        ];
+
+        // --- 2. VARIÁVEIS DE ESTADO ---
+        let currentQuestionIndex = 0;
+        let score = 0;
+
+        // --- 3. REFERÊNCIAS DE ELEMENTOS (DOM) ---
+        const startScreen = document.getElementById('start-screen');
+        const quizScreen = document.getElementById('quiz-screen');
+        const resultsScreen = document.getElementById('results-screen');
+        
+        const startBtn = document.getElementById('start-btn');
+        const restartBtn = document.getElementById('restart-btn');
+        
+        const questionText = document.getElementById('question-text');
+        const optionsContainer = document.getElementById('options-container');
+        
+        const progressBar = document.getElementById('progress-bar');
+        const progressText = document.getElementById('progress-text');
+
+        // --- 4. FUNÇÕES DO QUIZ ---
+
+        function startQuiz() {
+            currentQuestionIndex = 0;
+            score = 0;
+            startScreen.classList.add('hidden');
+            resultsScreen.classList.add('hidden');
+            document.querySelectorAll('.result-card').forEach(card => card.classList.add('hidden'));
+            quizScreen.classList.remove('hidden');
+            showQuestion(currentQuestionIndex);
+        }
+
+        function showQuestion(index) {
+            quizScreen.classList.remove('fade-in');
+            
+            const question = questions[index];
+            questionText.textContent = question.question;
+            optionsContainer.innerHTML = '';
+
+            question.options.forEach(option => {
+                const button = document.createElement('button');
+                button.textContent = option.text;
+                button.className = 'option-btn';
+                button.dataset.points = option.points;
+                button.addEventListener('click', selectOption);
+                optionsContainer.appendChild(button);
+            });
+
+            const progressPercentage = ((index + 1) / questions.length) * 100;
+            progressBar.style.width = `${progressPercentage}%`;
+            progressText.textContent = `Questão ${index + 1} de ${questions.length}`;
+            
+            quizScreen.classList.add('fade-in');
+        }
+
+        function selectOption(e) {
+            const selectedButton = e.target;
+            const points = parseInt(selectedButton.dataset.points);
+            score += points;
+
+            Array.from(optionsContainer.children).forEach(button => {
+                button.disabled = true;
+                if (button === selectedButton) {
+                    button.classList.add('selected');
+                }
+            });
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                if (currentQuestionIndex < questions.length) {
+                    showQuestion(currentQuestionIndex);
+                } else {
+                    showResults();
+                }
+            }, 600); 
+        }
+
+        function showResults() {
+            quizScreen.classList.add('hidden');
+            resultsScreen.classList.remove('hidden');
+            resultsScreen.classList.add('fade-in');
+
+            let resultId;
+            if (score <= 15) {
+                resultId = 'result-10';
+            } else if (score <= 25) {
+                resultId = 'result-16';
+            } else if (score <= 35) {
+                resultId = 'result-26';
+            } else {
+                resultId = 'result-36';
+            }
+
+            const resultCard = document.getElementById(resultId);
+            resultCard.classList.remove('hidden');
+            resultCard.querySelector('.score-text span').textContent = score;
+        }
+
+        // --- 5. EVENT LISTENERS ---
+        startBtn.addEventListener('click', startQuiz);
+        restartBtn.addEventListener('click', startQuiz);
+
+    </script>
+</body>
+</html>

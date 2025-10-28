@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Álbum de Conquistas: O Antídoto da Autocrítica</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-coral: #f87171; /* Coral/Vermelho Claro principal */
+            --light-coral-bg: #fff1f2; /* Fundo muito claro */
+            --dark-coral-text: #991b1b; /* Texto vermelho escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #fecaca;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente coral */
+            background: linear-gradient(135deg, var(--dark-coral-text), var(--primary-coral));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-coral-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-coral-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-coral);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-coral-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-coral);
+            padding-left: 10px;
+        }
+        .container > p {
+             font-size: 1rem;
+             line-height: 1.6;
+             margin-bottom: 1.5rem;
+             color: var(--text-color);
+        }
+
+        /* --- Estilo do Acordeão --- */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header {
+            background-color: var(--light-coral-bg);
+            color: var(--dark-coral-text);
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .accordion-header:hover {
+            background-color: #fee2e2;
+        }
+        .accordion-header .icon {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+            color: var(--primary-coral);
+        }
+        .accordion-header-title {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .accordion-chevron {
+            font-size: 1rem;
+            transition: transform 0.3s ease-out;
+            color: var(--primary-coral);
+        }
+
+        .accordion-content {
+            background-color: #fffbfa; /* Levemente diferente do bg claro */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+        }
+        .accordion-content-inner {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .accordion-content strong {
+            color: var(--dark-coral-text);
+        }
+        .accordion-content ul {
+            list-style: none;
+            padding-left: 0;
+            margin-top: 1rem;
+        }
+         .accordion-content li {
+             position: relative;
+             padding-left: 25px;
+             margin-bottom: 0.5rem;
+         }
+         .accordion-content li::before {
+             content: '✨'; /* Usando emoji como marcador */
+             position: absolute;
+             left: 0;
+             top: 0;
+         }
+        .example-box {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+        .example-box p { margin: 0; }
+        .example-box .meta { font-size: 0.85rem; color: var(--subtle-text); margin-top: 0.5rem; }
+
+        /* Lógica de Abertura do Acordeão */
+        .accordion-item.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 800px; /* altura máx. de segurança */
+        }
+        .accordion-item.active .accordion-header {
+            background-color: #fee2e2;
+        }
+
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-coral), var(--dark-coral-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-trophy"></i>Álbum de Conquistas</h1>
+        <p>O antídoto contra a autocrítica. Treine seu cérebro para focar no positivo, registrando suas pequenas (e grandes!) vitórias diárias contra a ansiedade.</p>
+    </header>
+
+    <h2><i class="fas fa-book-open"></i> Explorando Seu Álbum</h2>
+    <p>Clique nas seções abaixo para entender como usar essa ferramenta poderosa para construir resiliência.</p>
+
+    <div class="accordion">
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-question-circle"></i> O Que é e Por Quê Funciona?</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>O que é:</strong> Um registro diário das suas "provas de resiliência" – momentos em que você agiu apesar da ansiedade, usou uma técnica, estabeleceu um limite ou simplesmente sobreviveu a um dia difícil.
+                    <br><br>
+                    <strong>Por quê funciona:</strong>
+                    <ul>
+                        <li><strong>Combate o Viés Negativo:</strong> A ansiedade foca no que deu errado. O álbum força seu cérebro a ver o que deu certo.</li>
+                        <li><strong>Reforça a Autoeficácia:</strong> Ver suas vitórias acumuladas prova que você É capaz, aumentando sua confiança.</li>
+                        <li><strong>Cria um Recurso:</strong> Nos dias ruins, reler seu álbum funciona como um lembrete poderoso da sua força.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-edit"></i> Como Registrar uma Conquista?</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>A chave é a simplicidade e a consistência.</strong> Um bom registro responde a 3 perguntas:
+                    <ol>
+                        <li><strong>O Que Você Conquistou?</strong> (A ação específica)</li>
+                        <li><strong>Por Que Foi uma Vitória?</strong> (Qual era o desafio? O que a ansiedade dizia?)</li>
+                        <li><strong>Como Você se Sentiu Depois?</strong> (Orgulho? Alívio? Cansaço?)</li>
+                    </ol>
+                    <strong>Exemplo de Registro:</strong>
+                    <div class="example-box">
+                       <p><strong>🏆 Conquista:</strong> Fui à reunião de equipe mesmo sentindo muita ansiedade social.</p>
+                       <p><strong>챌 Desafio:</strong> A ansiedade dizia "Todos vão te julgar", "Você vai falar besteira".</p>
+                       <p><strong>😊 Sensação Pós:</strong> Cansada, mas orgulhosa por ter enfrentado.</p>
+                       <p class="meta">🗓️ Data: [Data de Hoje] | Área: Isolamento/Evitação</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-lightbulb"></i> Ideias do Que Registrar (Pequenas Vitórias!)</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Lembre-se: O tamanho não importa!</strong> Pequenas vitórias consistentes são mais poderosas que grandes feitos raros.
+                    <ul>
+                        <li>Usou uma técnica de respiração (ex: 4-7-8).</li>
+                        <li>Disse "não" a um pedido que te sobrecarregaria.</li>
+                        <li>Fez uma pausa de 5 minutos quando estava se sentindo esgotada.</li>
+                        <li>Saiu para uma caminhada rápida, mesmo sem vontade.</li>
+                        <li>Questionou um pensamento catastrófico ("Isso é verdade mesmo?").</li>
+                        <li>Pediu ajuda quando precisou.</li>
+                        <li>Conseguiu dormir um pouco melhor.</li>
+                        <li>Fez uma tarefa que estava procrastinando por ansiedade.</li>
+                        <li>Permitiu-se sentir a emoção sem julgamento.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-chart-line"></i> O Poder do Hábito (Gamificação)</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>Transforme o registro em um jogo contra a ansiedade!</strong>
+                    <ul>
+                        <li>🎯 <strong>Meta Semanal:</strong> Defina um número realista de conquistas por semana (comece com 3 ou 5). Atingir a meta reforça o hábito.</li>
+                        <li>🔥 <strong>Streak (Sequência):</strong> Tente registrar pelo menos uma conquista por dia. Ver a sequência de dias crescendo é super motivador!</li>
+                        <li>🏅 <strong>Badges (Conceitual):</strong> Imagine que você ganha "medalhas" por marcos (ex: 7 dias seguidos, 50 conquistas registradas, primeira vez usando a Tática X).</li>
+                    </ul>
+                    <p>Essa abordagem lúdica ajuda a manter a motivação e a visualizar seu progresso de forma concreta.</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <div class="cta-box">
+        <h2><i class="fas fa-pen-alt"></i>Comece Seu Álbum Hoje!</h2>
+        <p>Você não precisa de um app complexo. Pegue um caderno bonito, use o bloco de notas do celular ou uma planilha simples. O importante é começar a registrar suas vitórias, por menores que pareçam. Cada registro é um passo para reescrever sua história com a ansiedade.</p>
+    </div>
+</div>
+
+<script>
+    // --- Lógica para o Acordeão (Abrir/Fechar) ---
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+
+            // Comportamento de "acordeão" (fecha os outros)
+            document.querySelectorAll('.accordion-item').forEach(i => {
+                if (i !== item && i.classList.contains('active')) {
+                    i.classList.remove('active');
+                    i.querySelector('.accordion-content').style.maxHeight = null;
+                }
+            });
+
+            // Abre ou fecha o item clicado
+            item.classList.toggle('active');
+            if (item.classList.contains('active')) {
+                // Ajusta a altura máxima dinamicamente
+                content.style.maxHeight = (content.scrollHeight + 20) + 'px'; // +20px buffer
+            } else {
+                content.style.maxHeight = null;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>

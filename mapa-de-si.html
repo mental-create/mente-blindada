@@ -1,0 +1,507 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mapa de Si Mesmo: Valores e Padrões</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-blue: #3b82f6; /* Azul principal */
+            --light-blue-bg: #eff6ff; /* Fundo muito claro */
+            --dark-blue-text: #1e3a8a; /* Texto azul escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #dbeafe;
+            --success-bg: #dcfce7;
+            --success-text: #166534;
+            --warning-bg: #fffbeb;
+            --warning-text: #b45309;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente azul moderno */
+            background: linear-gradient(135deg, var(--dark-blue-text), var(--primary-blue));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-blue-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-blue-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-blue);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-blue-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1rem;
+            border-left: 5px solid var(--primary-blue);
+            padding-left: 10px;
+        }
+        .container > p {
+             font-size: 1rem;
+             line-height: 1.6;
+             margin-bottom: 1.5rem;
+             color: var(--text-color);
+        }
+
+        /* --- Estilo do Acordeão (Valores) --- */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header {
+            background-color: var(--light-blue-bg);
+            color: var(--dark-blue-text);
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .accordion-header:hover {
+            background-color: #dbeafe;
+        }
+        .accordion-header .icon {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+            color: var(--primary-blue);
+        }
+        .accordion-header-title {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .accordion-chevron {
+            font-size: 1rem;
+            transition: transform 0.3s ease-out;
+            color: var(--primary-blue);
+        }
+
+        .accordion-content {
+            background-color: #fbfdff;
+            /* Animação suave */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+        }
+        .accordion-content p {
+            margin: 0;
+            padding: 0 1.25rem;
+            font-size: 0.95rem;
+        }
+        .accordion-content-inner {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+        }
+        .accordion-content strong {
+            color: var(--dark-blue-text);
+        }
+        .alert-box {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            border-radius: 8px;
+            padding: 0.75rem 1rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+        }
+
+        /* Lógica de Abertura do Acordeão */
+        .accordion-item.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 500px; /* altura máx. de segurança */
+        }
+        .accordion-item.active .accordion-header {
+            background-color: #dbeafe;
+        }
+
+
+        /* --- Estilo do Quiz (Padrões) --- */
+        .quiz-container {
+            background-color: var(--light-blue-bg);
+            padding: 2rem;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
+            margin-top: 20px;
+        }
+        
+        #progress-bar-container {
+            width: 100%;
+            background-color: #dbeafe;
+            border-radius: 8px;
+            height: 10px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+        }
+        #progress-bar {
+            width: 0%;
+            height: 100%;
+            background-color: var(--primary-blue);
+            transition: width 0.4s ease;
+        }
+        
+        .quiz-step {
+            display: none; /* Começa escondido */
+        }
+        .quiz-step.active {
+            display: block; /* Aparece */
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .quiz-question {
+            font-weight: 600;
+            font-size: 1.2rem;
+            margin-bottom: 1.5rem;
+            color: var(--dark-blue-text);
+        }
+        
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .option-card {
+            background: var(--white);
+            border: 2px solid var(--border-color);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all 0.2s ease-out;
+        }
+        .option-card:hover {
+            border-color: var(--primary-blue);
+            transform: translateY(-3px);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .option-card.selected {
+            border-color: var(--primary-blue);
+            background-color: #eff6ff;
+            box-shadow: 0 4px 15px rgba(59, 130, 246, 0.1);
+        }
+        
+        .quiz-result-box {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-weight: 600;
+            text-align: center;
+            display: none; /* Começa escondido */
+            animation: fadeIn 0.5s ease;
+        }
+        .result-positive {
+            background-color: var(--success-bg);
+            color: var(--success-text);
+            border: 1px solid #bbf7d0;
+        }
+        .result-negative {
+            background-color: var(--warning-bg);
+            color: var(--warning-text);
+            border: 1px solid #fef08a;
+        }
+        
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-blue), var(--dark-blue-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+        
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="fas fa-compass icon"></i>1º A: Autoconhecimento</h1>
+        <p>O primeiro pilar do Protocolo 4A's. É impossível mudar aquilo que você não vê. Este módulo é o seu mapa para entender quem você realmente é: seus valores, gatilhos e padrões automáticos.</p>
+    </header>
+
+    <h2><i class="fas fa-map-signs"></i>O Seu Norte Interno: A Lista de Valores</h2>
+    <p>Seus valores são as bússolas que guiam suas decisões. Quando agimos contra eles, sentimos ansiedade e frustração. Clique para explorar os principais valores e refletir sobre os seus:</p>
+
+    <div class="accordion">
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title">
+                    <i class="icon fas fa-feather-alt"></i> Liberdade e Autonomia
+                </div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>O que é:</strong> É a necessidade de fazer suas próprias escolhas, ser independente e ter espaço para ser quem você é, sem se sentir preso ou microgerenciado.</p>
+                    <div class="alert-box">
+                        <strong>🚨 Sinal de Alerta:</strong> Você se sente sufocado, irritado com regras ou dependente da aprovação de outros.
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title">
+                    <i class="icon fas fa-users"></i> Conexão e Pertencimento
+                </div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>O que é:</strong> A necessidade de amar, ser amado, e sentir que faz parte de um grupo ou comunidade (família, amigos, trabalho).</p>
+                    <div class="alert-box">
+                        <strong>🚨 Sinal de Alerta:</strong> Sentimentos de solidão, exclusão ou de que "ninguém me entende".
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title">
+                    <i class="icon fas fa-shield-alt"></i> Segurança e Estabilidade
+                </div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>O que é:</strong> A busca por previsibilidade e proteção. Pode ser financeira, emocional (saber o que esperar das pessoas) ou física (sentir-se seguro).</p>
+                    <div class="alert-box">
+                        <strong>🚨 Sinal de Alerta:</strong> Ansiedade sobre o futuro, pânico sobre dinheiro, ou permanecer em situações ruins "só por segurança".
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title">
+                    <i class="icon fas fa-seedling"></i> Contribuição e Crescimento
+                </div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <p><strong>O que é:</strong> O desejo de aprender, evoluir, e sentir que está fazendo a diferença no mundo ou na vida de alguém. A estagnação é o maior inimigo.</p>
+                    <div class="alert-box">
+                        <strong>🚨 Sinal de Alerta:</strong> Sentimento de tédio, apatia, ou a sensação de que "a vida não tem propósito".
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <h2><i class="fas fa-robot"></i>Seus Padrões: A Trilha do Piloto Automático</h2>
+    <p>Muitas vezes, agimos baseados em "scripts" antigos. Identificar esses padrões é o primeiro passo para o Autocontrole. Responda a este pequeno quiz de reflexão:</p>
+
+    <div class="quiz-container">
+        <div id="progress-bar-container">
+            <div id="progress-bar"></div>
+        </div>
+        
+        <div class="quiz-step active" data-step="1">
+            <p class="quiz-question">1. Quando recebo um elogio, minha primeira reação é:</p>
+            <div class="options-grid">
+                <div class="option-card" data-value="A">A. Aceitar e agradecer genuinamente.</div>
+                <div class="option-card" data-value="B">B. Minimizar ou desviar ("Não foi nada demais", "Foi sorte").</div>
+            </div>
+        </div>
+        
+        <div class="quiz-step" data-step="2">
+            <p class="quiz-question">2. Em um conflito ou discordância, minha tendência é:</p>
+            <div class="options-grid">
+                <div class="option-card" data-value="A">A. Expressar minha opinião calmamente, mesmo que seja difícil.</div>
+                <div class="option-card" data-value="B">B. Evitar a briga a todo custo ou explodir impulsivamente.</div>
+            </div>
+        </div>
+        
+        <div class="quiz-step" data-step="3">
+            <p class="quiz-question">3. Ao cometer um erro, eu geralmente:</p>
+            <div class="options-grid">
+                <div class="option-card" data-value="A">A. Analiso o que aprendi com isso e sigo em frente.</div>
+                <div class="option-card" data-value="B">B. Me culpo intensamente, revivendo o momento por dias.</div>
+            </div>
+        </div>
+
+        <div class="quiz-step" data-step="4">
+            <p class="quiz-question">4. Quando algo não sai como planejei, eu sinto:</p>
+            <div class="options-grid">
+                <div class="option-card" data-value="A">A. Frustração inicial, mas logo me adapto e busco soluções.</div>
+                <div class="option-card" data-value="B">B. Grande irritação e foco no que deu errado, ruminando o problema.</div>
+            </div>
+        </div>
+        
+        <div id="quizResult" class="quiz-result-box"></div>
+    </div>
+    
+    <div class="cta-box">
+        <h2><i class="fas fa-pencil-alt"></i> Ação Prática: O Caderno do "Por Quê?"</h2>
+        <p>Você identificou seus valores e padrões. O próximo passo é aprofundar! Use um caderno ou o bloco de notas do seu celular. Para cada emoção que te incomodar, pergunte-se: <strong>"Mas por quê?"</strong>. Continue até chegar na raiz do seu padrão. Isso te prepara para o 2º A: Autoanálise.</p>
+    </div>
+</div>
+
+<script>
+    // --- Lógica para o Acordeão (Abrir/Fechar) ---
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            const wasActive = item.classList.contains('active');
+            
+            // Fecha todos os outros
+            document.querySelectorAll('.accordion-item').forEach(i => {
+                i.classList.remove('active');
+            });
+            
+            // Se não estava ativo, abre
+            if (!wasActive) {
+                item.classList.add('active');
+            }
+        });
+    });
+
+    // --- Lógica para o Quiz Interativo ---
+    const quizSteps = document.querySelectorAll('.quiz-step');
+    const optionCards = document.querySelectorAll('.option-card');
+    const progressBar = document.getElementById('progress-bar');
+    const resultDiv = document.getElementById('quizResult');
+    const totalSteps = quizSteps.length;
+    
+    let currentStep = 1;
+    let answers = {};
+
+    optionCards.forEach(card => {
+        card.addEventListener('click', () => {
+            const step = card.closest('.quiz-step');
+            const stepIndex = step.dataset.step;
+            const value = card.dataset.value;
+            
+            // Armazena a resposta
+            answers[stepIndex] = value;
+            
+            // Desmarca o irmão
+            step.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+            // Marca o clicado
+            card.classList.add('selected');
+
+            // Atraso para o usuário ver o clique
+            setTimeout(() => {
+                goToStep(currentStep + 1);
+            }, 400);
+        });
+    });
+
+    function goToStep(step) {
+        if (step > totalSteps) {
+            showResult();
+            return;
+        }
+        
+        // Esconde o atual
+        document.querySelector(`.quiz-step.active`).classList.remove('active');
+        // Mostra o próximo
+        document.querySelector(`.quiz-step[data-step="${step}"]`).classList.add('active');
+        
+        currentStep = step;
+        updateProgressBar();
+    }
+    
+    function updateProgressBar() {
+        // A barra fica cheia *antes* do resultado
+        const progress = ((currentStep - 1) / totalSteps) * 100;
+        progressBar.style.width = progress + '%';
+    }
+
+    // --- RESULTADO DO QUIZ (ALTERADO) ---
+    function showResult() {
+        // Esconde a última pergunta
+        document.querySelector(`.quiz-step.active`).classList.remove('active');
+        progressBar.style.width = '100%'; // Completa a barra
+
+        let scoreB = 0;
+        for (let key in answers) {
+            if (answers[key] === 'B') scoreB++;
+        }
+        
+        let message = '';
+        if (scoreB >= 3) { // Ajustado para 4 perguntas
+            message = `Sua reflexão indica que <b>há padrões inconscientes fortes</b> 🤖. Você está no piloto automático em ${scoreB} de ${totalSteps} situações. Este 1º A é crucial para você! Observe ativamente essas reações no seu dia a dia.`;
+            resultDiv.className = 'quiz-result-box result-negative';
+        } else {
+            message = `Sua reflexão sugere que você já tem <b>boa consciência</b> dos seus padrões! 🧠 (Apenas ${scoreB} de ${totalSteps} situações em modo automático). Use o 2º A (Autoanálise) para refinar ainda mais seu entendimento!`;
+            resultDiv.className = 'quiz-result-box result-positive';
+        }
+        
+        resultDiv.innerHTML = message;
+        resultDiv.style.display = 'block';
+    }
+
+</script>
+
+</body>
+</html>

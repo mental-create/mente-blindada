@@ -1,0 +1,379 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dossiê da Ansiedade: Desarmando a Manipulação</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-violet: #8b5cf6; /* Violeta principal */
+            --light-violet-bg: #f5f3ff; /* Fundo muito claro */
+            --dark-violet-text: #4c1d95; /* Texto violeta escuro */
+            --white: #ffffff;
+            --text-color: #374151;
+            --subtle-text: #6b7280;
+            --border-color: #ddd6fe;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 2rem 1rem;
+            /* Fundo gradiente violeta */
+            background: linear-gradient(135deg, var(--dark-violet-text), var(--primary-violet));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 700px;
+            width: 100%;
+            margin: 0 auto;
+            background-color: var(--white);
+            padding: 2rem 2.5rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+        }
+
+        /* --- Header --- */
+        .header {
+            text-align: center;
+            border-bottom: 2px solid var(--light-violet-bg);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        .header h1 {
+            color: var(--dark-violet-text);
+            font-size: 2rem;
+            margin: 0 0 0.5rem 0;
+        }
+        .header .icon {
+            font-size: 1.5rem;
+            margin-right: 0.75rem;
+            color: var(--primary-violet);
+        }
+        .header p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+            color: var(--subtle-text);
+            margin: 0;
+        }
+
+        /* --- Títulos de Seção --- */
+        h2 {
+            color: var(--dark-violet-text);
+            font-size: 1.5em;
+            margin-top: 2.5rem;
+            margin-bottom: 1.5rem;
+            border-left: 5px solid var(--primary-violet);
+            padding-left: 10px;
+        }
+        .container > p {
+             font-size: 1rem;
+             line-height: 1.6;
+             margin-bottom: 1.5rem;
+             color: var(--text-color);
+        }
+
+        /* --- Estilo do Acordeão --- */
+        .accordion-item {
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            margin-bottom: 0.75rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .accordion-header {
+            background-color: var(--light-violet-bg);
+            color: var(--dark-violet-text);
+            padding: 1rem 1.25rem;
+            cursor: pointer;
+            font-weight: 600;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: background-color 0.3s;
+        }
+        .accordion-header:hover {
+            background-color: #ede9fe;
+        }
+        .accordion-header .icon {
+            font-size: 1.1rem;
+            margin-right: 0.75rem;
+            color: var(--primary-violet);
+        }
+        .accordion-header-title {
+            display: flex;
+            align-items: center;
+            flex-grow: 1;
+        }
+        .accordion-chevron {
+            font-size: 1rem;
+            transition: transform 0.3s ease-out;
+            color: var(--primary-violet);
+        }
+
+        .accordion-content {
+            background-color: #fafaff; /* Levemente diferente */
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out, padding 0.4s ease-out;
+        }
+        .accordion-content-inner {
+            padding: 1.25rem;
+            border-top: 1px solid var(--border-color);
+            font-size: 0.95rem;
+            line-height: 1.6;
+        }
+        .accordion-content strong {
+            color: var(--dark-violet-text);
+        }
+         .accordion-content h3 {
+             margin-top: 1.2rem;
+             margin-bottom: 0.5rem;
+             font-size: 1.05rem;
+             color: var(--dark-violet-text);
+         }
+         .accordion-content h3:first-child { margin-top: 0; }
+         .accordion-content ul, .accordion-content ol {
+             padding-left: 20px;
+             margin-top: 0.5rem;
+             margin-bottom: 0;
+         }
+         .accordion-content li {
+             margin-bottom: 0.5rem;
+         }
+        .example-box {
+            background-color: var(--white);
+            border: 1px solid var(--border-color);
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+        }
+         .example-box p { margin: 0 0 0.5rem 0; }
+         .example-box p:last-child { margin-bottom: 0; }
+         .example-box .meta { font-size: 0.85rem; color: var(--subtle-text); margin-top: 0.5rem; }
+
+        /* Lógica de Abertura do Acordeão */
+        .accordion-item.active .accordion-chevron {
+            transform: rotate(180deg);
+        }
+        .accordion-item.active .accordion-content {
+            max-height: 1500px; /* altura máx. de segurança - pode precisar ajustar */
+        }
+        .accordion-item.active .accordion-header {
+            background-color: #ede9fe;
+        }
+
+        /* --- CTA Final --- */
+        .cta-box {
+            background: linear-gradient(135deg, var(--primary-violet), var(--dark-violet-text));
+            color: var(--white);
+            text-align: center;
+            padding: 2rem;
+            border-radius: 16px;
+            margin-top: 2.5rem;
+        }
+        .cta-box h2 {
+            color: var(--white);
+            border-left: none;
+            padding-left: 0;
+            margin: 0 0 1rem 0;
+            font-size: 1.5rem;
+        }
+        .cta-box p {
+            font-size: 1rem;
+            line-height: 1.6;
+            opacity: 0.9;
+            margin: 0;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header class="header">
+        <h1><i class="icon fas fa-file-alt"></i>Dossiê da Ansiedade</h1>
+        <p>Uma ferramenta para investigar as táticas da ansiedade, desarmar suas mentiras com fatos e construir um arquivo de provas da sua resiliência.</p>
+    </header>
+
+    <h2><i class="fas fa-search-plus"></i>Como Funciona o Dossiê?</h2>
+    <p>Pense nele como um arquivo de detetive 🕵️‍♀️. Você anota as "acusações" da ansiedade e as contesta com evidências reais. Explore as seções:</p>
+
+    <div class="accordion">
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-question-circle"></i> O Que é o Dossiê e Por Quê Usar?</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <strong>O que é:</strong> Um registro contínuo onde você documenta os pensamentos automáticos negativos (as "táticas" da ansiedade) e aplica uma "contra-ação" racional, baseada em fatos, para reestruturá-los.
+                    <br><br>
+                    <strong>Por quê usar:</strong>
+                    <ul>
+                        <li><strong>Visibilidade:</strong> Tira os pensamentos da sua cabeça e os coloca no papel (ou tela), tornando-os menos assustadores e mais fáceis de analisar.</li>
+                        <li><strong>Treinamento Mental:</strong> A cada registro, você pratica a habilidade de questionar a ansiedade e fortalece caminhos neurais mais realistas.</li>
+                        <li><strong>Arquivo de Provas:</strong> Com o tempo, seu Dossiê se torna uma coleção poderosa de evidências contra as mentiras da ansiedade, útil para reler em momentos difíceis.</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-mask"></i> Identificando as Táticas da Ansiedade</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    A ansiedade usa truques mentais (distorções cognitivas) para parecer convincente. Aprenda a reconhecê-los:
+                    
+                    <h3>💣 Catastrofização ("E se o pior acontecer?")</h3>
+                    <ul>
+                        <li><strong>Como aparece:</strong> Pensa que a pior coisa possível VAI acontecer.</li>
+                        <li><strong>Contra-ação:</strong> Pergunte "Qual a probabilidade REAL disso (0-100%)?" e "Se acontecer, qual meu plano B?".</li>
+                    </ul>
+
+                    <h3>🔮 Leitura Mental ("Eu sei o que pensam...")</h3>
+                    <ul>
+                        <li><strong>Como aparece:</strong> Acredita saber o que os outros pensam (geralmente negativo).</li>
+                        <li><strong>Contra-ação:</strong> Liste 3 outras explicações possíveis para o comportamento da pessoa E procure evidências concretas (fatos) contra sua hipótese.</li>
+                    </ul>
+                    
+                    <h3>⚖️ Tudo ou Nada ("Perfeito ou Fracasso")</h3>
+                    <ul>
+                        <li><strong>Como aparece:</strong> Vê situações apenas em extremos (bom/mau, sucesso/fracasso).</li>
+                        <li><strong>Contra-ação:</strong> Procure os "tons de cinza". Liste 2-3 coisas que foram "boas o suficiente" ou que você aprendeu, mesmo que o resultado não tenha sido 100%.</li>
+                    </ul>
+                    
+                    <h3>⛓️ Tirania do "Deveria" ("Tenho que...")</h3>
+                    <ul>
+                        <li><strong>Como aparece:</strong> Usa regras rígidas sobre como você ou os outros "deveriam" agir.</li>
+                        <li><strong>Contra-ação:</strong> Substitua "Deveria" por linguagem flexível: "Gostaria de...", "Posso tentar...", "Seria bom se...".</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-pencil-ruler"></i> Montando Seu Dossiê: Passo a Passo</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    Quando sentir a ansiedade surgir, pegue seu caderno ou bloco de notas e siga estes passos:
+                    <ol>
+                        <li><strong>Situação Gatilho:</strong> O que aconteceu logo antes de você se sentir ansiosa? (Ex: Recebi um e-mail do chefe).</li>
+                        <li><strong>Pensamento Automático:</strong> Qual foi a primeira frase que veio à sua mente? Qual tática a ansiedade usou? (Ex: "Ele vai me criticar." - Leitura Mental).</li>
+                        <li><strong>Emoção(ões) e Intensidade (0-10):</strong> O que você sentiu? (Ex: Medo 8/10, Vergonha 6/10).</li>
+                        <li><strong>Evidências Contra o Pensamento:</strong> Liste fatos reais que desafiam a "acusação" da ansiedade. (Ex: "Meu último feedback foi positivo", "Ele pode querer discutir outro assunto").</li>
+                        <li><strong>Pensamento Alternativo Realista:</strong> Crie uma nova frase, mais equilibrada e baseada nos fatos. (Ex: "Não sei o que ele quer. Pode ser sobre o projeto X. Vou responder e ver.").</li>
+                        <li><strong>Resultado:</strong> Como você se sente *agora* (0-10)? (Ex: Medo 4/10).</li>
+                    </ol>
+                    <strong>Exemplo Visual de uma Entrada no Dossiê:</strong>
+                    <div class="example-box">
+                       <p><strong>Situação:</strong> Errei um cálculo na planilha.</p>
+                       <p><strong>Pensamento:</strong> "Eu sou péssima nisso, sempre erro!" (Tática: Generalização/Rotulação)</p>
+                       <p><strong>Emoção:</strong> Frustração 7/10, Vergonha 5/10</p>
+                       <p><strong>Evidências Contra:</strong> "Ontem acertei todos os cálculos.", "Recebi elogio pela organização da planilha.", "Errar faz parte do aprendizado."</p>
+                       <p><strong>Alternativa:</strong> "Cometi um erro neste cálculo. Vou corrigir e revisar com mais atenção da próxima vez. Isso não define minha capacidade."</p>
+                       <p class="meta">Resultado: Frustração 3/10</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-microscope"></i> Ciência Rápida: Por Que Isso Funciona?</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    <ul>
+                        <li>🚨 **Amígdala:** É o "alarme de incêndio" do cérebro. Na ansiedade, ela dispara por "fumaça" (pensamentos), não só por "fogo" (perigo real).</li>
+                        <li>🔥 **Hormônios (Adrenalina/Cortisol):** Preparam seu corpo para lutar ou fugir. Causam coração acelerado, respiração curta, tensão. É desconfortável, mas não perigoso.</li>
+                        <li>🧠 **Córtex Pré-Frontal (CPF):** É o "detetive racional". O Dossiê treina seu CPF a analisar as evidências e acalmar a Amígdala, mostrando que o alarme é falso.</li>
+                    </ul>
+                    <p>Ao praticar o Dossiê, você fortalece a comunicação entre o CPF e a Amígdala, ensinando seu cérebro a reagir de forma mais equilibrada.</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="accordion-item">
+            <div class="accordion-header">
+                <div class="accordion-header-title"><i class="icon fas fa-life-ring"></i> SOS Rápido (Quando a Análise Falha)</div>
+                <i class="fas fa-chevron-down accordion-chevron"></i>
+            </div>
+            <div class="accordion-content">
+                <div class="accordion-content-inner">
+                    Às vezes, a ansiedade é tão intensa que analisar parece impossível. Use estas técnicas para acalmar o corpo primeiro:
+                    
+                    <h3>🌬️ Respiração 4-7-8</h3>
+                    <ol>
+                        <li>Inspire pelo nariz contando até <strong>4</strong>.</li>
+                        <li>Segure o ar contando até <strong>7</strong>.</li>
+                        <li>Expire LENTAMENTE pela boca contando até <strong>8</strong>.</li>
+                        <li>Repita <strong>4 vezes</strong>.</li>
+                    </ol>
+
+                    <h3>⚓ Ancoragem 5-4-3-2-1</h3>
+                    <p>Volte ao presente nomeando:</p>
+                    <ul>
+                        <li><strong>5</strong> coisas que você VÊ.</li>
+                        <li><strong>4</strong> coisas que você TOCA.</li>
+                        <li><strong>3</strong> coisas que você OUVE.</li>
+                        <li><strong>2</strong> coisas que você CHEIRA.</li>
+                        <li><strong>1</strong> coisa que você SABOREIA.</li>
+                    </ul>
+                    <p>Depois que o corpo acalmar, tente revisitar o Dossiê.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cta-box">
+        <h2><i class="fas fa-user-secret"></i> Torne-se a Detetive da Sua Mente</h2>
+        <p>O Dossiê da Ansiedade é sua ferramenta secreta. Use-o consistentemente para desmascarar as mentiras da ansiedade e reescrever sua narrativa interna com base em fatos e autocompaixão. A cada registro, você fica mais forte.</p>
+    </div>
+</div>
+
+<script>
+    // --- Lógica para o Acordeão (Abrir/Fechar) ---
+    document.querySelectorAll('.accordion-header').forEach(header => {
+        header.addEventListener('click', () => {
+            const item = header.parentElement;
+            const content = header.nextElementSibling;
+
+            // Comportamento de "acordeão" (fecha os outros)
+            document.querySelectorAll('.accordion-item').forEach(i => {
+                if (i !== item && i.classList.contains('active')) {
+                    i.classList.remove('active');
+                    i.querySelector('.accordion-content').style.maxHeight = null;
+                }
+            });
+
+            // Abre ou fecha o item clicado
+            item.classList.toggle('active');
+            if (item.classList.contains('active')) {
+                // Ajusta a altura máxima dinamicamente
+                content.style.maxHeight = (content.scrollHeight + 40) + 'px'; // +40px buffer
+            } else {
+                content.style.maxHeight = null;
+            }
+        });
+    });
+</script>
+
+</body>
+</html>
