@@ -73,7 +73,6 @@
             <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
 
-        <!-- Secção Adicionar Conteúdo -->
         <div id="add-section" class="content-section">
             <h2>Adicionar ou Editar Conteúdo</h2>
             <form id="contentForm">
@@ -93,27 +92,30 @@
             </form>
         </div>
         
-        <!-- Secção Listar Conteúdos -->
         <div id="list-section" class="content-section"><h2>Listagem de Conteúdos</h2><div class="form-group"><label for="filterModule">Filtrar por Módulo</label><select id="filterModule" onchange="loadContents()"></select></div><div class="content-list" id="contentList"></div></div>
 
-        <!-- Secção Gerir Sub-Módulos -->
         <div id="submodules-section" class="content-section"><h2>Adicionar ou Editar Sub-Módulos</h2><form id="subModuleForm"><input type="hidden" id="editSubModuleId"><input type="hidden" id="subModuleImageUrl"><div class="form-group"><label for="parentModuleKey">Módulo Pai</label><select id="parentModuleKey" required></select></div><div class="form-group"><label for="subModuleName">Nome do Sub-Módulo</label><input type="text" id="subModuleName" required></div><div class="form-group"><label for="subModuleImageFile">Imagem</label><input type="file" id="subModuleImageFile" accept="image/*"><div class="image-preview" id="subModuleImagePreview"></div></div><div class="form-group"><label for="subModuleOrder">Ordem</label><input type="number" id="subModuleOrder" value="1" min="1" required></div><div class="button-group"><button type="submit" class="btn" id="saveSubModuleBtn">Adicionar Sub-Módulo</button><button type="button" class="btn btn-secondary" onclick="resetSubModuleForm()">Limpar</button></div></form><hr><h3>Sub-Módulos Atuais</h3><div class="content-list" id="subModuleList"></div></div>
         
-        <!-- Secção Gerir Módulos -->
         <div id="modules-section" class="content-section"><h2>Adicionar ou Editar Módulos</h2><form id="moduleForm"><input type="hidden" id="editModuleKey"><input type="hidden" id="moduleImageUrl"><div class="form-group"><label for="newModuleKey">Chave (ID único, sem espaços. Ex: comece_aqui)</label><input type="text" id="newModuleKey" required></div><div class="form-group"><label for="newModuleName">Nome (O que aparece no App)</label><input type="text" id="newModuleName" required></div><div class="form-group"><label for="moduleImageFile">Imagem</label><input type="file" id="moduleImageFile" accept="image/*"><div class="image-preview" id="moduleImagePreview"></div></div><div class="form-group"><label for="newModuleOrder">Ordem</label><input type="number" id="newModuleOrder" value="1" min="1" required></div><div class="form-group"><label for="moduleProduct">Produto Requerido</label><select id="moduleProduct" required></select></div><div class="button-group"><button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button><button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button></div></form><hr><h3>Módulos Atuais</h3><div class="content-list" id="moduleList"></div></div>
 
-        <!-- NOVA SECÇÃO: Gerir Produtos -->
         <div id="products-section" class="content-section">
             <h2>Gerir Produtos</h2>
             <form id="productForm">
                 <input type="hidden" id="isEditingProduct">
                 <div class="form-group">
-                    <label for="productId">ID do Produto (Ex: PROD_HISTORIA_01)</label>
-                    <input type="text" id="productId" required>
+                    <label for="productId">ID do Produto (Código da Oferta da Hotmart)</label>
+                    <input type="text" id="productId" required placeholder="Ex: m89x46y2">
                 </div>
                 <div class="form-group">
-                    <label for="productName">Nome do Produto (Ex: História "A Casa de Vó")</label>
-                    <input type="text" id="productName" required>
+                    <label for="productName">Nome do Produto (para sua organização)</label>
+                    <input type="text" id="productName" required placeholder="Ex: Plano Básico Anual">
+                </div>
+                <div class="form-group">
+                    <label for="productDuration">Duração do Acesso (em dias)</label>
+                    <input type="number" id="productDuration" required placeholder="365" value="365" min="1">
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                        Use <strong>365</strong> para 1 ano. Para acesso vitalício, use um número alto, como <strong>36500</strong> (100 anos).
+                    </small>
                 </div>
                 <div class="button-group">
                     <button type="submit" class="btn" id="saveProductBtn">Adicionar Produto</button>
@@ -125,10 +127,8 @@
             <div class="content-list" id="productList"></div>
         </div>
 
-        <!-- Secção Gerir Feed -->
         <div id="feed-section" class="content-section"><h2>Adicionar ou Editar Post no Feed</h2><form id="feedForm" style="margin-bottom: 30px;"><input type="hidden" id="editFeedId"><div class="form-group"><label for="feedTitle">Título do Post</label><input type="text" id="feedTitle" required></div><div class="form-group"><label for="feedContent">Conteúdo</label><textarea id="feedContent" rows="5" required></textarea></div><div class="form-group"><label for="feedImageFile">Imagem (opcional)</label><input type="file" id="feedImageFile" accept="image/*"><div class="image-preview" id="feedImagePreview"></div><input type="hidden" id="feedImageUrl"></div><div class="form-group"><label><input type="checkbox" id="feedActive" checked> Post Ativo</label></div><div class="button-group"><button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button><button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button></div></form><hr><h3>Posts Publicados</h3><div id="feedList" class="content-list"></div></div>
         
-        <!-- Secção Moderar Comunidade -->
         <div id="community-section" class="content-section"><h2>Moderar Mensagens da Comunidade</h2><div class="form-group"><label for="filterStatus">Filtrar por Status</label><select id="filterStatus" onchange="loadCommunityMessages()"><option value="pending">Pendentes</option><option value="approved">Aprovadas</option><option value="rejected">Rejeitadas</option></select></div><div id="communityList" class="content-list"></div></div>
     </div>
 
@@ -155,11 +155,12 @@
         }
 
         async function loadInitialData() {
+            // Carrega a nova coluna duration_days
             const [modulesRes, subModulesRes, profilesRes, productsRes] = await Promise.all([
                 supabase.from('modules').select('*').order('order_position'),
                 supabase.from('sub_modules').select('*').order('order_position'),
                 supabase.from('profiles').select('id, name, email'),
-                supabase.from('products').select('*').order('name')
+                supabase.from('products').select('id, name, duration_days').order('name') // Assegura que duration_days é carregado
             ]);
             if (modulesRes.data) { modulesMap.clear(); modulesRes.data.forEach(m => modulesMap.set(m.key, m)); updateModuleSelects(modulesRes.data); }
             if (subModulesRes.data) { subModulesMap.clear(); subModulesRes.data.forEach(sm => subModulesMap.set(sm.id, sm)); }
@@ -212,13 +213,113 @@
         function displayModules(modules) { const listEl = document.getElementById('moduleList'); if (!modules || modules.length === 0) { listEl.innerHTML = '<p>Nenhum módulo.</p>'; return; } listEl.innerHTML = modules.map(mod => { const product = products.find(p => p.id === mod.product_id); return `<div class="content-item"><div class="content-image" style="background-image: url('${mod.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${mod.name}</div><div class="content-module">Produto: <strong>${product ? product.name : 'N/D'}</strong></div></div><div class="content-actions"><button class="btn btn-small" onclick="editModule('${mod.key}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">Excluir</button></div></div>`}).join(''); }
         async function deleteModule(key) { if (!confirm('TEM A CERTEZA? Excluir um módulo irá apagar todos os seus sub-módulos e conteúdos.')) return; const { error } = await supabase.from('modules').delete().eq('key', key); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Módulo excluído com sucesso!', 'success'); await loadInitialData(); loadModules(); }}
 
-        // --- LÓGICA PARA GERIR PRODUTOS ---
-        document.getElementById('productForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveProductBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { const isEditing = document.getElementById('isEditingProduct').value; const productId = document.getElementById('productId').value; const productName = document.getElementById('productName').value; const { error } = await supabase.from('products').upsert({ id: productId, name: productName }); if (error) throw error; showMessage(`Produto ${isEditing ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetProductForm(); loadProducts(); } catch(error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = 'Adicionar Produto'; }});
-        function resetProductForm() { document.getElementById('productForm').reset(); document.getElementById('isEditingProduct').value = ''; document.getElementById('productId').disabled = false; document.getElementById('saveProductBtn').textContent = 'Adicionar Produto'; }
-        function editProduct(id) { const product = products.find(p => p.id === id); if(!product) return; resetProductForm(); document.getElementById('isEditingProduct').value = 'true'; document.getElementById('productId').value = product.id; document.getElementById('productId').disabled = true; document.getElementById('productName').value = product.name; document.getElementById('saveProductBtn').textContent = 'Atualizar Produto'; window.scrollTo(0, 0); }
-        async function loadProducts() { const listEl = document.getElementById('productList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; displayProducts(); }
-        function displayProducts() { const listEl = document.getElementById('productList'); if (products.length === 0) { listEl.innerHTML = '<p>Nenhum produto cadastrado.</p>'; return; } listEl.innerHTML = products.map(p => `<div class="content-item"><div class="content-info"><div class="content-title">${p.name}</div><div class="content-module">ID: ${p.id}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editProduct('${p.id}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">Excluir</button></div></div>`).join(''); }
-        async function deleteProduct(id) { if (!confirm('Tem a certeza? Se este produto estiver em uso por algum módulo ou conteúdo, poderá causar problemas de acesso.')) return; const { error } = await supabase.from('products').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Produto excluído!', 'success'); await loadInitialData(); loadProducts(); } }
+        // --- LÓGICA PARA GERIR PRODUTOS (MODIFICADA) ---
+        document.getElementById('productForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const saveBtn = document.getElementById('saveProductBtn'); 
+            saveBtn.disabled = true; 
+            saveBtn.textContent = 'A guardar...'; 
+            try { 
+                const isEditing = document.getElementById('isEditingProduct').value; 
+                const productId = document.getElementById('productId').value; 
+                const productName = document.getElementById('productName').value;
+                // Capta o novo valor de duração
+                const productDuration = parseInt(document.getElementById('productDuration').value, 10);
+
+                if (!productDuration || productDuration < 1) {
+                    throw new Error('A duração deve ser um número maior que 0.');
+                }
+                
+                // Salva o novo valor na tabela
+                const { error } = await supabase.from('products').upsert({ 
+                    id: productId, 
+                    name: productName, 
+                    duration_days: productDuration 
+                }); 
+
+                if (error) throw error; 
+                showMessage(`Produto ${isEditing ? 'atualizado' : 'criado'}!`, 'success'); 
+                await loadInitialData(); // Recarrega os dados (incluindo produtos)
+                resetProductForm(); 
+                loadProducts(); 
+            } catch(error) { 
+                showMessage(`Erro: ${error.message}`, 'error'); 
+            } finally { 
+                saveBtn.disabled = false; 
+                saveBtn.textContent = 'Adicionar Produto'; 
+            }
+        });
+        
+        // Reseta o formulário para o valor padrão de 365 dias
+        function resetProductForm() { 
+            document.getElementById('productForm').reset(); 
+            document.getElementById('isEditingProduct').value = ''; 
+            document.getElementById('productId').disabled = false; 
+            document.getElementById('productDuration').value = '365'; // Define o valor padrão
+            document.getElementById('saveProductBtn').textContent = 'Adicionar Produto'; 
+        }
+
+        // Carrega o valor da duração ao editar
+        function editProduct(id) { 
+            const product = products.find(p => p.id === id); 
+            if(!product) return; 
+            resetProductForm(); 
+            document.getElementById('isEditingProduct').value = 'true'; 
+            document.getElementById('productId').value = product.id; 
+            document.getElementById('productId').disabled = true; 
+            document.getElementById('productName').value = product.name; 
+            document.getElementById('productDuration').value = product.duration_days; // Carrega a duração salva
+            document.getElementById('saveProductBtn').textContent = 'Atualizar Produto'; 
+            window.scrollTo(0, 0); 
+        }
+
+        async function loadProducts() { 
+            const listEl = document.getElementById('productList'); 
+            listEl.innerHTML = '<div class="loading">A carregar...</div>'; 
+            // Os 'products' já foram carregados no loadInitialData()
+            displayProducts(); 
+        }
+
+        // Mostra a duração na lista de produtos
+        function displayProducts() { 
+            const listEl = document.getElementById('productList'); 
+            if (products.length === 0) { 
+                listEl.innerHTML = '<p>Nenhum produto cadastrado.</p>'; 
+                return; 
+            } 
+            listEl.innerHTML = products.map(p => {
+                let durationText = `${p.duration_days} dias`;
+                if (p.duration_days > 3650) durationText = 'Vitalício'; // Ex: 100 anos
+                else if (p.duration_days === 365) durationText = '1 Ano';
+                else if (p.duration_days === 1) durationText = '1 Dia';
+
+                return `<div class="content-item">
+                    <div class="content-info">
+                        <div class="content-title">${p.name}</div>
+                        <div class="content-module">ID Hotmart: <strong>${p.id}</strong></div>
+                        <div class="content-module">Duração: <strong>${durationText}</strong></div>
+                    </div>
+                    <div class="content-actions">
+                        <button class="btn btn-small" onclick="editProduct('${p.id}')">Editar</button>
+                        <button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">Excluir</button>
+                    </div>
+                </div>`
+            }).join(''); 
+        }
+
+        async function deleteProduct(id) { 
+            if (!confirm('Tem a certeza? Se este produto estiver em uso por algum módulo ou conteúdo, poderá causar problemas de acesso.')) return; 
+            const { error } = await supabase.from('products').delete().eq('id', id); 
+            if (error) showMessage('Erro: ' + error.message, 'error'); 
+            else { 
+                showMessage('Produto excluído!', 'success'); 
+                await loadInitialData(); // Recarrega os dados
+                loadProducts(); 
+            } 
+        }
+
+        // --- RESTANTE DO CÓDIGO (FEED E COMUNIDADE) ---
+        // Nenhuma alteração necessária abaixo desta linha
 
         document.getElementById('feedForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveFeedBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('feedImageUrl').value; if (document.getElementById('feedImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('feedImageFile'), 'feed'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editFeedId').value; const formData = { title: document.getElementById('feedTitle').value, content: document.getElementById('feedContent').value, image_url: imageUrl || null, active: document.getElementById('feedActive').checked }; const { error } = editId ? await supabase.from('feed_posts').update(formData).eq('id', editId) : await supabase.from('feed_posts').insert([formData]); if (error) throw error; showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success'); resetFeedForm(); loadFeedPosts(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Publicar Post'; } });
         async function loadFeedPosts() { const listEl = document.getElementById('feedList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const { data, error } = await supabase.from('feed_posts').select('*').order('created_at', { ascending: false }); if (error) { listEl.innerHTML = `<p style="color:red">Erro: ${error.message}</p>`; return; } displayFeedPosts(data); }
@@ -246,4 +347,3 @@
     </script>
 </body>
 </html>
-

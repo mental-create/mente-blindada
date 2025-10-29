@@ -118,7 +118,10 @@
         let contentsMap = new Map();
         let profilesMap = new Map();
         let currentAudio = null;
-        const PREMIUM_PRODUCT_ID = 'VIVAMENTE_PREMIUM'; // ID do produto Premium
+        
+        // --- ALTERAÇÃO DE HOJE ---
+        // Este é o ID do produto Premium (Vitalício) real da Hotmart
+        const PREMIUM_PRODUCT_ID = 'mackvtut'; 
 
         async function init() {
             const { data: { session } } = await supabase.auth.getSession();
@@ -143,6 +146,7 @@
 
             currentUser.profile = profileRes.data || {};
             currentUser.purchasedProducts = authorizedUserRes.data ? authorizedUserRes.data.purchased_products : [];
+            // A verificação de Premium agora usa o código real da Hotmart
             currentUser.isPremium = currentUser.purchasedProducts.includes(PREMIUM_PRODUCT_ID);
 
             if(allProfilesRes.data) allProfilesRes.data.forEach(p => profilesMap.set(p.id, { name: p.name || p.email.split('@')[0], avatar_url: p.avatar_url }));
@@ -221,7 +225,11 @@
 
             mainContent.innerHTML = '';
             modules.forEach(mod => {
-                const hasAccess = currentUser.isPremium || currentUser.purchasedProducts.includes(mod.product_id);
+                // Lógica de acesso:
+                // 1. O utilizador é premium (comprou 'mackvtut')?
+                // 2. O módulo não requer produto (product_id é nulo)?
+                // 3. O utilizador comprou este produto específico?
+                const hasAccess = currentUser.isPremium || !mod.product_id || currentUser.purchasedProducts.includes(mod.product_id);
 
                 const card = document.createElement('div');
                 card.className = `card ${!hasAccess ? 'locked' : ''}`;
@@ -282,7 +290,30 @@
                 mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível ainda.</div>';
             } else {
                 contents.forEach(content => {
-                    let hasAccess = currentUser.isPremium || (!content.product_id || currentUser.purchasedProducts.includes(content.product_id));
+                    // Lógica de acesso (Herdada do módulo pai):
+                    const parentModule = modulesMap.get(content.module_key);
+                    const moduleProductId = parentModule ? parentModule.product_id : null;
+                    
+                    // O acesso é permitido se:
+                    // 1. O utilizador for premium
+                    // 2. O conteúdo não tiver produto (product_id é nulo) E o módulo pai também não (ou o utilizador comprou o produto do módulo pai)
+                    // 3. O utilizador comprou o produto específico deste conteúdo
+                    
+                    const hasModuleAccess = currentUser.isPremium || !moduleProductId || currentUser.purchasedProducts.includes(moduleProductId);
+                    const hasContentAccess = currentUser.isPremium || !content.product_id || currentUser.purchasedProducts.includes(content.product_id);
+                    
+                    // O utilizador precisa de ter acesso ao módulo E ao conteúdo
+                    // Se o conteúdo tiver o seu próprio product_id, ele sobrepõe-se ao do módulo.
+                    // Se o conteúdo NÃO tiver, ele herda o requisito do módulo.
+                    
+                    let hasAccess = false;
+                    if (content.product_id) {
+                        // Se o conteúdo tem um produto específico, é isso que conta
+                        hasAccess = currentUser.isPremium || currentUser.purchasedProducts.includes(content.product_id);
+                    } else {
+                        // Se o conteúdo não tem, ele herda o requisito do módulo
+                        hasAccess = hasModuleAccess;
+                    }
 
                     const card = document.createElement('div');
                     card.className = `card ${!hasAccess ? 'locked' : ''}`;
@@ -416,4 +447,3 @@
     </script>
 </body>
 </html>
-
