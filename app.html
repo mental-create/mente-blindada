@@ -108,7 +108,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
-        // IMPORTANTE: Cole aqui a sua chave ANON KEY correta do Supabase!
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -119,10 +118,12 @@
         let profilesMap = new Map();
         let currentAudio = null;
         
-        // --- ALTERAÇÃO DE HOJE ---
-        // Este é o ID do produto Premium (Vitalício) real da Hotmart
+        // ID do produto Premium (deve ser o mesmo da Hotmart)
+        // O código vai procurar por 'premium' ou 'lifetime'
         const PREMIUM_PRODUCT_ID = 'mackvtut'; 
 
+        // --- INÍCIO DA VERSÃO CORRIGIDA (Baseada na Análise) ---
+        
         async function init() {
             const { data: { session } } = await supabase.auth.getSession();
             if (!session) {
@@ -131,23 +132,99 @@
             }
             currentUser = session.user;
 
+            // ✅ BUSCAR POR EMAIL (não por user_id)
             const [profileRes, authorizedUserRes, allProfilesRes, contentsRes] = await Promise.all([
                 supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
-                supabase.from('authorized_users').select('purchased_products').eq('user_id', currentUser.id).single(),
+                supabase.from('authorized_users').select('*').eq('email', currentUser.email.toLowerCase()).single(),
                 supabase.from('profiles').select('id, name, email, avatar_url'),
                 supabase.from('contents').select('*').eq('active', true)
             ]);
 
-            if (profileRes.error || (authorizedUserRes.error && authorizedUserRes.error.code !== 'PGRST116')) {
-                console.error("Erro ao carregar dados do utilizador:", profileRes.error || authorizedUserRes.error);
-                document.body.innerHTML = "Erro ao carregar os seus dados. Por favor, tente novamente.";
+            if (profileRes.error) {
+                console.error("Erro ao carregar perfil:", profileRes.error);
+                document.body.innerHTML = `
+                    <div style="padding: 40px; text-align: center; font-family: Arial;">
+                        <h2>⚠️ Erro ao carregar perfil</h2>
+                        <p>Por favor, contacte o suporte.</p>
+                        <button onclick="logout()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
+                            Sair
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+            
+            if (authorizedUserRes.error && authorizedUserRes.error.code !== 'PGRST116') {
+                console.error("Erro ao carregar dados de autorização:", authorizedUserRes.error);
+                document.body.innerHTML = `
+                    <div style="padding: 40px; text-align: center; font-family: Arial;">
+                        <h2>⚠️ Acesso não autorizado</h2>
+                        <p>Use o email registrado na compra.</p>
+                        <button onclick="logout()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
+                            Voltar ao Login
+                        </button>
+                    </div>
+                `;
                 return;
             }
 
             currentUser.profile = profileRes.data || {};
-            currentUser.purchasedProducts = authorizedUserRes.data ? authorizedUserRes.data.purchased_products : [];
-            // A verificação de Premium agora usa o código real da Hotmart
-            currentUser.isPremium = currentUser.purchasedProducts.includes(PREMIUM_PRODUCT_ID);
+                
+            // ✅ VERIFICAÇÃO DE EXPIRAÇÃO (nomes corretos)
+            const authUser = authorizedUserRes.data;
+            if (authUser) {
+                currentUser.purchasedProducts = authUser.purchased_products || [];
+                currentUser.subscriptionExpiresAt = authUser.expires_at; // ← CORRETO (baseado no SQL que executámos)
+                currentUser.subscriptionType = authUser.subscription_type;
+                        
+                // Verificar se expirou
+                if (currentUser.subscriptionExpiresAt) {
+                    const expirationDate = new Date(currentUser.subscriptionExpiresAt); // ← CORRETO
+                    const now = new Date();
+                                
+                    if (expirationDate < now) {
+                        // Assinatura expirada!
+                        showExpirationModal();
+                        return;
+                    }
+                                
+                    // Calcular dias restantes
+                    const daysRemaining = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
+                    currentUser.daysRemaining = daysRemaining;
+                                
+                    // Avisar se faltam menos de 7 dias
+                    if (daysRemaining <= 7 && daysRemaining > 0) {
+                        showExpirationWarning(daysRemaining);
+                    }
+                }
+                        
+                // Premium = tem produto premium
+                currentUser.isPremium = currentUser.purchasedProducts.some(p => 
+                    p.toLowerCase().includes('premium') || p.includes(PREMIUM_PRODUCT_ID)
+                ) || authUser.subscription_type === 'lifetime';
+            
+            } else {
+                // Usuário não tem compra registrada
+                document.body.innerHTML = `
+                    <div style="padding: 40px; text-align: center; font-family: Arial;">
+                        <h2>🔒 Acesso Restrito</h2>
+                        <p>Você precisa adquirir o VivaMente para acessar.</p>
+                        <p style="margin-top: 20px;">
+                            <a href="https://pay.hotmart.com/O102665956S?off=mackvtut"
+                                style="padding: 15px 30px; background: #4169E1; color: white;
+                                       text-decoration: none; border-radius: 10px; display: inline-block;">
+                                Adquirir Agora
+                            </a>
+                        </p>
+                        <button onclick="logout()" 
+                                style="padding: 10px 20px; margin-top: 20px; cursor: pointer;
+                                        background: #e0e0e0; border: none; border-radius: 5px;">
+                            Sair
+                        </button>
+                    </div>
+                `;
+                return;
+            }
 
             if(allProfilesRes.data) allProfilesRes.data.forEach(p => profilesMap.set(p.id, { name: p.name || p.email.split('@')[0], avatar_url: p.avatar_url }));
             if(contentsRes.data) contentsRes.data.forEach(c => contentsMap.set(c.id, c));
@@ -161,6 +238,19 @@
             setInterval(updateTime, 60000);
         }
 
+        // --- NOVAS FUNÇÕES DE AJUDA ---
+        function showExpirationModal() {
+            // Mostra um alerta simples e faz logout
+            alert("A sua assinatura expirou. Por favor, renove para continuar a aceder.");
+            logout();
+        }
+
+        function showExpirationWarning(daysRemaining) {
+            // Mostra um alerta não-bloqueante
+            alert(`Aviso: A sua assinatura expira em ${daysRemaining} dias.`);
+        }
+        
+        // --- FUNÇÕES ANTIGAS (Sem alteração) ---
         function updateTime() { document.getElementById('time').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
         function updateDate() { document.getElementById('date').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }); }
         function updateGreeting() {
@@ -225,10 +315,6 @@
 
             mainContent.innerHTML = '';
             modules.forEach(mod => {
-                // Lógica de acesso:
-                // 1. O utilizador é premium (comprou 'mackvtut')?
-                // 2. O módulo não requer produto (product_id é nulo)?
-                // 3. O utilizador comprou este produto específico?
                 const hasAccess = currentUser.isPremium || !mod.product_id || currentUser.purchasedProducts.includes(mod.product_id);
 
                 const card = document.createElement('div');
@@ -290,28 +376,14 @@
                 mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível ainda.</div>';
             } else {
                 contents.forEach(content => {
-                    // Lógica de acesso (Herdada do módulo pai):
                     const parentModule = modulesMap.get(content.module_key);
                     const moduleProductId = parentModule ? parentModule.product_id : null;
-                    
-                    // O acesso é permitido se:
-                    // 1. O utilizador for premium
-                    // 2. O conteúdo não tiver produto (product_id é nulo) E o módulo pai também não (ou o utilizador comprou o produto do módulo pai)
-                    // 3. O utilizador comprou o produto específico deste conteúdo
-                    
                     const hasModuleAccess = currentUser.isPremium || !moduleProductId || currentUser.purchasedProducts.includes(moduleProductId);
-                    const hasContentAccess = currentUser.isPremium || !content.product_id || currentUser.purchasedProducts.includes(content.product_id);
-                    
-                    // O utilizador precisa de ter acesso ao módulo E ao conteúdo
-                    // Se o conteúdo tiver o seu próprio product_id, ele sobrepõe-se ao do módulo.
-                    // Se o conteúdo NÃO tiver, ele herda o requisito do módulo.
                     
                     let hasAccess = false;
                     if (content.product_id) {
-                        // Se o conteúdo tem um produto específico, é isso que conta
                         hasAccess = currentUser.isPremium || currentUser.purchasedProducts.includes(content.product_id);
                     } else {
-                        // Se o conteúdo não tem, ele herda o requisito do módulo
                         hasAccess = hasModuleAccess;
                     }
 
