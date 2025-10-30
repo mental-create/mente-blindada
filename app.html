@@ -8,6 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
+        /* [O CSS (style) permanece o mesmo, está oculto aqui por brevidade] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
         .container { flex: 1; width: 100%; max-width: 480px; margin: 0 auto; background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 40%); display: flex; flex-direction: column; min-height: 100vh; }
@@ -118,11 +119,8 @@
         let profilesMap = new Map();
         let currentAudio = null;
         
-        // ID do produto Premium (deve ser o mesmo da Hotmart)
-        // O código vai procurar por 'premium' ou 'lifetime'
         const PREMIUM_PRODUCT_ID = 'mackvtut'; 
 
-        // --- INÍCIO DA VERSÃO CORRIGIDA (Baseada na Análise) ---
         
         async function init() {
             const { data: { session } } = await supabase.auth.getSession();
@@ -132,13 +130,17 @@
             }
             currentUser = session.user;
 
-            // ✅ BUSCAR POR EMAIL (não por user_id)
+            // --- ESTA É A MUDANÇA (v8) ---
+            // Revertemos para buscar por 'user_id' (currentUser.id), 
+            // que é o método correto e seguro após a vinculação no index.html.
             const [profileRes, authorizedUserRes, allProfilesRes, contentsRes] = await Promise.all([
                 supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
-                supabase.from('authorized_users').select('*').eq('email', currentUser.email.toLowerCase()).single(),
+                supabase.from('authorized_users').select('*').eq('user_id', currentUser.id).single(),
                 supabase.from('profiles').select('id, name, email, avatar_url'),
                 supabase.from('contents').select('*').eq('active', true)
             ]);
+            // --- FIM DA MUDANÇA ---
+
 
             if (profileRes.error) {
                 console.error("Erro ao carregar perfil:", profileRes.error);
@@ -154,6 +156,7 @@
                 return;
             }
             
+            // Erro PGRST116 = "0 rows" (sem correspondência), o que significa que não é autorizado
             if (authorizedUserRes.error && authorizedUserRes.error.code !== 'PGRST116') {
                 console.error("Erro ao carregar dados de autorização:", authorizedUserRes.error);
                 document.body.innerHTML = `
@@ -170,41 +173,35 @@
 
             currentUser.profile = profileRes.data || {};
                 
-            // ✅ VERIFICAÇÃO DE EXPIRAÇÃO (nomes corretos)
             const authUser = authorizedUserRes.data;
             if (authUser) {
                 currentUser.purchasedProducts = authUser.purchased_products || [];
-                currentUser.subscriptionExpiresAt = authUser.expires_at; // ← CORRETO (baseado no SQL que executámos)
+                currentUser.subscriptionExpiresAt = authUser.expires_at;
                 currentUser.subscriptionType = authUser.subscription_type;
                         
-                // Verificar se expirou
                 if (currentUser.subscriptionExpiresAt) {
-                    const expirationDate = new Date(currentUser.subscriptionExpiresAt); // ← CORRETO
+                    const expirationDate = new Date(currentUser.subscriptionExpiresAt);
                     const now = new Date();
                                 
                     if (expirationDate < now) {
-                        // Assinatura expirada!
                         showExpirationModal();
                         return;
                     }
                                 
-                    // Calcular dias restantes
                     const daysRemaining = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
                     currentUser.daysRemaining = daysRemaining;
                                 
-                    // Avisar se faltam menos de 7 dias
                     if (daysRemaining <= 7 && daysRemaining > 0) {
                         showExpirationWarning(daysRemaining);
                     }
                 }
                         
-                // Premium = tem produto premium
                 currentUser.isPremium = currentUser.purchasedProducts.some(p => 
                     p.toLowerCase().includes('premium') || p.includes(PREMIUM_PRODUCT_ID)
                 ) || authUser.subscription_type === 'lifetime';
             
             } else {
-                // Usuário não tem compra registrada
+                // Usuário não tem compra registrada (PGRST116 ou authUser é nulo)
                 document.body.innerHTML = `
                     <div style="padding: 40px; text-align: center; font-family: Arial;">
                         <h2>🔒 Acesso Restrito</h2>
@@ -238,19 +235,16 @@
             setInterval(updateTime, 60000);
         }
 
-        // --- NOVAS FUNÇÕES DE AJUDA ---
+        // --- FUNÇÕES DE AJUDA ---
         function showExpirationModal() {
-            // Mostra um alerta simples e faz logout
             alert("A sua assinatura expirou. Por favor, renove para continuar a aceder.");
             logout();
         }
 
         function showExpirationWarning(daysRemaining) {
-            // Mostra um alerta não-bloqueante
             alert(`Aviso: A sua assinatura expira em ${daysRemaining} dias.`);
         }
         
-        // --- FUNÇÕES ANTIGAS (Sem alteração) ---
         function updateTime() { document.getElementById('time').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
         function updateDate() { document.getElementById('date').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }); }
         function updateGreeting() {
