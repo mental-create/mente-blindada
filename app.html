@@ -178,8 +178,31 @@
                 modules.forEach(m => modulesMap.set(m.key, m));
                 subModules.forEach(sm => subModulesMap.set(sm.id, sm));
                 contents.forEach(c => contentsMap.set(c.id, c));
-                currentUser.isPremium = !!(authorizedUserRes.data && authorizedUserRes.data.product_id === PREMIUM_PRODUCT_ID);
-                currentUser.purchasedProducts = (authorizedUserRes.data && authorizedUserRes.data.products) || [];
+                
+                // Verificar se usuário está autorizado
+                if (!authorizedUserRes.data) {
+                    mainContent.innerHTML = `<div class="empty-state">❌ Acesso não autorizado. <br><small>Entre em contato com o suporte.</small></div>`;
+                    return;
+                }
+                
+                const authUser = authorizedUserRes.data;
+                
+                // Pegar produtos do usuário (aceita diferentes formatos de coluna)
+                const userProducts = authUser.purchased_products || authUser.products || [];
+                currentUser.purchasedProducts = Array.isArray(userProducts) ? userProducts : [];
+                
+                // Verificar se tem produto premium (mackvtut ou qualquer produto com todos os módulos)
+                const hasPremium = currentUser.purchasedProducts.some(prodId => {
+                    const product = productsData.find(p => p.id === prodId);
+                    return product && product.module_keys && product.module_keys.length >= modules.length;
+                });
+                
+                currentUser.isPremium = hasPremium;
+                
+                console.log('Usuário:', currentUser.email);
+                console.log('Produtos:', currentUser.purchasedProducts);
+                console.log('Premium:', currentUser.isPremium);
+                
                 updateGreeting();
                 if (window.location.hash) handleHashChange();
                 else loadHomeModules(false);

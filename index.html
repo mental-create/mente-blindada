@@ -358,59 +358,37 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // VERIFICAR SE USUÁRIO JÁ ESTÁ LOGADO AO CARREGAR A PÁGINA
-        async function checkExistingSession() {
-            console.log('🔍 Verificando sessão existente...');
-            
-            const { data: { session }, error } = await supabase.auth.getSession();
-            
-            if (error) {
-                console.error('Erro ao verificar sessão:', error);
-                return;
-            }
-            
-            if (session) {
-                console.log('✅ Sessão encontrada! Redirecionando...');
-                showSuccess('✅ Acesso autorizado! Redirecionando...');
-                
-                // Vincular user_id se necessário
-                await linkUserIdToAuthorizedUser(session);
-                
-                // Redirecionar após pequeno delay
-                setTimeout(() => {
-                    window.location.href = `${window.location.origin}/app.html`;
-                }, 800);
-            } else {
-                console.log('❌ Nenhuma sessão encontrada');
-            }
-        }
-
-        // Vincular user_id na tabela authorized_users
-        async function linkUserIdToAuthorizedUser(session) {
-            if (!session || !session.user) return;
-            
+        // 🔒 Verificação de email autorizado (só para o envio do magic link)
+        async function checkPurchaseStatus(email) {
             try {
-                const { error: linkError } = await supabase
+                const { data, error } = await supabase
                     .from('authorized_users')
-                    .update({ user_id: session.user.id })
-                    .eq('email', session.user.email.toLowerCase());
+                    .select('*')
+                    .eq('email', email)
+                    .eq('status', 'active')
+                    .single();
                 
-                if (linkError) {
-                    console.error('Erro ao vincular user_id:', linkError);
-                } else {
-                    console.log('✅ User ID vinculado com sucesso!');
+                if (error || !data) return false;
+                
+                // Verificar expiração
+                if (data.expires_at && new Date(data.expires_at) < new Date()) {
+                    return false;
                 }
-            } catch (e) {
-                console.error('Erro no linkUserIdToAuthorizedUser:', e);
+                
+                return true;
+            } catch (error) {
+                console.error('Erro ao verificar o estado da compra:', error);
+                return false;
             }
         }
 
-        // ENVIAR LINK MÁGICO
+        // 📧 ENVIO DO MAGIC LINK (com verificação de autorização)
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const email = document.getElementById('email').value.trim().toLowerCase();
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            
             if (!emailRegex.test(email)) {
                 showError('Por favor, digite um email válido');
                 return;
@@ -420,48 +398,36 @@
             hideMessages();
 
             try {
-                // 🔍 VERIFICAR SE EMAIL ESTÁ AUTORIZADO
-                const { data: authUser, error: authCheckError } = await supabase
-                    .from('authorized_users')
-                    .select('status, expires_at')
-                    .eq('email', email)
-                    .single();
-
-                if (authCheckError || !authUser) {
-                    showError('Email não autorizado. Use o email registrado na compra ou contacte o suporte.');
+                // ✅ Verificar se o email está autorizado ANTES de enviar o link
+                console.log('🔍 Verificando autorização para:', email);
+                const isAuthorized = await checkPurchaseStatus(email);
+                
+                if (!isAuthorized) {
+                    console.log('❌ Email não autorizado:', email);
+                    showError('Email não encontrado. Use o mesmo email registado na compra ou entre em contato com o suporte.');
                     showLoading(false);
                     return;
                 }
 
-                // Verificar se expirou
-                if (authUser.expires_at && new Date(authUser.expires_at) < new Date()) {
-                    showError('Sua assinatura expirou. Renove para continuar acessando.');
-                    showLoading(false);
-                    return;
-                }
+                console.log('✅ Email autorizado! Enviando magic link...');
 
-                // Verificar status
-                if (authUser.status !== 'active') {
-                    showError('Acesso inativo. Contacte o suporte se acha que isso é um erro.');
-                    showLoading(false);
-                    return;
-                }
-
-                // ✅ EMAIL AUTORIZADO - ENVIAR LINK MÁGICO
+                // ✅ Enviar magic link
                 const { error } = await supabase.auth.signInWithOtp({
                     email: email,
                     options: {
                         emailRedirectTo: `${window.location.origin}/app.html`,
                     }
                 });
-                
+
                 if (error) throw error;
 
+                console.log('✅ Magic link enviado com sucesso!');
                 showSuccess('Link enviado com sucesso!');
                 document.getElementById('emailSentInfo').classList.add('show');
                 document.getElementById('loginForm').classList.add('form-sent');
+                
             } catch (error) {
-                console.error('Erro no login:', error);
+                console.error('❌ Erro no login:', error);
                 if (error.message.includes('rate limit')) {
                     showError('Muitas tentativas. Aguarde 5 minutos e tente novamente.');
                 } else {
@@ -472,22 +438,42 @@
             }
         });
 
-        // LISTENER DE MUDANÇA DE ESTADO DE AUTENTICAÇÃO
+        // 🎯 LISTENER DE AUTENTICAÇÃO - AQUI ESTÁ A CORREÇÃO CRÍTICA!
         supabase.auth.onAuthStateChange(async (event, session) => {
-            console.log('🔔 Auth state changed:', event);
+            console.log('🔔 Auth state changed:', event, session ? 'Session exists' : 'No session');
             
+            // ✅ SIGNED_IN: Quando o usuário clica no magic link
             if (event === 'SIGNED_IN' && session) {
-                console.log('✅ Usuário autenticado!');
+                console.log('✅ Usuário autenticado! Email:', session.user.email);
                 
-                // Vincular user_id
-                await linkUserIdToAuthorizedUser(session);
+                // ⚠️ CRÍTICO: NÃO VERIFICAR checkPurchaseStatus AQUI!
+                // O Supabase já validou o token do magic link
+                // Se chegou aqui, o email é válido e o token está correto
                 
                 showSuccess('✅ Acesso autorizado! Redirecionando...');
+                
+                // Redirecionar após pequeno delay
                 setTimeout(() => {
+                    console.log('🚀 Redirecionando para app.html...');
                     window.location.href = `${window.location.origin}/app.html`;
-                }, 800);
+                }, 500);
             }
             
+            // ℹ️ INITIAL_SESSION: Quando a página carrega
+            if (event === 'INITIAL_SESSION') {
+                console.log('📍 Initial session check');
+                if (session) {
+                    console.log('✅ Sessão existente encontrada, redirecionando...');
+                    window.location.href = `${window.location.origin}/app.html`;
+                }
+            }
+            
+            // ⚠️ SIGNED_OUT: Se for deslogado (não deve acontecer no fluxo normal)
+            if (event === 'SIGNED_OUT') {
+                console.log('⚠️ Usuário deslogado');
+            }
+            
+            // ℹ️ TOKEN_REFRESHED: Quando o token é atualizado
             if (event === 'TOKEN_REFRESHED') {
                 console.log('🔄 Token atualizado');
             }
@@ -526,12 +512,10 @@
             }
         }
 
-        // EXECUTAR VERIFICAÇÃO DE SESSÃO AO CARREGAR
-        window.addEventListener('DOMContentLoaded', () => {
-            console.log('📱 Página carregada, verificando sessão...');
-            checkExistingSession();
-        });
-
+        // 🔍 LOG INICIAL para debug
+        console.log('📱 Index.html carregado');
+        console.log('🌐 Origin:', window.location.origin);
+        console.log('🔗 Redirect URL:', `${window.location.origin}/app.html`);
     </script>
 </body>
 </html>
