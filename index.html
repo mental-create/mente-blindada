@@ -358,10 +358,54 @@
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        
-        // --- INÍCIO DO NOVO CÓDIGO (v7) ---
+        // VERIFICAR SE USUÁRIO JÁ ESTÁ LOGADO AO CARREGAR A PÁGINA
+        async function checkExistingSession() {
+            console.log('🔍 Verificando sessão existente...');
+            
+            const { data: { session }, error } = await supabase.auth.getSession();
+            
+            if (error) {
+                console.error('Erro ao verificar sessão:', error);
+                return;
+            }
+            
+            if (session) {
+                console.log('✅ Sessão encontrada! Redirecionando...');
+                showSuccess('✅ Acesso autorizado! Redirecionando...');
+                
+                // Vincular user_id se necessário
+                await linkUserIdToAuthorizedUser(session);
+                
+                // Redirecionar após pequeno delay
+                setTimeout(() => {
+                    window.location.href = `${window.location.origin}/app.html`;
+                }, 800);
+            } else {
+                console.log('❌ Nenhuma sessão encontrada');
+            }
+        }
 
-        // Encontre a função de submit do loginForm e substitua por:
+        // Vincular user_id na tabela authorized_users
+        async function linkUserIdToAuthorizedUser(session) {
+            if (!session || !session.user) return;
+            
+            try {
+                const { error: linkError } = await supabase
+                    .from('authorized_users')
+                    .update({ user_id: session.user.id })
+                    .eq('email', session.user.email.toLowerCase());
+                
+                if (linkError) {
+                    console.error('Erro ao vincular user_id:', linkError);
+                } else {
+                    console.log('✅ User ID vinculado com sucesso!');
+                }
+            } catch (e) {
+                console.error('Erro no linkUserIdToAuthorizedUser:', e);
+            }
+        }
+
+        // ENVIAR LINK MÁGICO
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -375,7 +419,6 @@
             showLoading(true);
             hideMessages();
 
-            
             try {
                 // 🔍 VERIFICAR SE EMAIL ESTÁ AUTORIZADO
                 const { data: authUser, error: authCheckError } = await supabase
@@ -385,7 +428,6 @@
                     .single();
 
                 if (authCheckError || !authUser) {
-              
                     showError('Email não autorizado. Use o email registrado na compra ou contacte o suporte.');
                     showLoading(false);
                     return;
@@ -412,6 +454,7 @@
                         emailRedirectTo: `${window.location.origin}/app.html`,
                     }
                 });
+                
                 if (error) throw error;
 
                 showSuccess('Link enviado com sucesso!');
@@ -429,8 +472,28 @@
             }
         });
 
+        // LISTENER DE MUDANÇA DE ESTADO DE AUTENTICAÇÃO
+        supabase.auth.onAuthStateChange(async (event, session) => {
+            console.log('🔔 Auth state changed:', event);
+            
+            if (event === 'SIGNED_IN' && session) {
+                console.log('✅ Usuário autenticado!');
+                
+                // Vincular user_id
+                await linkUserIdToAuthorizedUser(session);
+                
+                showSuccess('✅ Acesso autorizado! Redirecionando...');
+                setTimeout(() => {
+                    window.location.href = `${window.location.origin}/app.html`;
+                }, 800);
+            }
+            
+            if (event === 'TOKEN_REFRESHED') {
+                console.log('🔄 Token atualizado');
+            }
+        });
 
-        // Funções de feedback (sem alteração)
+        // Funções de feedback
         function showError(message) {
             const errorEl = document.getElementById('errorMessage');
             errorEl.textContent = message;
@@ -463,30 +526,11 @@
             }
         }
 
-        // Listener para quando usuário volta do email
-        supabase.auth.onAuthStateChange(async (event, session) => {
-            if (event === 'SIGNED_IN' && session) {
-                // 🔗 VINCULAR USER_ID NA TABELA authorized_users
-                const { error: linkError } = await supabase
-                    .from('authorized_users')
-                    .update({ user_id: session.user.id })
-                    .eq('email', session.user.email.toLowerCase());
-                
-          
-                if (linkError) {
-                    console.error('Erro ao vincular user_id:', linkError);
-                } else {
-                    console.log('✅ User ID vinculado com sucesso!');
-                }
-
-                showSuccess('✅ Acesso autorizado! Redirecionando...');
-                setTimeout(() => {
-                    window.location.href = `${window.location.origin}/app.html`;
-                }, 1500);
-            }
+        // EXECUTAR VERIFICAÇÃO DE SESSÃO AO CARREGAR
+        window.addEventListener('DOMContentLoaded', () => {
+            console.log('📱 Página carregada, verificando sessão...');
+            checkExistingSession();
         });
-        
-        // --- FIM DO NOVO CÓDIGO (v7) ---
 
     </script>
 </body>
