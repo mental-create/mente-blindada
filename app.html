@@ -67,384 +67,275 @@
         .nav-item.active { color: white; background: rgba(255, 255, 255, 0.15); border-radius: 10px; margin: 0 5px; }
         .nav-icon { font-size: 24px; margin-bottom: 4px; }
         .nav-label { font-size: 12px; font-weight: 500; }
-        .loading, .empty-state { grid-column: 1/-1; text-align: center; padding: 40px; color: #666; }
-        .iframe-container { grid-column: 1/-1; background: white; border-radius: 15px; padding: 10px; height: calc(100vh - 250px); min-height: 500px; overflow: auto; position: relative; }
-        .audio-player-view { grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; padding: 20px 0; height: calc(100vh - 220px); justify-content: center; }
-        .player-art { width: 220px; height: 220px; border-radius: 50%; box-shadow: 0 10px 30px rgba(0,0,0,0.2); position: relative; border: 5px solid white; }
-        .player-art-image { width: 100%; height: 100%; border-radius: 50%; object-fit: cover; }
-        .player-info { text-align: center; margin-top: 40px; }
-        .player-title { font-size: 28px; font-weight: 700; color: #333; }
-        .player-progress-container { width: 100%; max-width: 350px; margin-top: 40px; }
-        .progress-time { display: flex; justify-content: space-between; font-size: 14px; color: #555; margin-bottom: 5px; font-weight: 500; }
-        .progress-bar { width: 100%; -webkit-appearance: none; appearance: none; height: 8px; background: #ddd; border-radius: 5px; outline: none; cursor: pointer; }
-        .progress-bar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; background: #4169E1; border-radius: 50%; cursor: pointer; border: 3px solid white; box-shadow: 0 0 5px rgba(0,0,0,0.2); }
-        .player-controls { display: flex; justify-content: center; align-items: center; gap: 40px; margin-top: 30px; }
-        .control-btn { background: none; border: none; cursor: pointer; font-size: 32px; color: #333; }
-        .play-pause-btn { font-size: 60px; color: #4169E1; width: 70px; height: 70px; background: white; border-radius: 50%; box-shadow: 0 5px 15px rgba(65, 105, 225, 0.3); display: flex; align-items: center; justify-content: center; }
+        .loading { grid-column: 1/-1; text-align: center; padding: 40px 20px; color: #666; font-size: 16px; display: none; }
+        .loading.active { display: block; }
+        .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #999; font-size: 18px; }
+        .content-player { grid-column: 1/-1; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .content-player h2 { font-size: 26px; font-weight: 700; color: #333; margin-bottom: 20px; text-align: center; }
+        .content-player video { width: 100%; border-radius: 12px; margin-bottom: 20px; }
+        .content-player audio { width: 100%; margin-bottom: 20px; }
+        .content-player img { width: 100%; border-radius: 12px; margin-bottom: 20px; }
+        .content-player p { color: #666; line-height: 1.8; font-size: 16px; }
+        .content-player .content-description { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .back-to-list { margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; }
     </style>
 </head>
 <body>
     <div class="container">
-        <div class="header" id="mainHeader">
-            <div class="time" id="time">00:00</div>
-            <div class="date" id="date">A carregar...</div>
+        <header class="header">
             <div class="app-icon"></div>
+            <div class="time" id="time">00:00</div>
+            <div class="date" id="date">Segunda-feira, 1 de Janeiro</div>
+        </header>
+        <div class="title-bar">
+            <h1 class="title" id="pageTitle">Viva Mente</h1>
+            <div class="greeting" id="greeting">👋 Olá, Utilizador</div>
         </div>
-        
-        <div class="title-bar" id="titleBar">
-            <h1 class="title">VivaMente</h1>
-            <div class="greeting" id="greeting">Olá!</div>
-        </div>
-        
-        <div class="main-content" id="mainContent"></div>
-        
+        <main class="main-content" id="mainContent">
+            <div class="loading active">A carregar...</div>
+        </main>
         <nav class="nav-bar">
-            <div class="nav-item active" onclick="handleNavClick('home')" data-nav="home"><span class="nav-icon">🏠</span><span class="nav-label">INÍCIO</span></div>
-            <div class="nav-item" onclick="handleNavClick('feed')" data-nav="feed"><span class="nav-icon">📋</span><span class="nav-label">Feed</span></div>
-            <div class="nav-item" onclick="handleNavClick('community')" data-nav="community"><span class="nav-icon">💬</span><span class="nav-label">Comunidade</span></div>
-            <div class="nav-item" onclick="handleNavClick('profile')" data-nav="profile"><span class="nav-icon">👤</span><span class="nav-label">Perfil</span></div>
+            <div class="nav-item active" data-nav="home" onclick="handleNavClick('home')">
+                <div class="nav-icon">🏠</div>
+                <div class="nav-label">Início</div>
+            </div>
+            <div class="nav-item" data-nav="feed" onclick="handleNavClick('feed')">
+                <div class="nav-icon">📰</div>
+                <div class="nav-label">Feed</div>
+            </div>
+            <div class="nav-item" data-nav="community" onclick="handleNavClick('community')">
+                <div class="nav-icon">💬</div>
+                <div class="nav-label">Comunidade</div>
+            </div>
+            <div class="nav-item" data-nav="profile" onclick="handleNavClick('profile')">
+                <div class="nav-icon">👤</div>
+                <div class="nav-label">Perfil</div>
+            </div>
         </nav>
     </div>
-
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2Njc4MDgsImV4cCI6MjA1MTI0MzgwOH0.zDlBuhNHpvYsCWX0XmpCZIJPjjq6Cp8H0_W7AHBCrXw';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        let currentUser = null;
+        let currentUser = { isPremium: false, purchasedProducts: [] };
+        let modules = [];
+        let subModules = [];
+        let contents = [];
         let modulesMap = new Map();
         let subModulesMap = new Map();
         let contentsMap = new Map();
         let profilesMap = new Map();
         let currentAudio = null;
-        
-        const PREMIUM_PRODUCT_ID = 'mackvtut'; 
 
-        
+        const PREMIUM_PRODUCT_ID = 'mackvtut';
+        let productsData = [];
+
+        // Função para verificar se usuário tem acesso a um módulo
+        function userHasAccessToModule(moduleKey) {
+            // Premium tem acesso a tudo
+            if (currentUser.isPremium) return true;
+            
+            // Buscar quais produtos incluem este módulo
+            const productsWithModule = productsData.filter(p => 
+                p.module_keys && p.module_keys.includes(moduleKey)
+            );
+            
+            // Verificar se o usuário tem ALGUM desses produtos
+            return productsWithModule.some(product => 
+                currentUser.purchasedProducts && currentUser.purchasedProducts.includes(product.id)
+            );
+        }
+
         async function init() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) {
-                window.location.href = `${window.location.origin}/index.html`;
-                return;
-            }
-            currentUser = session.user;
-
-            // --- ESTA É A MUDANÇA (v8) ---
-            // Revertemos para buscar por 'user_id' (currentUser.id), 
-            // que é o método correto e seguro após a vinculação no index.html.
-            const [profileRes, authorizedUserRes, allProfilesRes, contentsRes] = await Promise.all([
-                supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
-                supabase.from('authorized_users').select('*').eq('user_id', currentUser.id).single(),
-                supabase.from('profiles').select('id, name, email, avatar_url'),
-                supabase.from('contents').select('*').eq('active', true)
-            ]);
-            // --- FIM DA MUDANÇA ---
-
-
-            if (profileRes.error) {
-                console.error("Erro ao carregar perfil:", profileRes.error);
-                document.body.innerHTML = `
-                    <div style="padding: 40px; text-align: center; font-family: Arial;">
-                        <h2>⚠️ Erro ao carregar perfil</h2>
-                        <p>Por favor, contacte o suporte.</p>
-                        <button onclick="logout()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
-                            Sair
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-            
-            // Erro PGRST116 = "0 rows" (sem correspondência), o que significa que não é autorizado
-            if (authorizedUserRes.error && authorizedUserRes.error.code !== 'PGRST116') {
-                console.error("Erro ao carregar dados de autorização:", authorizedUserRes.error);
-                document.body.innerHTML = `
-                    <div style="padding: 40px; text-align: center; font-family: Arial;">
-                        <h2>⚠️ Acesso não autorizado</h2>
-                        <p>Use o email registrado na compra.</p>
-                        <button onclick="logout()" style="padding: 10px 20px; margin-top: 20px; cursor: pointer;">
-                            Voltar ao Login
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            currentUser.profile = profileRes.data || {};
-                
-            const authUser = authorizedUserRes.data;
-            if (authUser) {
-                currentUser.purchasedProducts = authUser.purchased_products || [];
-                currentUser.subscriptionExpiresAt = authUser.expires_at;
-                currentUser.subscriptionType = authUser.subscription_type;
-                        
-                if (currentUser.subscriptionExpiresAt) {
-                    const expirationDate = new Date(currentUser.subscriptionExpiresAt);
-                    const now = new Date();
-                                
-                    if (expirationDate < now) {
-                        showExpirationModal();
-                        return;
-                    }
-                                
-                    const daysRemaining = Math.ceil((expirationDate - now) / (1000 * 60 * 60 * 24));
-                    currentUser.daysRemaining = daysRemaining;
-                                
-                    if (daysRemaining <= 7 && daysRemaining > 0) {
-                        showExpirationWarning(daysRemaining);
-                    }
-                }
-                        
-                currentUser.isPremium = currentUser.purchasedProducts.some(p => 
-                    p.toLowerCase().includes('premium') || p.includes(PREMIUM_PRODUCT_ID)
-                ) || authUser.subscription_type === 'lifetime';
-            
-            } else {
-                // Usuário não tem compra registrada (PGRST116 ou authUser é nulo)
-                document.body.innerHTML = `
-                    <div style="padding: 40px; text-align: center; font-family: Arial;">
-                        <h2>🔒 Acesso Restrito</h2>
-                        <p>Você precisa adquirir o VivaMente para acessar.</p>
-                        <p style="margin-top: 20px;">
-                            <a href="https://pay.hotmart.com/O102665956S?off=mackvtut"
-                                style="padding: 15px 30px; background: #4169E1; color: white;
-                                       text-decoration: none; border-radius: 10px; display: inline-block;">
-                                Adquirir Agora
-                            </a>
-                        </p>
-                        <button onclick="logout()" 
-                                style="padding: 10px 20px; margin-top: 20px; cursor: pointer;
-                                        background: #e0e0e0; border: none; border-radius: 5px;">
-                            Sair
-                        </button>
-                    </div>
-                `;
-                return;
-            }
-
-            if(allProfilesRes.data) allProfilesRes.data.forEach(p => profilesMap.set(p.id, { name: p.name || p.email.split('@')[0], avatar_url: p.avatar_url }));
-            if(contentsRes.data) contentsRes.data.forEach(c => contentsMap.set(c.id, c));
-
+            await checkAuth();
             updateTime();
-            updateDate();
-            updateGreeting();
-            history.replaceState({ view: 'home' }, '', '#home');
-            loadHomeModules(false);
-            window.addEventListener('popstate', handlePopState);
-            setInterval(updateTime, 60000);
+            setInterval(updateTime, 1000);
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<div class="loading active">A carregar...</div>';
+            try {
+                const [profileRes, authorizedUserRes, modulesRes, subModulesRes, allProfilesRes, contentsRes, productsRes] = await Promise.all([
+                    supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
+                    supabase.from('authorized_users').select('*').eq('email', currentUser.email).single(),
+                    supabase.from('modules').select('*').eq('active', true).order('position', { ascending: true }),
+                    supabase.from('sub_modules').select('*').eq('active', true).order('position', { ascending: true }),
+                    supabase.from('profiles').select('id, name, avatar_url'),
+                    supabase.from('contents').select('*').eq('active', true).order('position', { ascending: true }),
+                    supabase.from('products').select('id, name, module_keys, duration_days')
+                ]);
+                
+                // Guardar produtos
+                productsData = productsRes.data || [];
+                console.log('Produtos carregados:', productsData.length);
+                
+                currentUser.profile = profileRes.data || {};
+                modules = modulesRes.data || [];
+                subModules = subModulesRes.data || [];
+                contents = contentsRes.data || [];
+                const allProfiles = allProfilesRes.data || [];
+                allProfiles.forEach(p => profilesMap.set(p.id, p));
+                modules.forEach(m => modulesMap.set(m.key, m));
+                subModules.forEach(sm => subModulesMap.set(sm.id, sm));
+                contents.forEach(c => contentsMap.set(c.id, c));
+                currentUser.isPremium = !!(authorizedUserRes.data && authorizedUserRes.data.product_id === PREMIUM_PRODUCT_ID);
+                currentUser.purchasedProducts = (authorizedUserRes.data && authorizedUserRes.data.products) || [];
+                updateGreeting();
+                if (window.location.hash) handleHashChange();
+                else loadHomeModules(false);
+                window.addEventListener('popstate', handleHashChange);
+            } catch (error) { mainContent.innerHTML = `<div class="empty-state">Erro ao carregar os dados. <br><small>${error.message}</small></div>`; console.error(error); }
         }
 
-        // --- FUNÇÕES DE AJUDA ---
-        function showExpirationModal() {
-            alert("A sua assinatura expirou. Por favor, renove para continuar a aceder.");
-            logout();
+        async function checkAuth() {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) { window.location.href = `${window.location.origin}/index.html`; return; }
+            currentUser.id = session.user.id;
+            currentUser.email = session.user.email;
         }
 
-        function showExpirationWarning(daysRemaining) {
-            alert(`Aviso: A sua assinatura expira em ${daysRemaining} dias.`);
+        function updateTime() {
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            document.getElementById('time').textContent = timeStr;
+            const dateStr = now.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+            document.getElementById('date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
         }
-        
-        function updateTime() { document.getElementById('time').textContent = new Date().toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
-        function updateDate() { document.getElementById('date').textContent = new Date().toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' }); }
+
         function updateGreeting() {
-            const hour = new Date().getHours();
-            let greeting = hour < 12 ? '🌅 Bom Dia' : hour < 18 ? '☀️ Boa Tarde' : '🌙 Boa Noite';
-            const name = currentUser.profile.name ? currentUser.profile.name.split(' ')[0] : 'Utilizador';
-            document.getElementById('greeting').innerHTML = `${greeting}, ${name}!`;
+            const name = currentUser.profile?.name || currentUser.email.split('@')[0];
+            document.getElementById('greeting').innerHTML = `👋 Olá, ${name}`;
         }
 
-        function handlePopState(event) {
-            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-            if (event.state) {
-                const state = event.state;
-                switch(state.view) {
-                    case 'home': setActiveNav('home'); loadHomeModules(false); break;
-                    case 'feed': setActiveNav('feed'); loadFeed(false); break;
-                    case 'community': setActiveNav('community'); loadCommunity(false); break;
-                    case 'profile': setActiveNav('profile'); loadProfile(false); break;
-                    case 'subModule': setActiveNav('home'); loadSubModules(state.key, false); break;
-                    case 'contentList': setActiveNav('home'); loadModuleContents(state.id, false); break;
-                    case 'content': setActiveNav('home'); openContent(state.id, false); break;
-                    default: setActiveNav('home'); loadHomeModules(false);
-                }
-            } else {
-                setActiveNav('home');
-                loadHomeModules(false);
-            }
+        function setActiveNav(navId) {
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            const navItem = document.querySelector(`[data-nav="${navId}"]`);
+            if (navItem) navItem.classList.add('active');
         }
 
-        function setActiveNav(view) {
-            document.querySelectorAll('.nav-item').forEach(item => item.classList.toggle('active', item.dataset.nav === view));
-            const isHomeScreen = ['home', 'subModule', 'contentList', 'content'].includes(view);
-            document.getElementById('mainHeader').style.display = isHomeScreen ? 'block' : 'none';
-            document.getElementById('titleBar').style.display = isHomeScreen ? 'block' : 'none';
+        function handleNavClick(section) {
+            if (section === 'home') loadHomeModules();
+            else if (section === 'feed') loadFeed();
+            else if (section === 'community') loadCommunity();
+            else if (section === 'profile') loadProfile();
         }
 
-        function handleNavClick(view) {
-            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
-            const currentState = history.state || { view: 'home' };
-            if (view === 'home' && ['subModule', 'contentList', 'content'].includes(currentState.view)) {}
-            else if (currentState.view === view) return;
-            switch(view) {
-                case 'home': loadHomeModules(); break;
-                case 'feed': loadFeed(); break;
-                case 'community': loadCommunity(); break;
-                case 'profile': loadProfile(); break;
-            }
+        function handleHashChange() {
+            const hash = window.location.hash.substring(1);
+            if (!hash) return loadHomeModules(false);
+            const [view, id] = hash.split('/');
+            if (view === 'feed') loadFeed(false);
+            else if (view === 'community') loadCommunity(false);
+            else if (view === 'profile') loadProfile(false);
+            else if (view === 'sub-modules') loadSubModules(id, false);
+            else if (view === 'content-list') loadModuleContents(parseInt(id), false);
+            else if (view === 'content') openContent(parseInt(id), false);
+            else loadHomeModules(false);
         }
 
-        async function loadHomeModules(push = true) {
+        function loadHomeModules(push = true) {
             if (push && (history.state?.view !== 'home')) history.pushState({ view: 'home' }, '', '#home');
             setActiveNav('home');
-
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">A carregar módulos...</div>';
-
-            const { data: modules, error } = await supabase.from('modules').select('*').order('order_position');
-            if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar módulos. <br><small>${error.message}</small></div>`;
-
-            modulesMap.clear();
-            modules.forEach(m => modulesMap.set(m.key, m));
-
+            document.getElementById('pageTitle').textContent = 'Viva Mente';
             mainContent.innerHTML = '';
             modules.forEach(mod => {
-                const hasAccess = currentUser.isPremium || !mod.product_id || currentUser.purchasedProducts.includes(mod.product_id);
-
+                const hasAccess = userHasAccessToModule(mod.key);
                 const card = document.createElement('div');
                 card.className = `card ${!hasAccess ? 'locked' : ''}`;
-                card.innerHTML = `<div class="card-image" style="background-image: url('${mod.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}')"></div><span class="card-title">${mod.name}</span>`;
+                card.innerHTML = `<div class="card-image" style="background-image: url('${mod.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${mod.name}</span>`;
                 if (hasAccess) card.onclick = () => loadSubModules(mod.key);
-                else card.onclick = () => alert('Você precisa de adquirir este módulo para o poder aceder.');
+                else card.onclick = () => alert('Você precisa adquirir este módulo para poder acessá-lo.');
                 mainContent.appendChild(card);
             });
         }
 
         async function loadSubModules(moduleKey, push = true) {
-            if (push) history.pushState({ view: 'subModule', key: moduleKey }, '', `#submodule/${moduleKey}`);
-            setActiveNav('subModule');
-
+            if (push) history.pushState({ view: 'sub-modules', id: moduleKey }, '', `#sub-modules/${moduleKey}`);
+            setActiveNav('home');
+            const module = modulesMap.get(moduleKey);
+            if (!module) return;
+            const parentModule = module;
+            document.getElementById('pageTitle').textContent = module.name;
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">A carregar...</div>';
-
-            const { data: subModules, error } = await supabase.from('sub_modules').select('*').eq('module_key', moduleKey).order('order_position');
-            if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar. <br><small>${error.message}</small></div>`;
-
-            const parentModule = modulesMap.get(moduleKey);
-            const backButtonHtml = `<button class="back-button" onclick="history.back()">← Voltar aos Módulos</button>`;
-            mainContent.innerHTML = `${backButtonHtml}<h2 class="module-title">${parentModule.name}</h2>`;
-
-            if (subModules.length === 0) {
-                mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível neste módulo ainda.</div>';
-            } else {
-                subModules.forEach(sm => {
-                    subModulesMap.set(sm.id, sm);
-                    const card = document.createElement('div');
-                    card.className = 'card';
-                    card.innerHTML = `<div class="card-image" style="background-image: url('${sm.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${sm.name}</span>`;
+            mainContent.innerHTML = '<button class="back-button" onclick="history.back()">← Voltar</button>';
+            const filteredSubModules = subModules.filter(sm => sm.module_key === moduleKey);
+            filteredSubModules.forEach(sm => {
+                subModulesMap.set(sm.id, sm);
+                const hasAccess = userHasAccessToModule(parentModule.key);
+                const card = document.createElement('div');
+                card.className = `card ${!hasAccess ? 'locked' : ''}`;
+                card.innerHTML = `<div class="card-image" style="background-image: url('${sm.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${sm.name}</span>`;
+                if (hasAccess) {
                     card.onclick = () => loadModuleContents(sm.id);
-                    mainContent.appendChild(card);
-                });
-                mainContent.insertAdjacentHTML('beforeend', backButtonHtml);
-            }
+                } else {
+                    card.onclick = () => alert('Você precisa adquirir este módulo para poder acessá-lo.');
+                }
+                mainContent.appendChild(card);
+            });
         }
 
         async function loadModuleContents(subModuleId, push = true) {
+            if (push) history.pushState({ view: 'contentList', id: subModuleId }, '', `#content-list/${subModuleId}`);
+            
+            // Verificar acesso ao módulo
             const subModule = subModulesMap.get(subModuleId);
-            if (!subModule) return mainContent.innerHTML = '<div class="empty-state">Sub-módulo não encontrado.</div>';
-
-            if (push) history.pushState({ view: 'contentList', id: subModuleId }, '', `#contentlist/${subModuleId}`);
-            setActiveNav('contentList');
-
-            const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">A carregar conteúdos...</div>';
-
-            const contents = Array.from(contentsMap.values())
-                .filter(c => c.sub_module_id === subModuleId)
-                .sort((a, b) => a.order_position - b.order_position);
-
-            const backButtonHtml = `<button class="back-button" onclick="history.back()">← Voltar</button>`;
-            mainContent.innerHTML = `${backButtonHtml}<h2 class="module-title">${subModule.name}</h2>`;
-
-            if (contents.length === 0) {
-                mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível ainda.</div>';
-            } else {
-                contents.forEach(content => {
-                    const parentModule = modulesMap.get(content.module_key);
-                    const moduleProductId = parentModule ? parentModule.product_id : null;
-                    const hasModuleAccess = currentUser.isPremium || !moduleProductId || currentUser.purchasedProducts.includes(moduleProductId);
-                    
-                    let hasAccess = false;
-                    if (content.product_id) {
-                        hasAccess = currentUser.isPremium || currentUser.purchasedProducts.includes(content.product_id);
-                    } else {
-                        hasAccess = hasModuleAccess;
+            if (subModule) {
+                const parentModule = modulesMap.get(subModule.module_key);
+                if (parentModule) {
+                    const hasAccess = userHasAccessToModule(parentModule.key);
+                    if (!hasAccess) {
+                        alert('Você não tem acesso a este conteúdo. Adquira o módulo para continuar.');
+                        history.back();
+                        return;
                     }
-
-                    const card = document.createElement('div');
-                    card.className = `card ${!hasAccess ? 'locked' : ''}`;
-                    card.innerHTML = `<div class="card-image" style="background-image: url('${content.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${content.title}</span>`;
-
-                    if(hasAccess) {
-                        card.onclick = () => openContent(content.id);
-                    } else {
-                        card.onclick = () => alert('Você precisa de adquirir este conteúdo para o poder aceder.');
-                    }
-                    mainContent.appendChild(card);
-                });
-                mainContent.insertAdjacentHTML('beforeend', backButtonHtml);
+                }
             }
+            
+            setActiveNav('home');
+            const sm = subModulesMap.get(subModuleId);
+            document.getElementById('pageTitle').textContent = sm ? sm.name : 'Conteúdos';
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = '<button class="back-button" onclick="history.back()">← Voltar</button>';
+            const filteredContents = contents.filter(c => c.sub_module_id === subModuleId);
+            if (filteredContents.length === 0) mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível neste módulo.</div>';
+            else filteredContents.forEach(content => { contentsMap.set(content.id, content); const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="card-image" style="background-image: url('${content.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${content.name}</span>`; card.onclick = () => openContent(content.id); mainContent.appendChild(card); });
         }
 
-        function openContent(contentId, push = true) {
+        async function openContent(contentId, push = true) {
+            if (push) history.pushState({ view: 'content', id: contentId }, '', `#content/${contentId}`);
+            setActiveNav('home');
             const content = contentsMap.get(contentId);
             if (!content) return;
-            if (push) history.pushState({ view: 'content', id: contentId }, '', `#content/${contentId}`);
-            setActiveNav('content');
-            if (content.content_type === 'audio') showAudioPlayer(content);
-            else showGenericContent(content);
+            document.getElementById('pageTitle').textContent = content.name;
+            const mainContent = document.getElementById('mainContent');
+            mainContent.innerHTML = `<div class="content-player"><h2>${content.name}</h2>${content.description ? `<div class="content-description">${content.description}</div>` : ''}${getContentMedia(content)}<button class="back-to-list" onclick="goBackFromPlayer()">← Voltar à Lista</button></div>`;
         }
 
-        function showGenericContent(content) {
-            const mainContent = document.getElementById('mainContent');
-            const backButtonHtml = `<button class="back-button" onclick="history.back()">← Voltar</button>`;
-            let contentHtml = '';
-            if (content.content_type === 'iframe' && content.content_url) {
-                contentHtml = `<div class="iframe-container"><iframe src="${content.content_url}" style="width: 100%; height: 100%; border: none; border-radius: 10px;" frameborder="0" allowfullscreen></iframe></div>`;
-            } else if (content.content_type === 'html') {
-                contentHtml = `<div style="grid-column: 1/-1; background: white; padding: 20px; border-radius: 15px;">${content.content_html || '<p>Conteúdo não disponível</p>'}</div>`;
-            }
-            mainContent.innerHTML = `${backButtonHtml}<h2 class="module-title">${content.title}</h2>${contentHtml}${backButtonHtml}`;
+        function getContentMedia(content) {
+            if (!content.type || !content.url) return '<p style="color: #999; text-align: center;">Nenhum conteúdo disponível.</p>';
+            if (content.type === 'video') return `<video controls controlsList="nodownload" oncontextmenu="return false;"><source src="${content.url}" type="video/mp4">Seu navegador não suporta vídeo.</video>`;
+            if (content.type === 'audio') return `<audio controls controlsList="nodownload" oncontextmenu="return false;" onplay="handleAudioPlay(this)"><source src="${content.url}" type="audio/mpeg">Seu navegador não suporta áudio.</audio>`;
+            if (content.type === 'image') return `<img src="${content.url}" alt="${content.name}">`;
+            if (content.type === 'text') return `<p>${content.text_content || 'Sem conteúdo de texto disponível.'}</p>`;
+            return '<p style="color: #999; text-align: center;">Tipo de conteúdo desconhecido.</p>';
         }
 
-        function showAudioPlayer(content) {
-            const mainContent = document.getElementById('mainContent');
-            const backButtonHtml = `<button class="back-button" onclick="goBackFromPlayer()">← Voltar</button>`;
-            mainContent.innerHTML = `${backButtonHtml}<div class="audio-player-view"><div class="player-art"><img src="${content.image_url || 'https://placehold.co/220x220/667eea/ffffff?text=Audio'}" class="player-art-image"></div><div class="player-info"><h2 class="player-title">${content.title}</h2></div><div class="player-progress-container"><div class="progress-time"><span id="currentTime">0:00</span><span id="totalDuration">0:00</span></div><input type="range" id="progressBar" class="progress-bar" value="0" step="1"></div><div class="player-controls"><button class="control-btn" id="rewindBtn">⏮️</button><button class="control-btn play-pause-btn" id="playPauseBtn">▶️</button><button class="control-btn" id="forwardBtn">⏭️</button></div></div>${backButtonHtml}`;
-            const audio = new Audio(content.content_url);
-            currentAudio = audio;
-            const playPauseBtn = document.getElementById('playPauseBtn');
-            const progressBar = document.getElementById('progressBar');
-            const formatTime = (s) => `${Math.floor(s/60)}:${String(Math.floor(s%60)).padStart(2,'0')}`;
-            audio.onloadedmetadata = () => { progressBar.max = audio.duration; document.getElementById('totalDuration').textContent = formatTime(audio.duration); };
-            audio.ontimeupdate = () => { progressBar.value = audio.currentTime; document.getElementById('currentTime').textContent = formatTime(audio.currentTime); };
-            audio.onended = () => playPauseBtn.innerHTML = '▶️';
-            playPauseBtn.onclick = () => { audio.paused ? (audio.play(), playPauseBtn.innerHTML = '⏸️') : (audio.pause(), playPauseBtn.innerHTML = '▶️'); };
-            progressBar.oninput = () => audio.currentTime = progressBar.value;
-            document.getElementById('rewindBtn').onclick = () => audio.currentTime -= 10;
-            document.getElementById('forwardBtn').onclick = () => audio.currentTime += 10;
+        function handleAudioPlay(audioElement) {
+            if (currentAudio && currentAudio !== audioElement) currentAudio.pause();
+            currentAudio = audioElement;
         }
 
         function goBackFromPlayer() {
-            if (currentAudio) { currentAudio.pause(); currentAudio = null; }
             history.back();
         }
 
         async function loadFeed(push = true) {
             if (push && (history.state?.view !== 'feed')) history.pushState({ view: 'feed' }, '', '#feed');
             setActiveNav('feed');
+            document.getElementById('pageTitle').textContent = 'Feed';
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<div class="loading active">A carregar feed...</div>';
+            mainContent.innerHTML = '<div class="loading active">A carregar o feed...</div>';
             const { data, error } = await supabase.from('feed_posts').select('*').eq('active', true).order('created_at', { ascending: false });
             if (error) return mainContent.innerHTML = `<div class="empty-state">Erro ao carregar o feed. <br><small>${error.message}</small></div>`;
             if (!data || data.length === 0) return mainContent.innerHTML = '<div class="empty-state">Nenhuma postagem no feed ainda.</div>';

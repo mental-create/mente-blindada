@@ -20,7 +20,7 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; color: #333; font-weight: 600; }
-        input[type="text"], input[type="url"], input[type="number"], input[type="file"], input[type="checkbox"], select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 14px; transition: border-color 0.3s ease; }
+        input[type="text"], input[type="email"], input[type="url"], input[type="number"], input[type="date"], input[type="file"], input[type="checkbox"], select, textarea { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-family: 'Montserrat', sans-serif; font-size: 14px; transition: border-color 0.3s ease; }
         input:disabled { background-color: #f8f9fa; color: #6c757d; }
         input[type="checkbox"] { width: auto; }
         input:focus, select:focus, textarea:focus { outline: none; border-color: #4169E1; }
@@ -45,6 +45,7 @@
         .status-badge.status-pending { background: #ffc107; color: #333; }
         .status-badge.status-approved, .status-badge.status-active { background: #27ae60; color: white; }
         .status-badge.status-rejected, .status-badge.status-inactive { background: #e74c3c; color: white; }
+        .status-badge.status-expired { background: #95a5a6; color: white; }
         .loading { text-align: center; padding: 40px; color: #666; }
         .message { padding: 15px; border-radius: 10px; margin-bottom: 20px; animation: fadeIn 0.5s; }
         .message.success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
@@ -54,6 +55,22 @@
         .image-preview img { max-width: 100px; max-height: 100px; border-radius: 5px; border: 1px solid #ddd; }
         .image-preview span { font-size: 12px; color: #666; }
         hr { margin: 40px 0; border: none; border-top: 1px solid #eee; }
+        .search-box { margin-bottom: 20px; }
+        .search-box input { width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 14px; }
+        .client-email { font-size: 13px; color: #666; margin-top: 3px; }
+        .client-products { font-size: 12px; color: #4169E1; margin-top: 5px; }
+        .multi-select { border: 2px solid #e0e0e0; border-radius: 10px; padding: 10px; max-height: 150px; overflow-y: auto; }
+        .multi-select label { display: block; padding: 5px 0; cursor: pointer; font-weight: 400; }
+        .multi-select input[type="checkbox"] { margin-right: 8px; }
+        .editor-btn { padding: 5px 10px; background: white; border: 1px solid #ddd; border-radius: 5px; cursor: pointer; font-size: 12px; transition: all 0.2s; }
+        .editor-btn:hover { background: #f0f0f0; }
+        .editor-btn:active { background: #e0e0e0; }
+        #feedContent:empty:before { content: attr(placeholder); color: #999; }
+        .status-scheduled { background: #3498db; color: white; }
+        .sale-link-info { background: #e8f5e9; border: 1px solid #4caf50; padding: 10px; border-radius: 5px; margin-top: 10px; font-size: 13px; color: #2e7d32; }
+        .module-keys-badge { display: inline-block; background: #e3f2fd; color: #1976d2; padding: 3px 8px; border-radius: 5px; font-size: 11px; margin: 2px; }
+        .info-box { background: #fff3cd; border: 1px solid #ffc107; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
+        .info-box strong { color: #856404; }
     </style>
 </head>
 <body>
@@ -69,11 +86,69 @@
             <button class="tab" onclick="switchTab('submodules')">Gerir Sub-Módulos</button>
             <button class="tab" onclick="switchTab('modules')">Gerir Módulos</button>
             <button class="tab" onclick="switchTab('products')">Gerir Produtos</button>
+            <button class="tab" onclick="switchTab('clients')">Gerir Clientes</button>
             <button class="tab" onclick="switchTab('feed')">Gerir Feed</button>
             <button class="tab" onclick="switchTab('community')">Moderar Comunidade</button>
         </div>
 
-        <div id="add-section" class="content-section">
+        <!-- SEÇÃO DE PRODUTOS (CORRIGIDA) -->
+        <div id="products-section" class="content-section">
+            <h2>Gestão de Produtos Hotmart</h2>
+            
+            <div class="info-box">
+                <strong>⚠️ IMPORTANTE:</strong> O ID do Produto deve ser o mesmo código da oferta configurado na Hotmart. 
+                Os <strong>Módulos Desbloqueados</strong> definem quais módulos do app o cliente terá acesso ao comprar este produto.
+            </div>
+            
+            <form id="productForm">
+                <input type="hidden" id="isEditingProduct">
+                <input type="hidden" id="originalProductId">
+                
+                <div class="form-group">
+                    <label for="productId">ID do Produto (Código da Oferta da Hotmart) *</label>
+                    <input type="text" id="productId" required placeholder="Ex: m89x46y2">
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                        Este código deve corresponder exatamente ao código da oferta configurado na Hotmart
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productName">Nome do Produto (para sua organização) *</label>
+                    <input type="text" id="productName" required placeholder="Ex: Plano Básico Anual">
+                </div>
+                
+                <div class="form-group">
+                    <label>Módulos Desbloqueados por este Produto *</label>
+                    <div class="multi-select" id="productModuleKeys">
+                        <!-- Será preenchido dinamicamente com os módulos disponíveis -->
+                    </div>
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                        Selecione os módulos que os clientes terão acesso ao comprar este produto
+                    </small>
+                </div>
+                
+                <div class="form-group">
+                    <label for="productDuration">Duração do Acesso (em dias) *</label>
+                    <input type="number" id="productDuration" required placeholder="365" value="365" min="1">
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                        Use <strong>365</strong> para 1 ano. Para acesso vitalício, use <strong>36500</strong> (100 anos).
+                    </small>
+                </div>
+                
+                <div class="button-group">
+                    <button type="submit" class="btn" id="saveProductBtn">Adicionar Produto</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetProductForm()">Limpar</button>
+                </div>
+            </form>
+            
+            <hr>
+            <h3>Produtos Cadastrados</h3>
+            <div class="content-list" id="productList"></div>
+        </div>
+
+        <!-- [OUTRAS SEÇÕES PERMANECEM AS MESMAS] -->
+        <!-- SEÇÃO: ADICIONAR CONTEÚDO -->
+        <div id="add-section" class="content-section active">
             <h2>Adicionar ou Editar Conteúdo</h2>
             <form id="contentForm">
                 <input type="hidden" id="editContentId"><input type="hidden" id="imageUrl">
@@ -82,54 +157,138 @@
                 <div class="form-group"><label for="title">Título do Conteúdo</label><input type="text" id="title" required></div>
                 <div class="form-group"><label for="contentImageFile">Imagem de Capa/Banner</label><input type="file" id="contentImageFile" accept="image/*"><div class="image-preview" id="contentImagePreview"></div></div>
                 <div class="form-group"><label for="contentType">Tipo de Conteúdo</label><select id="contentType" onchange="toggleContentInput()"><option value="iframe">iFrame (Gamma, etc.)</option><option value="html">Código HTML</option><option value="audio">Áudio (Upload MP3)</option></select></div>
-                <div class="form-group" id="urlInput"><label for="contentUrl">URL (iFrame)</label><input type="url" id="contentUrl"></div>
-                <div class="form-group" id="htmlInput" style="display: none;"><label for="contentHtml">Código HTML</label><textarea id="contentHtml"></textarea></div>
-                <div class="form-group" id="audioUploadInput" style="display: none;"><label for="audioFile">Ficheiro de Áudio (MP3)</label><input type="file" id="audioFile" accept="audio/*"><div class="image-preview" id="audioFilePreview"></div><input type="hidden" id="contentAudioUrl"></div>
-                <div class="form-group"><label for="contentProduct">Produto Requerido (Opcional)</label><select id="contentProduct"></select></div>
-                <div class="form-group"><label for="orderPosition">Ordem</label><input type="number" id="orderPosition" value="1" min="1"></div>
+                <div class="form-group" id="urlInput"><label for="contentUrl">URL do iFrame</label><input type="url" id="contentUrl" placeholder="https://..."></div>
+                <div class="form-group" id="htmlInput" style="display:none;"><label for="contentHtml">Código HTML</label><textarea id="contentHtml" placeholder="<div>...</div>"></textarea></div>
+                <div class="form-group" id="audioUploadInput" style="display:none;"><label for="audioFile">Arquivo de Áudio (MP3)</label><input type="file" id="audioFile" accept="audio/mpeg"><input type="hidden" id="contentAudioUrl"><div class="image-preview" id="audioFilePreview"></div></div>
+                <div class="form-group"><label for="orderPosition">Posição (Ordem)</label><input type="number" id="orderPosition" value="1" min="1"></div>
+                <div class="form-group"><label for="contentProduct">Produto Específico</label><select id="contentProduct"><option value="">Herdar do Módulo</option></select><small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">Deixe em branco para herdar o produto do módulo pai</small></div>
+                <div class="form-group"><label for="contentSaleLink">Link de Venda (Order Bump)</label><input type="url" id="contentSaleLink" placeholder="https://pay.hotmart.com/..."><div class="sale-link-info">📝 Este link será exibido no conteúdo caso o usuário não tenha acesso.</div></div>
                 <div class="form-group"><label><input type="checkbox" id="isActive" checked> Conteúdo Ativo</label></div>
                 <div class="button-group"><button type="submit" class="btn" id="saveContentBtn">💾 Guardar Conteúdo</button><button type="button" class="btn btn-secondary" onclick="resetContentForm()">Limpar</button></div>
             </form>
         </div>
-        
-        <div id="list-section" class="content-section"><h2>Listagem de Conteúdos</h2><div class="form-group"><label for="filterModule">Filtrar por Módulo</label><select id="filterModule" onchange="loadContents()"></select></div><div class="content-list" id="contentList"></div></div>
 
-        <div id="submodules-section" class="content-section"><h2>Adicionar ou Editar Sub-Módulos</h2><form id="subModuleForm"><input type="hidden" id="editSubModuleId"><input type="hidden" id="subModuleImageUrl"><div class="form-group"><label for="parentModuleKey">Módulo Pai</label><select id="parentModuleKey" required></select></div><div class="form-group"><label for="subModuleName">Nome do Sub-Módulo</label><input type="text" id="subModuleName" required></div><div class="form-group"><label for="subModuleImageFile">Imagem</label><input type="file" id="subModuleImageFile" accept="image/*"><div class="image-preview" id="subModuleImagePreview"></div></div><div class="form-group"><label for="subModuleOrder">Ordem</label><input type="number" id="subModuleOrder" value="1" min="1" required></div><div class="button-group"><button type="submit" class="btn" id="saveSubModuleBtn">Adicionar Sub-Módulo</button><button type="button" class="btn btn-secondary" onclick="resetSubModuleForm()">Limpar</button></div></form><hr><h3>Sub-Módulos Atuais</h3><div class="content-list" id="subModuleList"></div></div>
-        
-        <div id="modules-section" class="content-section"><h2>Adicionar ou Editar Módulos</h2><form id="moduleForm"><input type="hidden" id="editModuleKey"><input type="hidden" id="moduleImageUrl"><div class="form-group"><label for="newModuleKey">Chave (ID único, sem espaços. Ex: comece_aqui)</label><input type="text" id="newModuleKey" required></div><div class="form-group"><label for="newModuleName">Nome (O que aparece no App)</label><input type="text" id="newModuleName" required></div><div class="form-group"><label for="moduleImageFile">Imagem</label><input type="file" id="moduleImageFile" accept="image/*"><div class="image-preview" id="moduleImagePreview"></div></div><div class="form-group"><label for="newModuleOrder">Ordem</label><input type="number" id="newModuleOrder" value="1" min="1" required></div><div class="form-group"><label for="moduleProduct">Produto Requerido</label><select id="moduleProduct" required></select></div><div class="button-group"><button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button><button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button></div></form><hr><h3>Módulos Atuais</h3><div class="content-list" id="moduleList"></div></div>
+        <!-- SEÇÃO: LISTAR CONTEÚDOS -->
+        <div id="list-section" class="content-section">
+            <h2>Todos os Conteúdos</h2>
+            <div class="search-box"><select id="filterModule" onchange="loadContents()"><option value="">Todos os Módulos</option></select></div>
+            <div class="content-list" id="contentList"></div>
+        </div>
 
-        <div id="products-section" class="content-section">
-            <h2>Gerir Produtos</h2>
-            <form id="productForm">
-                <input type="hidden" id="isEditingProduct">
+        <!-- SEÇÃO: GERIR SUB-MÓDULOS -->
+        <div id="submodules-section" class="content-section">
+            <h2>Gerir Sub-Módulos</h2>
+            <form id="subModuleForm">
+                <input type="hidden" id="editSubModuleId"><input type="hidden" id="subModuleImageUrl">
+                <div class="form-group"><label for="parentModuleKey">Módulo Pai</label><select id="parentModuleKey" required></select></div>
+                <div class="form-group"><label for="subModuleName">Nome do Sub-Módulo</label><input type="text" id="subModuleName" required></div>
+                <div class="form-group"><label for="subModuleImageFile">Imagem</label><input type="file" id="subModuleImageFile" accept="image/*"><div class="image-preview" id="subModuleImagePreview"></div></div>
+                <div class="form-group"><label for="subModuleOrder">Posição</label><input type="number" id="subModuleOrder" value="1" min="1"></div>
+                <div class="button-group"><button type="submit" class="btn" id="saveSubModuleBtn">Adicionar Sub-Módulo</button><button type="button" class="btn btn-secondary" onclick="resetSubModuleForm()">Limpar</button></div>
+            </form>
+            <hr><h3>Sub-Módulos Atuais</h3><div class="content-list" id="subModuleList"></div>
+        </div>
+
+        <!-- SEÇÃO: GERIR MÓDULOS -->
+        <div id="modules-section" class="content-section">
+            <h2>Gerir Módulos</h2>
+            <form id="moduleForm">
+                <input type="hidden" id="editModuleKey"><input type="hidden" id="moduleImageUrl">
+                <div class="form-group"><label for="newModuleKey">Chave do Módulo</label><input type="text" id="newModuleKey" required placeholder="Ex: ansiedade"></div>
+                <div class="form-group"><label for="newModuleName">Nome do Módulo</label><input type="text" id="newModuleName" required></div>
+                <div class="form-group"><label for="moduleImageFile">Imagem</label><input type="file" id="moduleImageFile" accept="image/*"><div class="image-preview" id="moduleImagePreview"></div></div>
+                <div class="form-group"><label for="newModuleOrder">Posição</label><input type="number" id="newModuleOrder" value="1" min="1"></div>
+                <div class="form-group"><label for="moduleProduct">Produto</label><select id="moduleProduct"></select></div>
+                <div class="form-group"><label for="moduleSaleLink">Link de Venda</label><input type="url" id="moduleSaleLink" placeholder="https://pay.hotmart.com/..."><div class="sale-link-info">📝 Exibido quando usuário não tiver acesso ao módulo.</div></div>
+                <div class="button-group"><button type="submit" class="btn" id="saveModuleBtn">Adicionar Módulo</button><button type="button" class="btn btn-secondary" onclick="resetModuleForm()">Limpar</button></div>
+            </form>
+            <hr><h3>Módulos Atuais</h3><div class="content-list" id="moduleList"></div>
+        </div>
+
+        <!-- SEÇÃO: GESTÃO DE CLIENTES -->
+        <div id="clients-section" class="content-section">
+            <h2>Gestão de Clientes</h2>
+            <form id="clientForm">
+                <input type="hidden" id="editClientId">
                 <div class="form-group">
-                    <label for="productId">ID do Produto (Código da Oferta da Hotmart)</label>
-                    <input type="text" id="productId" required placeholder="Ex: m89x46y2">
+                    <label for="clientEmail">Email do Cliente *</label>
+                    <input type="email" id="clientEmail" required placeholder="cliente@exemplo.com">
                 </div>
                 <div class="form-group">
-                    <label for="productName">Nome do Produto (para sua organização)</label>
-                    <input type="text" id="productName" required placeholder="Ex: Plano Básico Anual">
-                </div>
-                <div class="form-group">
-                    <label for="productDuration">Duração do Acesso (em dias)</label>
-                    <input type="number" id="productDuration" required placeholder="365" value="365" min="1">
+                    <label>Produtos Adquiridos *</label>
+                    <div class="multi-select" id="clientProductsSelect">
+                        <!-- Será preenchido dinamicamente -->
+                    </div>
                     <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
-                        Use <strong>365</strong> para 1 ano. Para acesso vitalício, use um número alto, como <strong>36500</strong> (100 anos).
+                        Selecione um ou mais produtos que o cliente tem acesso
                     </small>
                 </div>
+                <div class="form-group">
+                    <label for="clientExpiresAt">Data de Expiração (Opcional)</label>
+                    <input type="date" id="clientExpiresAt">
+                    <small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">
+                        Deixe em branco para acesso vitalício
+                    </small>
+                </div>
+                <div class="form-group">
+                    <label for="clientStatus">Status *</label>
+                    <select id="clientStatus" required>
+                        <option value="active">Ativo</option>
+                        <option value="inactive">Inativo</option>
+                        <option value="expired">Expirado</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="clientSubscriptionType">Tipo de Assinatura</label>
+                    <select id="clientSubscriptionType">
+                        <option value="monthly">Mensal</option>
+                        <option value="yearly">Anual</option>
+                        <option value="lifetime">Vitalício</option>
+                    </select>
+                </div>
                 <div class="button-group">
-                    <button type="submit" class="btn" id="saveProductBtn">Adicionar Produto</button>
-                    <button type="button" class="btn btn-secondary" onclick="resetProductForm()">Limpar</button>
+                    <button type="submit" class="btn" id="saveClientBtn">💾 Salvar Cliente</button>
+                    <button type="button" class="btn btn-secondary" onclick="resetClientForm()">Limpar</button>
                 </div>
             </form>
             <hr>
-            <h3>Produtos Atuais</h3>
-            <div class="content-list" id="productList"></div>
+            <h3>Clientes Cadastrados</h3>
+            <div class="search-box"><input type="text" id="clientSearch" placeholder="Buscar por email..." oninput="filterClients()"></div>
+            <div class="content-list" id="clientList"></div>
         </div>
 
-        <div id="feed-section" class="content-section"><h2>Adicionar ou Editar Post no Feed</h2><form id="feedForm" style="margin-bottom: 30px;"><input type="hidden" id="editFeedId"><div class="form-group"><label for="feedTitle">Título do Post</label><input type="text" id="feedTitle" required></div><div class="form-group"><label for="feedContent">Conteúdo</label><textarea id="feedContent" rows="5" required></textarea></div><div class="form-group"><label for="feedImageFile">Imagem (opcional)</label><input type="file" id="feedImageFile" accept="image/*"><div class="image-preview" id="feedImagePreview"></div><input type="hidden" id="feedImageUrl"></div><div class="form-group"><label><input type="checkbox" id="feedActive" checked> Post Ativo</label></div><div class="button-group"><button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button><button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button></div></form><hr><h3>Posts Publicados</h3><div id="feedList" class="content-list"></div></div>
-        
-        <div id="community-section" class="content-section"><h2>Moderar Mensagens da Comunidade</h2><div class="form-group"><label for="filterStatus">Filtrar por Status</label><select id="filterStatus" onchange="loadCommunityMessages()"><option value="pending">Pendentes</option><option value="approved">Aprovadas</option><option value="rejected">Rejeitadas</option></select></div><div id="communityList" class="content-list"></div></div>
+        <!-- SEÇÃO: GERIR FEED -->
+        <div id="feed-section" class="content-section">
+            <h2>Gerir Feed de Notícias</h2>
+            <form id="feedForm">
+                <input type="hidden" id="editFeedId"><input type="hidden" id="feedImageUrl">
+                <div class="form-group"><label for="feedTitle">Título do Post *</label><input type="text" id="feedTitle" required placeholder="Digite o título..."></div>
+                <div class="form-group"><label for="feedAuthor">Nome do Autor (opcional)</label><input type="text" id="feedAuthor" placeholder="Deixe em branco para usar 'VivaMente'"></div>
+                <div class="form-group"><label for="feedAuthorAvatar">Avatar do Autor (Emoji ou URL)</label><input type="text" id="feedAuthorAvatar" placeholder="🛡️ ou URL da imagem"></div>
+                <div class="form-group"><label>Conteúdo do Post *</label>
+                    <div style="margin-bottom: 10px;">
+                        <button type="button" class="editor-btn" onclick="formatText('bold')">Negrito</button>
+                        <button type="button" class="editor-btn" onclick="formatText('italic')">Itálico</button>
+                        <button type="button" class="editor-btn" onclick="formatText('underline')">Sublinhado</button>
+                        <button type="button" class="editor-btn" onclick="formatText('insertUnorderedList')">Lista</button>
+                        <button type="button" class="editor-btn" onclick="insertLink()">Link</button>
+                    </div>
+                    <div id="feedContent" contenteditable="true" style="min-height: 150px; padding: 15px; outline: none; font-family: 'Montserrat', sans-serif; font-size: 14px; line-height: 1.6;" placeholder="Digite o conteúdo do seu post..."></div>
+                </div>
+                <div class="form-group"><label for="feedImageFile">Imagem (opcional)</label><input type="file" id="feedImageFile" accept="image/*"><div class="image-preview" id="feedImagePreview"></div></div>
+                <div class="form-group"><label for="feedScheduledFor">Agendar Publicação (Opcional)</label><input type="datetime-local" id="feedScheduledFor"><small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">Deixe em branco para publicar imediatamente. Use para agendar posts futuros.</small></div>
+                <div class="form-group"><label><input type="checkbox" id="feedActive" checked> Post Ativo</label></div>
+                <div class="button-group"><button type="submit" class="btn" id="saveFeedBtn">💾 Publicar Post</button><button type="button" class="btn btn-secondary" onclick="resetFeedForm()">Limpar</button></div>
+            </form>
+            <hr><h3>Posts no Feed</h3><div class="content-list" id="feedPostsList"></div>
+        </div>
+
+        <!-- SEÇÃO: MODERAR COMUNIDADE -->
+        <div id="community-section" class="content-section">
+            <h2>Moderar Comunidade</h2>
+            <div class="search-box"><select id="filterStatus" onchange="loadCommunityMessages()"><option value="pending">Pendentes</option><option value="approved">Aprovadas</option><option value="rejected">Rejeitadas</option></select></div>
+            <div class="content-list" id="communityList"></div>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -137,60 +296,719 @@
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        let modulesMap = new Map();
-        let subModulesMap = new Map();
-        let profilesMap = new Map();
-        let products = [];
+
+        let modules = [], subModules = [], contents = [], products = [], allClients = [];
+        let modulesMap = new Map(), subModulesMap = new Map(), profilesMap = new Map();
 
         async function init() {
-            const loginUrl = `${window.location.origin}/admin-login.html`;
+            document.getElementById('loading-view').style.display = 'flex';
+            document.querySelector('.admin-container').style.display = 'none';
             const { data: { session } } = await supabase.auth.getSession();
-            if (!session) return window.location.href = loginUrl;
+            if (!session) return window.location.href = `${window.location.origin}/admin-login.html`;
             const { data: profile } = await supabase.from('profiles').select('is_admin').eq('id', session.user.id).single();
-            if (!profile || !profile.is_admin) { await supabase.auth.signOut(); return window.location.href = loginUrl; }
+            if (!profile || !profile.is_admin) { await supabase.auth.signOut(); return window.location.href = `${window.location.origin}/admin-login.html`; }
             document.getElementById('loading-view').style.display = 'none';
             document.querySelector('.admin-container').style.display = 'block';
             await loadInitialData();
-            switchTab('add');
         }
 
         async function loadInitialData() {
-            // Carrega a nova coluna duration_days
-            const [modulesRes, subModulesRes, profilesRes, productsRes] = await Promise.all([
-                supabase.from('modules').select('*').order('order_position'),
-                supabase.from('sub_modules').select('*').order('order_position'),
-                supabase.from('profiles').select('id, name, email'),
-                supabase.from('products').select('id, name, duration_days').order('name') // Assegura que duration_days é carregado
-            ]);
-            if (modulesRes.data) { modulesMap.clear(); modulesRes.data.forEach(m => modulesMap.set(m.key, m)); updateModuleSelects(modulesRes.data); }
-            if (subModulesRes.data) { subModulesMap.clear(); subModulesRes.data.forEach(sm => subModulesMap.set(sm.id, sm)); }
-            if(profilesRes.data) { profilesMap.clear(); profilesRes.data.forEach(p => profilesMap.set(p.id, p.name || p.email.split('@')[0])); }
-            if(productsRes.data) { products = productsRes.data; updateProductSelects(); }
-        }
-
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.content-section').forEach(s => s.style.display = 'none' );
-            document.querySelector(`.tab[onclick="switchTab('${tab}')"]`).classList.add('active');
-            const section = document.getElementById(`${tab}-section`);
-            if (section) {
-                section.style.display = 'block'; section.classList.add('active');
-                if (tab === 'list') loadContents();
-                else if (tab === 'modules') loadModules();
-                else if (tab === 'submodules') loadSubModules();
-                else if (tab === 'products') loadProducts(); // Carrega produtos
-                else if (tab === 'feed') loadFeedPosts();
-                else if (tab === 'community') loadCommunityMessages();
+            try {
+                const [modulesRes, subModulesRes, contentsRes, productsRes, profilesRes] = await Promise.all([
+                    supabase.from('modules').select('*').order('order_position'),
+                    supabase.from('sub_modules').select('*').order('order_position'),
+                    supabase.from('contents').select('*').order('order_position'),
+                    supabase.from('products').select('*'),
+                    supabase.from('profiles').select('id, name')
+                ]);
+                modules = modulesRes.data || [];
+                subModules = subModulesRes.data || [];
+                contents = contentsRes.data || [];
+                products = productsRes.data || [];
+                const profiles = profilesRes.data || [];
+                profiles.forEach(p => profilesMap.set(p.id, p.name));
+                modules.forEach(m => modulesMap.set(m.key, m));
+                subModules.forEach(sm => subModulesMap.set(sm.id, sm));
+                updateModuleSelects(modules);
+                updateProductSelects();
+                loadProducts();
+                loadContents();
+                loadModules();
+                loadSubModules();
+                console.log('Dados carregados:', { modules: modules.length, subModules: subModules.length, contents: contents.length, products: products.length });
+            } catch (error) {
+                showMessage('Erro ao carregar dados: ' + error.message, 'error');
+                console.error('Erro no loadInitialData:', error);
             }
         }
-        function showMessage(message, type) { const messageArea = document.getElementById('messageArea'); messageArea.innerHTML = `<div class="message ${type}">${message}</div>`; setTimeout(() => { messageArea.innerHTML = ''; }, 5000); }
-        async function logout() { await supabase.auth.signOut(); window.location.href = `${window.location.origin}/admin-login.html`; }
-        function slugify(text) { const a = 'àáâäæãåāăąçćčđďèéêëēėęěğǵḧîïíīįìłḿñńǹňôöòóœøōõőṕŕřßśšşșťțûüùúūǘůűųẃẍÿýžźż·/_,:;'; const b = 'aaaaaaaaaacccddeeeeeeeegghiiiiiilmnnnnoooooooooprrsssssttuuuuuuuuuwxyyzzz------'; const p = new RegExp(a.split('').join('|'), 'g'); return text.toString().toLowerCase().replace(/\s+/g, '-').replace(p, c => b.charAt(a.indexOf(c))).replace(/&/g, '-and-').replace(/[^\w\-]+/g, '').replace(/\-\-+/g, '-').replace(/^-+/, '').replace(/-+$/, '') }
-        async function uploadFile(fileInput, folder) { const file = fileInput.files[0]; if (!file) return { url: null, error: null }; const originalName = file.name.substring(0, file.name.lastIndexOf('.')); const extension = file.name.substring(file.name.lastIndexOf('.')); const safeName = slugify(originalName) + extension; const filePath = `${folder}/${Date.now()}-${safeName}`; const { error } = await supabase.storage.from('app-uploads').upload(filePath, file); if (error) return { url: null, error: `Erro no upload: ${error.message}` }; const { data } = supabase.storage.from('app-uploads').getPublicUrl(filePath); return { url: data.publicUrl, error: null }; }
 
-        document.getElementById('contentForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveContentBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('imageUrl').value; if (document.getElementById('contentImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('contentImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } let audioUrl = document.getElementById('contentAudioUrl').value; if (document.getElementById('contentType').value === 'audio' && document.getElementById('audioFile').files.length > 0) { saveBtn.textContent = 'A enviar áudio...'; const { url, error } = await uploadFile(document.getElementById('audioFile'), 'audios'); if (error) throw new Error(error); audioUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editContentId').value; const contentProduct = document.getElementById('contentProduct').value; const formData = { sub_module_id: parseInt(document.getElementById('subModule').value), title: document.getElementById('title').value, image_url: imageUrl || null, content_type: document.getElementById('contentType').value, content_url: document.getElementById('contentType').value === 'audio' ? audioUrl : document.getElementById('contentUrl').value, content_html: document.getElementById('contentHtml').value || null, order_position: parseInt(document.getElementById('orderPosition').value), active: document.getElementById('isActive').checked, module_key: document.getElementById('module').value, product_id: contentProduct || null }; const { error } = editId ? await supabase.from('contents').update(formData).eq('id', editId) : await supabase.from('contents').insert([formData]); if (error) throw error; showMessage(`Conteúdo ${editId ? 'atualizado' : 'guardado'}!`, 'success'); resetContentForm(); switchTab('list'); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Conteúdo'; } });
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            document.querySelector(`[onclick="switchTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(`${tabName}-section`).classList.add('active');
+            if (tabName === 'list') loadContents();
+            if (tabName === 'modules') loadModules();
+            if (tabName === 'submodules') loadSubModules();
+            if (tabName === 'products') loadProducts();
+            if (tabName === 'clients') loadClients();
+            if (tabName === 'feed') loadFeedPosts();
+            if (tabName === 'community') loadCommunityMessages();
+        }
+
+        function showMessage(msg, type) {
+            const msgArea = document.getElementById('messageArea');
+            msgArea.innerHTML = `<div class="message ${type}">${msg}</div>`;
+            setTimeout(() => msgArea.innerHTML = '', 5000);
+        }
+
+        async function uploadFile(fileInput, folder) {
+            const file = fileInput.files[0];
+            if (!file) return { url: null, error: 'Nenhum arquivo selecionado' };
+            const filePath = `${folder}/${Date.now()}_${file.name}`;
+            const { error: uploadError } = await supabase.storage.from('public-assets').upload(filePath, file, { upsert: true });
+            if (uploadError) return { url: null, error: uploadError.message };
+            const { data } = supabase.storage.from('public-assets').getPublicUrl(filePath);
+            return { url: data.publicUrl, error: null };
+        }
+
+        async function logout() {
+            await supabase.auth.signOut();
+            window.location.href = `${window.location.origin}/admin-login.html`;
+        }
+
+        // ============================================
+        // GESTÃO DE PRODUTOS (CORRIGIDA COM MODULE_KEYS)
+        // ============================================
+
+        function populateProductModuleKeys() {
+            const container = document.getElementById('productModuleKeys');
+            if (!container) return;
+            
+            container.innerHTML = modules.map(m => `
+                <label>
+                    <input type="checkbox" class="product-module-checkbox" value="${m.key}">
+                    ${m.name} (${m.key})
+                </label>
+            `).join('');
+        }
+
+        document.getElementById('productForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveProductBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'A guardar...';
+            
+            try {
+                const isEditing = document.getElementById('isEditingProduct').value === 'true';
+                const originalId = document.getElementById('originalProductId').value;
+                const productId = document.getElementById('productId').value.trim();
+                const productName = document.getElementById('productName').value.trim();
+                const productDuration = parseInt(document.getElementById('productDuration').value);
+                
+                // Pegar módulos selecionados
+                const selectedModules = Array.from(document.querySelectorAll('.product-module-checkbox:checked'))
+                    .map(cb => cb.value);
+                
+                if (selectedModules.length === 0) {
+                    throw new Error('Selecione pelo menos um módulo que este produto desbloqueia.');
+                }
+                
+                const formData = {
+                    id: productId,
+                    name: productName,
+                    module_keys: selectedModules,
+                    duration_days: productDuration
+                };
+                
+                console.log('Salvando produto:', formData);
+                
+                let error;
+                if (isEditing && originalId) {
+                    // Atualizar produto existente
+                    if (originalId !== productId) {
+                        // Se mudou o ID, precisa deletar o antigo e criar novo
+                        await supabase.from('products').delete().eq('id', originalId);
+                        const result = await supabase.from('products').insert([formData]);
+                        error = result.error;
+                    } else {
+                        // Atualizar normalmente
+                        const result = await supabase.from('products').update(formData).eq('id', originalId);
+                        error = result.error;
+                    }
+                } else {
+                    // Criar novo produto
+                    const result = await supabase.from('products').insert([formData]);
+                    error = result.error;
+                }
+                
+                if (error) throw error;
+                
+                showMessage(`Produto ${isEditing ? 'atualizado' : 'cadastrado'} com sucesso!`, 'success');
+                resetProductForm();
+                await loadInitialData();
+            } catch (error) {
+                console.error('Erro ao salvar produto:', error);
+                showMessage(`Erro: ${error.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Salvar Produto';
+            }
+        });
+
+        function resetProductForm() {
+            document.getElementById('productForm').reset();
+            document.getElementById('isEditingProduct').value = '';
+            document.getElementById('originalProductId').value = '';
+            document.getElementById('productId').disabled = false;
+            document.querySelectorAll('.product-module-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('saveProductBtn').textContent = 'Adicionar Produto';
+        }
+
+        async function loadProducts() {
+            const listEl = document.getElementById('productList');
+            listEl.innerHTML = '<div class="loading">A carregar produtos...</div>';
+            
+            try {
+                const { data, error } = await supabase.from('products').select('*');
+                
+                if (error) throw error;
+                
+                products = data || [];
+                populateProductModuleKeys();
+                populateClientProductsSelect();
+                displayProducts(products);
+            } catch (error) {
+                console.error('Erro ao carregar produtos:', error);
+                showMessage(`Erro ao carregar produtos: ${error.message}`, 'error');
+            }
+        }
+
+        function displayProducts(productsList) {
+            const listEl = document.getElementById('productList');
+            
+            if (!productsList || productsList.length === 0) {
+                listEl.innerHTML = '<p>Nenhum produto cadastrado ainda.</p>';
+                return;
+            }
+            
+            listEl.innerHTML = productsList.map(p => {
+                const moduleNames = (p.module_keys || []).map(key => {
+                    const module = modulesMap.get(key);
+                    return module ? module.name : key;
+                });
+                
+                const moduleBadges = moduleNames.map(name => 
+                    `<span class="module-keys-badge">${name}</span>`
+                ).join('');
+                
+                return `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">${p.name}</div>
+                            <div class="content-module">
+                                <strong>ID:</strong> ${p.id} | 
+                                <strong>Duração:</strong> ${p.duration_days} dias
+                            </div>
+                            <div class="content-module" style="margin-top: 8px;">
+                                <strong>Módulos desbloqueados:</strong><br>
+                                ${moduleBadges || '<em>Nenhum módulo configurado</em>'}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editProduct('${p.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function editProduct(productId) {
+            const product = products.find(p => p.id === productId);
+            if (!product) {
+                showMessage('Produto não encontrado.', 'error');
+                return;
+            }
+            
+            resetProductForm();
+            
+            document.getElementById('isEditingProduct').value = 'true';
+            document.getElementById('originalProductId').value = product.id;
+            document.getElementById('productId').value = product.id;
+            document.getElementById('productId').disabled = false; // Permitir edição do ID
+            document.getElementById('productName').value = product.name;
+            document.getElementById('productDuration').value = product.duration_days;
+            
+            // Marcar os módulos que este produto desbloqueia
+            (product.module_keys || []).forEach(key => {
+                const checkbox = document.querySelector(`.product-module-checkbox[value="${key}"]`);
+                if (checkbox) checkbox.checked = true;
+            });
+            
+            document.getElementById('saveProductBtn').textContent = '💾 Atualizar Produto';
+            
+            showMessage('Produto carregado para edição!', 'success');
+            window.scrollTo(0, 0);
+        }
+
+        async function deleteProduct(productId) {
+            if (!confirm('Tem a certeza que deseja excluir este produto? Esta ação não pode ser desfeita.')) return;
+            
+            try {
+                const { error } = await supabase.from('products').delete().eq('id', productId);
+                
+                if (error) throw error;
+                
+                showMessage('Produto excluído com sucesso!', 'success');
+                await loadInitialData();
+            } catch (error) {
+                showMessage('Erro ao excluir produto: ' + error.message, 'error');
+            }
+        }
+
+        // ============================================
+        // GESTÃO DE CLIENTES (com visualização dos módulos)
+        // ============================================
+
+        function populateClientProductsSelect() {
+            const container = document.getElementById('clientProductsSelect');
+            if (!container) return;
+            
+            container.innerHTML = products.map(p => {
+                const moduleNames = (p.module_keys || []).map(key => {
+                    const module = modulesMap.get(key);
+                    return module ? module.name : key;
+                }).join(', ');
+                
+                return `
+                    <label>
+                        <input type="checkbox" class="client-product-checkbox" value="${p.id}">
+                        ${p.name} (${p.id})
+                        ${moduleNames ? `<br><small style="color: #666; margin-left: 24px;">Módulos: ${moduleNames}</small>` : ''}
+                    </label>
+                `;
+            }).join('');
+        }
+
+        document.getElementById('clientForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const saveBtn = document.getElementById('saveClientBtn');
+            saveBtn.disabled = true;
+            saveBtn.textContent = 'A guardar...';
+            
+            try {
+                const editId = document.getElementById('editClientId').value;
+                const email = document.getElementById('clientEmail').value.trim().toLowerCase();
+                
+                // Pegar produtos selecionados
+                const selectedProducts = Array.from(document.querySelectorAll('.client-product-checkbox:checked'))
+                    .map(cb => cb.value);
+                
+                if (selectedProducts.length === 0) {
+                    throw new Error('Selecione pelo menos um produto para o cliente.');
+                }
+                
+                const expiresAt = document.getElementById('clientExpiresAt').value || null;
+                const status = document.getElementById('clientStatus').value;
+                const subscriptionType = document.getElementById('clientSubscriptionType').value;
+                
+                const formData = {
+                    email: email,
+                    products: selectedProducts, // Alterado de purchased_products para products
+                    expires_at: expiresAt,
+                    status: status,
+                    subscription_type: subscriptionType
+                };
+                
+                console.log('Dados a serem salvos:', formData);
+                
+                let error;
+                if (editId) {
+                    // Atualizar cliente existente
+                    console.log('Atualizando cliente ID:', editId);
+                    const result = await supabase
+                        .from('authorized_users')
+                        .update(formData)
+                        .eq('id', editId);
+                    error = result.error;
+                    console.log('Resultado da atualização:', result);
+                } else {
+                    // Criar novo cliente
+                    console.log('Criando novo cliente');
+                    const result = await supabase
+                        .from('authorized_users')
+                        .insert([formData]);
+                    error = result.error;
+                    console.log('Resultado da criação:', result);
+                }
+                
+                if (error) {
+                    console.error('Erro do Supabase:', error);
+                    throw error;
+                }
+                
+                showMessage(`Cliente ${editId ? 'atualizado' : 'cadastrado'} com sucesso!`, 'success');
+                resetClientForm();
+                loadClients();
+            } catch (error) {
+                console.error('Erro ao salvar cliente:', error);
+                showMessage(`Erro: ${error.message}`, 'error');
+            } finally {
+                saveBtn.disabled = false;
+                saveBtn.textContent = '💾 Salvar Cliente';
+            }
+        });
+
+        function resetClientForm() {
+            document.getElementById('clientForm').reset();
+            document.getElementById('editClientId').value = '';
+            document.getElementById('clientEmail').disabled = false;
+            document.querySelectorAll('.client-product-checkbox').forEach(cb => cb.checked = false);
+            document.getElementById('saveClientBtn').textContent = '💾 Salvar Cliente';
+        }
+
+        async function loadClients() {
+            const listEl = document.getElementById('clientList');
+            listEl.innerHTML = '<div class="loading">A carregar clientes...</div>';
+            
+            try {
+                const { data, error } = await supabase
+                    .from('authorized_users')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+                
+                if (error) {
+                    console.error('Erro ao carregar clientes:', error);
+                    return showMessage(`Erro ao carregar clientes: ${error.message}`, 'error');
+                }
+                
+                allClients = data || [];
+                console.log('Clientes carregados:', allClients.length);
+                displayClients(allClients);
+            } catch (error) {
+                console.error('Erro ao carregar clientes:', error);
+                showMessage(`Erro: ${error.message}`, 'error');
+            }
+        }
+
+        function displayClients(clientsList) {
+            const listEl = document.getElementById('clientList');
+            
+            if (!clientsList || clientsList.length === 0) {
+                listEl.innerHTML = '<p>Nenhum cliente cadastrado ainda.</p>';
+                return;
+            }
+            
+            listEl.innerHTML = clientsList.map(client => {
+                // Pegar produtos do cliente (suporta tanto 'products' quanto 'purchased_products')
+                const clientProducts = client.products || client.purchased_products || [];
+                
+                const productsList = clientProducts.map(productId => {
+                    const product = products.find(p => p.id === productId);
+                    if (!product) return `${productId} (produto não encontrado)`;
+                    
+                    const moduleNames = (product.module_keys || []).map(key => {
+                        const module = modulesMap.get(key);
+                        return module ? module.name : key;
+                    }).join(', ');
+                    
+                    return `${product.name}${moduleNames ? ` → ${moduleNames}` : ''}`;
+                }).join('<br>');
+                
+                const statusClass = {
+                    active: 'status-active',
+                    inactive: 'status-inactive',
+                    expired: 'status-expired'
+                }[client.status] || 'status-inactive';
+                
+                const expiresText = client.expires_at 
+                    ? `Expira em: ${new Date(client.expires_at).toLocaleDateString('pt-BR')}`
+                    : 'Acesso vitalício';
+                
+                return `
+                    <div class="content-item">
+                        <div class="content-info">
+                            <div class="content-title">
+                                ${client.email}
+                                <span class="status-badge ${statusClass}">${client.status}</span>
+                            </div>
+                            <div class="client-email">${expiresText}</div>
+                            <div class="client-products">
+                                <strong>Produtos:</strong><br>
+                                ${productsList || '<em>Nenhum produto</em>'}
+                            </div>
+                        </div>
+                        <div class="content-actions">
+                            <button class="btn btn-small" onclick="editClient('${client.id}')">✏️ Editar</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteClient('${client.id}')">🗑️ Excluir</button>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        async function editClient(id) {
+            const client = allClients.find(c => c.id === id);
+            if (!client) {
+                showMessage('Cliente não encontrado.', 'error');
+                return;
+            }
+            
+            resetClientForm();
+            
+            document.getElementById('editClientId').value = client.id;
+            document.getElementById('clientEmail').value = client.email;
+            document.getElementById('clientEmail').disabled = true;
+            
+            // Marcar produtos (suporta tanto 'products' quanto 'purchased_products')
+            const clientProducts = client.products || client.purchased_products || [];
+            clientProducts.forEach(productId => {
+                const checkbox = document.querySelector(`.client-product-checkbox[value="${productId}"]`);
+                if (checkbox) {
+                    checkbox.checked = true;
+                    console.log('Produto marcado:', productId);
+                }
+            });
+            
+            if (client.expires_at) {
+                const date = new Date(client.expires_at);
+                document.getElementById('clientExpiresAt').value = date.toISOString().split('T')[0];
+            }
+            
+            document.getElementById('clientStatus').value = client.status || 'active';
+            document.getElementById('clientSubscriptionType').value = client.subscription_type || 'yearly';
+            
+            document.getElementById('saveClientBtn').textContent = '💾 Atualizar Cliente';
+            
+            showMessage('Cliente carregado para edição!', 'success');
+        }
+
+        async function deleteClient(id) {
+            if (!confirm('Tem a certeza que deseja excluir este cliente? Esta ação não pode ser desfeita.')) return;
+            
+            const { error } = await supabase
+                .from('authorized_users')
+                .delete()
+                .eq('id', id);
+            
+            if (error) {
+                showMessage('Erro ao excluir cliente: ' + error.message, 'error');
+            } else {
+                showMessage('Cliente excluído com sucesso!', 'success');
+                loadClients();
+            }
+        }
+
+        function filterClients() {
+            const searchTerm = document.getElementById('clientSearch').value.toLowerCase();
+            
+            if (!searchTerm) {
+                displayClients(allClients);
+                return;
+            }
+            
+            const filtered = allClients.filter(client => 
+                client.email.toLowerCase().includes(searchTerm)
+            );
+            
+            displayClients(filtered);
+        }
+
+        // ============================================
+        // FUNÇÕES DO EDITOR DE TEXTO RICO
+        // ============================================
+        
+        function formatText(command) {
+            document.execCommand(command, false, null);
+            document.getElementById('feedContent').focus();
+        }
+        
+        function insertLink() {
+            const url = prompt('Digite a URL do link:');
+            if (url) {
+                document.execCommand('createLink', false, url);
+            }
+            document.getElementById('feedContent').focus();
+        }
+
+        // ============================================
+        // GESTÃO DE FEED COM AGENDAMENTO
+        // ============================================
+
+        document.getElementById('feedForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const saveBtn = document.getElementById('saveFeedBtn'); 
+            saveBtn.disabled = true; 
+            saveBtn.textContent = 'A guardar...'; 
+            
+            try { 
+                let imageUrl = document.getElementById('feedImageUrl').value; 
+                
+                if (document.getElementById('feedImageFile').files.length > 0) { 
+                    saveBtn.textContent = 'A enviar imagem...'; 
+                    const { url, error } = await uploadFile(document.getElementById('feedImageFile'), 'feed'); 
+                    if (error) throw new Error(error); 
+                    imageUrl = url; 
+                } 
+                
+                saveBtn.textContent = 'A guardar...'; 
+                const editId = document.getElementById('editFeedId').value; 
+                const contentDiv = document.getElementById('feedContent');
+                const content = contentDiv.innerHTML.trim();
+                
+                if (!content || content === '') {
+                    throw new Error('O conteúdo não pode estar vazio.');
+                }
+                
+                const scheduledFor = document.getElementById('feedScheduledFor').value || null;
+                
+                const formData = { 
+                    title: document.getElementById('feedTitle').value, 
+                    author_name: document.getElementById('feedAuthor').value || 'VivaMente', 
+                    author_avatar: document.getElementById('feedAuthorAvatar').value || '🛡️', 
+                    content: content, 
+                    image_url: imageUrl || null, 
+                    active: document.getElementById('feedActive').checked,
+                    scheduled_for: scheduledFor
+                }; 
+                
+                const { error } = editId 
+                    ? await supabase.from('feed_posts').update(formData).eq('id', editId) 
+                    : await supabase.from('feed_posts').insert([formData]); 
+                
+                if (error) throw error; 
+                
+                showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success'); 
+                resetFeedForm(); 
+                loadFeedPosts(); 
+            } catch (error) { 
+                showMessage(`Erro: ${error.message}`, 'error'); 
+            } finally { 
+                saveBtn.disabled = false; 
+                saveBtn.textContent = '💾 Publicar Post'; 
+            } 
+        });
+        
+        async function loadFeedPosts() { 
+            const listEl = document.getElementById('feedPostsList'); 
+            listEl.innerHTML = '<div class="loading">A carregar posts...</div>'; 
+            
+            const { data, error } = await supabase.from('feed_posts').select('*').order('created_at', { ascending: false }); 
+            
+            if (error) { 
+                showMessage('Erro ao carregar posts: ' + error.message, 'error'); 
+                return; 
+            } 
+            
+            displayFeedPosts(data); 
+        }
+        
+        function displayFeedPosts(posts) { 
+            const listEl = document.getElementById('feedPostsList'); 
+            
+            if (!posts || posts.length === 0) { 
+                listEl.innerHTML = '<p>Nenhum post no feed ainda.</p>'; 
+                return; 
+            } 
+            
+            listEl.innerHTML = posts.map(post => {
+                let statusClass = 'status-active';
+                let statusText = 'Ativo';
+                
+                if (post.scheduled_for && new Date(post.scheduled_for) > new Date()) {
+                    statusClass = 'status-scheduled';
+                    statusText = `Agendado: ${new Date(post.scheduled_for).toLocaleString('pt-BR')}`;
+                } else if (!post.active) {
+                    statusClass = 'status-inactive';
+                    statusText = 'Inativo';
+                }
+                
+                return `<div class="content-item">
+                    ${post.image_url ? `<div class="content-image" style="background-image: url('${post.image_url}')"></div>` : ''}
+                    <div class="content-info">
+                        <div class="content-title">
+                            ${post.title} 
+                            <span class="status-badge ${statusClass}">${statusText}</span>
+                        </div>
+                        <div class="content-module">Autor: <strong>${post.author_name || 'VivaMente'}</strong></div>
+                        <div class="content-module">Criado em: ${new Date(post.created_at).toLocaleDateString('pt-BR')}</div>
+                    </div>
+                    <div class="content-actions">
+                        <button class="btn btn-small" onclick="window.editFeedPost('${post.id}')">✏️ Editar</button>
+                        <button class="btn btn-small btn-danger" onclick="window.deleteFeedPost('${post.id}')">🗑️ Excluir</button>
+                    </div>
+                </div>`;
+            }).join(''); 
+        }
+        
+        async function editFeedPost(id) { 
+            const { data, error } = await supabase.from('feed_posts').select('*').eq('id', id).single(); 
+            
+            if (error) return showMessage('Erro ao carregar post.', 'error'); 
+            
+            resetFeedForm(); 
+            
+            document.getElementById('editFeedId').value = data.id; 
+            document.getElementById('feedTitle').value = data.title; 
+            document.getElementById('feedAuthor').value = data.author_name || ''; 
+            document.getElementById('feedAuthorAvatar').value = data.author_avatar || ''; 
+            document.getElementById('feedContent').innerHTML = data.content; 
+            document.getElementById('feedActive').checked = data.active; 
+            document.getElementById('feedImageUrl').value = data.image_url; 
+            
+            if (data.scheduled_for) {
+                const date = new Date(data.scheduled_for);
+                const dateStr = date.toISOString().slice(0, 16);
+                document.getElementById('feedScheduledFor').value = dateStr;
+            }
+            
+            if(data.image_url) {
+                document.getElementById('feedImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; 
+            }
+            
+            document.getElementById('saveFeedBtn').textContent = '💾 Atualizar Post'; 
+            window.scrollTo(0, 0); 
+        }
+        
+        function resetFeedForm() { 
+            document.getElementById('feedForm').reset(); 
+            document.getElementById('editFeedId').value = ''; 
+            document.getElementById('feedImageUrl').value = ''; 
+            document.getElementById('feedImagePreview').innerHTML = ''; 
+            document.getElementById('feedContent').innerHTML = ''; 
+            document.getElementById('saveFeedBtn').textContent = '💾 Publicar Post'; 
+        }
+        
+        async function deleteFeedPost(id) { 
+            if (!confirm('Tem a certeza que deseja excluir este post?')) return; 
+            
+            const { error } = await supabase.from('feed_posts').delete().eq('id', id); 
+            
+            if (error) {
+                showMessage('Erro ao excluir: ' + error.message, 'error'); 
+            } else { 
+                showMessage('Post excluído com sucesso!', 'success'); 
+                loadFeedPosts(); 
+            } 
+        }
+
+        // ============================================
+        // MODERAR COMUNIDADE
+        // ============================================
+
+        async function loadCommunityMessages() { const listEl = document.getElementById('communityList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const filter = document.getElementById('filterStatus').value; const { data, error } = await supabase.from('community_posts').select('*').eq('status', filter).order('created_at', { ascending: false }); if (error) { listEl.innerHTML = `<p style="color:red;">Erro: ${error.message}</p>`; return; } displayCommunityMessages(data); }
+        function displayCommunityMessages(messages) { const listEl = document.getElementById('communityList'); if (!messages || messages.length === 0) { listEl.innerHTML = '<p>Nenhuma mensagem encontrada para este status.</p>'; return; } listEl.innerHTML = messages.map(msg => { const author = profilesMap.get(msg.user_id) || 'Anónimo'; const statusClass = { pending: 'status-pending', approved: 'status-approved', rejected: 'status-rejected'}[msg.status]; return `<div class="content-item"><div class="content-info"><div class="content-title">${author} <span class="status-badge ${statusClass}">${msg.status}</span></div><p style="margin: 10px 0; background: #fff; border-radius: 5px; border: 1px solid #ddd; padding: 10px;">${msg.content}</p><div class="content-module">Data: ${new Date(msg.created_at).toLocaleString('pt-BR')}</div></div><div class="content-actions">${msg.status !== 'approved' ? `<button class="btn btn-small" onclick="updateMessageStatus('${msg.id}', 'approved')">✅ Aprovar</button>` : ''}${msg.status !== 'rejected' ? `<button class="btn btn-small btn-danger" onclick="updateMessageStatus('${msg.id}', 'rejected')">❌ Rejeitar</button>` : ''}<button class="btn btn-small btn-danger" style="margin-left: 10px;" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button></div></div>`}).join(''); }
+        async function updateMessageStatus(id, status) { const { error } = await supabase.from('community_posts').update({ status: status }).eq('id', id); if (error) showMessage('Erro ao atualizar status: ' + error.message, 'error'); else { showMessage(`Mensagem ${status === 'approved' ? 'aprovada' : 'rejeitada'}!`, 'success'); loadCommunityMessages(); } }
+        async function deleteMessage(id) { if (!confirm('Tem a certeza que deseja excluir esta mensagem permanentemente?')) return; const { error } = await supabase.from('community_posts').delete().eq('id', id); if (error) showMessage('Erro ao excluir: ' + error.message, 'error'); else { showMessage('Mensagem excluída com sucesso!', 'success'); loadCommunityMessages(); } }
+
+        // ============================================
+        // GESTÃO DE CONTEÚDOS, MÓDULOS E SUB-MÓDULOS
+        // ============================================
+
+        document.getElementById('contentForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveContentBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('imageUrl').value; if (document.getElementById('contentImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('contentImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } let audioUrl = document.getElementById('contentAudioUrl').value; if (document.getElementById('contentType').value === 'audio' && document.getElementById('audioFile').files.length > 0) { saveBtn.textContent = 'A enviar áudio...'; const { url, error } = await uploadFile(document.getElementById('audioFile'), 'audios'); if (error) throw new Error(error); audioUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editContentId').value; const contentProduct = document.getElementById('contentProduct').value; const formData = { sub_module_id: parseInt(document.getElementById('subModule').value), title: document.getElementById('title').value, image_url: imageUrl || null, content_type: document.getElementById('contentType').value, content_url: document.getElementById('contentType').value === 'audio' ? audioUrl : document.getElementById('contentUrl').value, content_html: document.getElementById('contentHtml').value || null, order_position: parseInt(document.getElementById('orderPosition').value), active: document.getElementById('isActive').checked, module_key: document.getElementById('module').value, product_id: contentProduct || null, sale_link: document.getElementById('contentSaleLink').value || null }; const { error } = editId ? await supabase.from('contents').update(formData).eq('id', editId) : await supabase.from('contents').insert([formData]); if (error) throw error; showMessage(`Conteúdo ${editId ? 'atualizado' : 'guardado'}!`, 'success'); resetContentForm(); switchTab('list'); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Conteúdo'; } });
         function resetContentForm() { document.getElementById('contentForm').reset(); document.getElementById('editContentId').value = ''; document.getElementById('imageUrl').value = ''; document.getElementById('contentAudioUrl').value = ''; document.getElementById('contentImagePreview').innerHTML = ''; document.getElementById('audioFilePreview').innerHTML = ''; toggleContentInput(); updateSubModuleSelect(''); }
-        async function editContent(id) { const { data, error } = await supabase.from('contents').select('*').eq('id', id).single(); if (error) return showMessage('Erro ao carregar conteúdo.', 'error'); resetContentForm(); switchTab('add'); document.getElementById('editContentId').value = data.id; document.getElementById('title').value = data.title; document.getElementById('module').value = data.module_key; await updateSubModuleSelect(data.module_key, data.sub_module_id); document.getElementById('contentType').value = data.content_type; document.getElementById('orderPosition').value = data.order_position; document.getElementById('isActive').checked = data.active; document.getElementById('imageUrl').value = data.image_url; document.getElementById('contentProduct').value = data.product_id || ''; if (data.image_url) document.getElementById('contentImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; if (data.content_type === 'audio') { document.getElementById('contentAudioUrl').value = data.content_url; if(data.content_url) document.getElementById('audioFilePreview').innerHTML = `<span>Áudio atual carregado.</span>`; } else { document.getElementById('contentUrl').value = data.content_url; } document.getElementById('contentHtml').value = data.content_html; toggleContentInput(); document.getElementById('saveContentBtn').textContent = '💾 Atualizar Conteúdo'; }
+        async function editContent(id) { const { data, error } = await supabase.from('contents').select('*').eq('id', id).single(); if (error) return showMessage('Erro ao carregar conteúdo.', 'error'); resetContentForm(); switchTab('add'); document.getElementById('editContentId').value = data.id; document.getElementById('title').value = data.title; document.getElementById('module').value = data.module_key; await updateSubModuleSelect(data.module_key, data.sub_module_id); document.getElementById('contentType').value = data.content_type; document.getElementById('orderPosition').value = data.order_position; document.getElementById('isActive').checked = data.active; document.getElementById('imageUrl').value = data.image_url; document.getElementById('contentProduct').value = data.product_id || ''; document.getElementById('contentSaleLink').value = data.sale_link || ''; if (data.image_url) document.getElementById('contentImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; if (data.content_type === 'audio') { document.getElementById('contentAudioUrl').value = data.content_url; if(data.content_url) document.getElementById('audioFilePreview').innerHTML = `<span>Áudio atual carregado.</span>`; } else { document.getElementById('contentUrl').value = data.content_url; } document.getElementById('contentHtml').value = data.content_html; toggleContentInput(); document.getElementById('saveContentBtn').textContent = '💾 Atualizar Conteúdo'; }
         function toggleContentInput() { const type = document.getElementById('contentType').value; document.getElementById('urlInput').style.display = type === 'iframe' ? 'block' : 'none'; document.getElementById('htmlInput').style.display = type === 'html' ? 'block' : 'none'; document.getElementById('audioUploadInput').style.display = type === 'audio' ? 'block' : 'none'; }
         function updateModuleSelects(modules) { const selects = document.querySelectorAll('#module, #filterModule, #parentModuleKey'); selects.forEach(select => { const currentVal = select.value; let placeholder = select.id === 'filterModule' ? 'Todos os Módulos' : 'Selecione...'; select.innerHTML = `<option value="">${placeholder}</option>`; (modules || []).forEach(mod => select.innerHTML += `<option value="${mod.key}">${mod.name}</option>`); select.value = currentVal; }); }
         async function updateSubModuleSelect(moduleKey, selectedId = null) { const subModuleSelect = document.getElementById('subModule'); subModuleSelect.innerHTML = '<option value="">A carregar...</option>'; if (!moduleKey) { subModuleSelect.innerHTML = '<option value="">Selecione um módulo</option>'; return; } const { data } = await supabase.from('sub_modules').select('id, name').eq('module_key', moduleKey).order('order_position'); subModuleSelect.innerHTML = '<option value="">Selecione o sub-módulo</option>'; data.forEach(sm => subModuleSelect.innerHTML += `<option value="${sm.id}">${sm.name}</option>`); if(selectedId) subModuleSelect.value = selectedId; }
@@ -206,132 +1024,12 @@
         async function deleteSubModule(id) { if (!confirm('Excluir sub-módulo irá apagar todos os conteúdos dentro dele. Continuar?')) return; const { error } = await supabase.from('sub_modules').delete().eq('id', id); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Sub-módulo excluído com sucesso!', 'success'); await loadInitialData(); loadSubModules(); }}
         
         function updateProductSelects() { const selects = document.querySelectorAll('#moduleProduct, #contentProduct'); selects.forEach(select => { let placeholder = select.id === 'contentProduct' ? 'Herdar do Módulo' : 'Selecione um produto'; select.innerHTML = `<option value="">${placeholder}</option>`; products.forEach(p => { select.innerHTML += `<option value="${p.id}">${p.name}</option>`; }); }); }
-        document.getElementById('moduleForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveModuleBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('moduleImageUrl').value; if (document.getElementById('moduleImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('moduleImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editKey = document.getElementById('editModuleKey').value; const formData = { key: document.getElementById('newModuleKey').value, name: document.getElementById('newModuleName').value, image_url: imageUrl || null, order_position: parseInt(document.getElementById('newModuleOrder').value), product_id: document.getElementById('moduleProduct').value }; const { error } = editKey ? await supabase.from('modules').update(formData).eq('key', editKey) : await supabase.from('modules').insert([formData]); if (error) throw error; showMessage(`Módulo ${editKey ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetModuleForm(); loadModules(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = document.getElementById('editModuleKey').value ? 'Atualizar Módulo' : 'Adicionar Módulo'; } });
+        document.getElementById('moduleForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveModuleBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('moduleImageUrl').value; if (document.getElementById('moduleImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('moduleImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editKey = document.getElementById('editModuleKey').value; const formData = { key: document.getElementById('newModuleKey').value, name: document.getElementById('newModuleName').value, image_url: imageUrl || null, order_position: parseInt(document.getElementById('newModuleOrder').value), product_id: document.getElementById('moduleProduct').value, sale_link: document.getElementById('moduleSaleLink').value || null }; const { error } = editKey ? await supabase.from('modules').update(formData).eq('key', editKey) : await supabase.from('modules').insert([formData]); if (error) throw error; showMessage(`Módulo ${editKey ? 'atualizado' : 'criado'}!`, 'success'); await loadInitialData(); resetModuleForm(); loadModules(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = document.getElementById('editModuleKey').value ? 'Atualizar Módulo' : 'Adicionar Módulo'; } });
         function resetModuleForm() { document.getElementById('moduleForm').reset(); document.getElementById('editModuleKey').value = ''; document.getElementById('moduleImageUrl').value = ''; document.getElementById('newModuleKey').disabled = false; document.getElementById('moduleImagePreview').innerHTML = ''; document.getElementById('saveModuleBtn').textContent = 'Adicionar Módulo';}
-        function editModule(key) { const mod = modulesMap.get(key); if (!mod) return; resetModuleForm(); document.getElementById('editModuleKey').value = mod.key; document.getElementById('newModuleKey').value = mod.key; document.getElementById('newModuleKey').disabled = true; document.getElementById('newModuleName').value = mod.name; document.getElementById('newModuleOrder').value = mod.order_position; document.getElementById('moduleProduct').value = mod.product_id; document.getElementById('moduleImageUrl').value = mod.image_url; if(mod.image_url) document.getElementById('moduleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${mod.image_url}" alt="Preview">`; document.getElementById('saveModuleBtn').textContent = 'Atualizar Módulo'; window.scrollTo(0, 0); }
-        async function loadModules() { const listEl = document.getElementById('moduleList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const modules = Array.from(modulesMap.values()).sort((a, b) => a.order_position - b.order_position); displayModules(modules); }
-        function displayModules(modules) { const listEl = document.getElementById('moduleList'); if (!modules || modules.length === 0) { listEl.innerHTML = '<p>Nenhum módulo.</p>'; return; } listEl.innerHTML = modules.map(mod => { const product = products.find(p => p.id === mod.product_id); return `<div class="content-item"><div class="content-image" style="background-image: url('${mod.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${mod.name}</div><div class="content-module">Produto: <strong>${product ? product.name : 'N/D'}</strong></div></div><div class="content-actions"><button class="btn btn-small" onclick="editModule('${mod.key}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteModule('${mod.key}')">Excluir</button></div></div>`}).join(''); }
-        async function deleteModule(key) { if (!confirm('TEM A CERTEZA? Excluir um módulo irá apagar todos os seus sub-módulos e conteúdos.')) return; const { error } = await supabase.from('modules').delete().eq('key', key); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Módulo excluído com sucesso!', 'success'); await loadInitialData(); loadModules(); }}
-
-        // --- LÓGICA PARA GERIR PRODUTOS (MODIFICADA) ---
-        document.getElementById('productForm').addEventListener('submit', async (e) => { 
-            e.preventDefault(); 
-            const saveBtn = document.getElementById('saveProductBtn'); 
-            saveBtn.disabled = true; 
-            saveBtn.textContent = 'A guardar...'; 
-            try { 
-                const isEditing = document.getElementById('isEditingProduct').value; 
-                const productId = document.getElementById('productId').value; 
-                const productName = document.getElementById('productName').value;
-                // Capta o novo valor de duração
-                const productDuration = parseInt(document.getElementById('productDuration').value, 10);
-
-                if (!productDuration || productDuration < 1) {
-                    throw new Error('A duração deve ser um número maior que 0.');
-                }
-                
-                // Salva o novo valor na tabela
-                const { error } = await supabase.from('products').upsert({ 
-                    id: productId, 
-                    name: productName, 
-                    duration_days: productDuration 
-                }); 
-
-                if (error) throw error; 
-                showMessage(`Produto ${isEditing ? 'atualizado' : 'criado'}!`, 'success'); 
-                await loadInitialData(); // Recarrega os dados (incluindo produtos)
-                resetProductForm(); 
-                loadProducts(); 
-            } catch(error) { 
-                showMessage(`Erro: ${error.message}`, 'error'); 
-            } finally { 
-                saveBtn.disabled = false; 
-                saveBtn.textContent = 'Adicionar Produto'; 
-            }
-        });
-        
-        // Reseta o formulário para o valor padrão de 365 dias
-        function resetProductForm() { 
-            document.getElementById('productForm').reset(); 
-            document.getElementById('isEditingProduct').value = ''; 
-            document.getElementById('productId').disabled = false; 
-            document.getElementById('productDuration').value = '365'; // Define o valor padrão
-            document.getElementById('saveProductBtn').textContent = 'Adicionar Produto'; 
-        }
-
-        // Carrega o valor da duração ao editar
-        function editProduct(id) { 
-            const product = products.find(p => p.id === id); 
-            if(!product) return; 
-            resetProductForm(); 
-            document.getElementById('isEditingProduct').value = 'true'; 
-            document.getElementById('productId').value = product.id; 
-            document.getElementById('productId').disabled = true; 
-            document.getElementById('productName').value = product.name; 
-            document.getElementById('productDuration').value = product.duration_days; // Carrega a duração salva
-            document.getElementById('saveProductBtn').textContent = 'Atualizar Produto'; 
-            window.scrollTo(0, 0); 
-        }
-
-        async function loadProducts() { 
-            const listEl = document.getElementById('productList'); 
-            listEl.innerHTML = '<div class="loading">A carregar...</div>'; 
-            // Os 'products' já foram carregados no loadInitialData()
-            displayProducts(); 
-        }
-
-        // Mostra a duração na lista de produtos
-        function displayProducts() { 
-            const listEl = document.getElementById('productList'); 
-            if (products.length === 0) { 
-                listEl.innerHTML = '<p>Nenhum produto cadastrado.</p>'; 
-                return; 
-            } 
-            listEl.innerHTML = products.map(p => {
-                let durationText = `${p.duration_days} dias`;
-                if (p.duration_days > 3650) durationText = 'Vitalício'; // Ex: 100 anos
-                else if (p.duration_days === 365) durationText = '1 Ano';
-                else if (p.duration_days === 1) durationText = '1 Dia';
-
-                return `<div class="content-item">
-                    <div class="content-info">
-                        <div class="content-title">${p.name}</div>
-                        <div class="content-module">ID Hotmart: <strong>${p.id}</strong></div>
-                        <div class="content-module">Duração: <strong>${durationText}</strong></div>
-                    </div>
-                    <div class="content-actions">
-                        <button class="btn btn-small" onclick="editProduct('${p.id}')">Editar</button>
-                        <button class="btn btn-small btn-danger" onclick="deleteProduct('${p.id}')">Excluir</button>
-                    </div>
-                </div>`
-            }).join(''); 
-        }
-
-        async function deleteProduct(id) { 
-            if (!confirm('Tem a certeza? Se este produto estiver em uso por algum módulo ou conteúdo, poderá causar problemas de acesso.')) return; 
-            const { error } = await supabase.from('products').delete().eq('id', id); 
-            if (error) showMessage('Erro: ' + error.message, 'error'); 
-            else { 
-                showMessage('Produto excluído!', 'success'); 
-                await loadInitialData(); // Recarrega os dados
-                loadProducts(); 
-            } 
-        }
-
-        // --- RESTANTE DO CÓDIGO (FEED E COMUNIDADE) ---
-        // Nenhuma alteração necessária abaixo desta linha
-
-        document.getElementById('feedForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveFeedBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('feedImageUrl').value; if (document.getElementById('feedImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('feedImageFile'), 'feed'); if (error) throw new Error(error); imageUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editFeedId').value; const formData = { title: document.getElementById('feedTitle').value, content: document.getElementById('feedContent').value, image_url: imageUrl || null, active: document.getElementById('feedActive').checked }; const { error } = editId ? await supabase.from('feed_posts').update(formData).eq('id', editId) : await supabase.from('feed_posts').insert([formData]); if (error) throw error; showMessage(`Post ${editId ? 'atualizado' : 'publicado'} com sucesso!`, 'success'); resetFeedForm(); loadFeedPosts(); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Publicar Post'; } });
-        async function loadFeedPosts() { const listEl = document.getElementById('feedList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const { data, error } = await supabase.from('feed_posts').select('*').order('created_at', { ascending: false }); if (error) { listEl.innerHTML = `<p style="color:red">Erro: ${error.message}</p>`; return; } displayFeedPosts(data); }
-        function displayFeedPosts(posts) { const listEl = document.getElementById('feedList'); if (!posts || posts.length === 0) { listEl.innerHTML = '<p>Nenhum post no feed ainda.</p>'; return; } listEl.innerHTML = posts.map(post => `<div class="content-item">${post.image_url ? `<div class="content-image" style="background-image: url('${post.image_url}')"></div>` : ''}<div class="content-info"><div class="content-title">${post.title} <span class="status-badge ${post.active ? 'status-active' : 'status-inactive'}">${post.active ? 'Ativo' : 'Inativo'}</span></div><div class="content-module">Publicado em: ${new Date(post.created_at).toLocaleDateString('pt-BR')}</div></div><div class="content-actions"><button class="btn btn-small" onclick="editFeedPost('${post.id}')">✏️ Editar</button><button class="btn btn-small btn-danger" onclick="deleteFeedPost('${post.id}')">🗑️ Excluir</button></div></div>`).join(''); }
-        async function editFeedPost(id) { const { data, error } = await supabase.from('feed_posts').select('*').eq('id', id).single(); if (error) return showMessage('Erro ao carregar post.', 'error'); resetFeedForm(); document.getElementById('editFeedId').value = data.id; document.getElementById('feedTitle').value = data.title; document.getElementById('feedContent').value = data.content; document.getElementById('feedActive').checked = data.active; document.getElementById('feedImageUrl').value = data.image_url; if(data.image_url) document.getElementById('feedImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; document.getElementById('saveFeedBtn').textContent = '💾 Atualizar Post'; window.scrollTo(0, 0); }
-        function resetFeedForm() { document.getElementById('feedForm').reset(); document.getElementById('editFeedId').value = ''; document.getElementById('feedImageUrl').value = ''; document.getElementById('feedImagePreview').innerHTML = ''; document.getElementById('saveFeedBtn').textContent = '💾 Publicar Post'; }
-        async function deleteFeedPost(id) { if (!confirm('Tem a certeza que deseja excluir este post?')) return; const { error } = await supabase.from('feed_posts').delete().eq('id', id); if (error) showMessage('Erro ao excluir: ' + error.message, 'error'); else { showMessage('Post excluído com sucesso!', 'success'); loadFeedPosts(); } }
-
-        async function loadCommunityMessages() { const listEl = document.getElementById('communityList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const filter = document.getElementById('filterStatus').value; const { data, error } = await supabase.from('community_posts').select('*').eq('status', filter).order('created_at', { ascending: false }); if (error) { listEl.innerHTML = `<p style="color:red;">Erro: ${error.message}</p>`; return; } displayCommunityMessages(data); }
-        function displayCommunityMessages(messages) { const listEl = document.getElementById('communityList'); if (!messages || messages.length === 0) { listEl.innerHTML = '<p>Nenhuma mensagem encontrada para este status.</p>'; return; } listEl.innerHTML = messages.map(msg => { const author = profilesMap.get(msg.user_id) || 'Anónimo'; const statusClass = { pending: 'status-pending', approved: 'status-approved', rejected: 'status-rejected'}[msg.status]; return `<div class="content-item"><div class="content-info"><div class="content-title">${author} <span class="status-badge ${statusClass}">${msg.status}</span></div><p style="margin: 10px 0; background: #fff; border-radius: 5px; border: 1px solid #ddd; padding: 10px;">${msg.content}</p><div class="content-module">Data: ${new Date(msg.created_at).toLocaleString('pt-BR')}</div></div><div class="content-actions">${msg.status !== 'approved' ? `<button class="btn btn-small" onclick="updateMessageStatus('${msg.id}', 'approved')">✅ Aprovar</button>` : ''}${msg.status !== 'rejected' ? `<button class="btn btn-small btn-danger" onclick="updateMessageStatus('${msg.id}', 'rejected')">❌ Rejeitar</button>` : ''}<button class="btn btn-small btn-danger" style="margin-left: 10px;" onclick="deleteMessage('${msg.id}')">🗑️ Excluir</button></div></div>`}).join(''); }
-        async function updateMessageStatus(id, status) { const { error } = await supabase.from('community_posts').update({ status: status, updated_at: new Date().toISOString() }).eq('id', id); if (error) showMessage('Erro ao atualizar status: ' + error.message, 'error'); else { showMessage(`Mensagem ${status === 'approved' ? 'aprovada' : 'rejeitada'}!`, 'success'); loadCommunityMessages(); } }
-        async function deleteMessage(id) { if (!confirm('Tem a certeza que deseja excluir esta mensagem permanentemente?')) return; const { error } = await supabase.from('community_posts').delete().eq('id', id); if (error) showMessage('Erro ao excluir: ' + error.message, 'error'); else { showMessage('Mensagem excluída com sucesso!', 'success'); loadCommunityMessages(); } }
+        function editModule(key) { const mod = modulesMap.get(key); if (!mod) return; resetModuleForm(); document.getElementById('editModuleKey').value = mod.key; document.getElementById('newModuleKey').value = mod.key; document.getElementById('newModuleKey').disabled = true; document.getElementById('newModuleName').value = mod.name; document.getElementById('newModuleOrder').value = mod.order_position; document.getElementById('moduleImageUrl').value = mod.image_url; document.getElementById('moduleProduct').value = mod.product_id || ''; document.getElementById('moduleSaleLink').value = mod.sale_link || ''; if(mod.image_url) document.getElementById('moduleImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${mod.image_url}" alt="Preview">`; document.getElementById('saveModuleBtn').textContent = 'Atualizar Módulo'; window.scrollTo(0, 0); }
+        async function loadModules() { const listEl = document.getElementById('moduleList'); listEl.innerHTML = '<div class="loading">A carregar...</div>'; const { data, error } = await supabase.from('modules').select('*').order('order_position'); if (error) return; displayModules(data); }
+        function displayModules(modules) { const listEl = document.getElementById('moduleList'); if (!modules || modules.length === 0) { listEl.innerHTML = '<p>Nenhum módulo.</p>'; return; } listEl.innerHTML = modules.map(m => { const p = products.find(prod => prod.id === m.product_id); return `<div class="content-item"><div class="content-image" style="background-image: url('${m.image_url || 'https://placehold.co/80x80/e0e0e0/333?text=Img'}')"></div><div class="content-info"><div class="content-title">${m.name}</div><div class="content-module">Key: <strong>${m.key}</strong></div>${p ? `<div class="content-module">Produto: <strong>${p.name}</strong></div>` : ''}</div><div class="content-actions"><button class="btn btn-small" onclick="editModule('${m.key}')">Editar</button><button class="btn btn-small btn-danger" onclick="deleteModule('${m.key}')">Excluir</button></div></div>`}).join(''); }
+        async function deleteModule(key) { if (!confirm('Excluir módulo irá apagar todos os sub-módulos e conteúdos dentro dele. Continuar?')) return; const { error } = await supabase.from('modules').delete().eq('key', key); if (error) showMessage('Erro: ' + error.message, 'error'); else { showMessage('Módulo excluído com sucesso!', 'success'); await loadInitialData(); loadModules(); }}
 
         document.addEventListener('DOMContentLoaded', init);
         Object.assign(window, { 
@@ -340,9 +1038,10 @@
             resetSubModuleForm, editSubModule, deleteSubModule, 
             resetModuleForm, editModule, deleteModule,
             loadContents, loadModules, loadSubModules,
-            loadFeedPosts, resetFeedForm, editFeedPost, deleteFeedPost,
+            formatText, insertLink, loadFeedPosts, resetFeedForm, editFeedPost, deleteFeedPost,
             loadCommunityMessages, updateMessageStatus, deleteMessage,
-            resetProductForm, editProduct, deleteProduct, loadProducts
+            resetProductForm, editProduct, deleteProduct, loadProducts,
+            resetClientForm, editClient, deleteClient, loadClients, filterClients
         });
     </script>
 </body>
