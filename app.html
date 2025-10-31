@@ -148,16 +148,68 @@
             );
         }
 
+        // ===================================================================
+        // AQUI COMEÇA A FUNÇÃO "init()" ATUALIZADA
+        // ===================================================================
         async function init() {
-            await checkAuth();
+            // Verificar sessão (código da sua instrução)
+            const { data: { session } } = await supabase.auth.getSession();
+            if (!session) {
+                window.location.href = `${window.location.origin}/index.html`;
+                return;
+            }
+            currentUser = session.user; // Linha da sua instrução
+            
+            // ✅ NOVA VERIFICAÇÃO: Checar se está autorizado (código da sua instrução)
+            console.log('🔍 Verificando autorização no app...');
+            const { data: authUser, error: authError } = await supabase
+                .from('authorized_users')
+                .select('*')
+                .eq('email', currentUser.email.toLowerCase())
+                .eq('status', 'active')
+                .single();
+            
+            if (authError || !authUser) {
+                console.log('❌ Email não autorizado:', currentUser.email);
+                alert('Acesso não autorizado. Entre em contato com o suporte.');
+                await supabase.auth.signOut();
+                window.location.href = `${window.location.origin}/index.html`;
+                return;
+            }
+            
+            // Verificar expiração (código da sua instrução)
+            if (authUser.expires_at && new Date(authUser.expires_at) < new Date()) {
+                console.log('❌ Acesso expirado');
+                alert('Seu acesso expirou. Entre em contato com o suporte.');
+                await supabase.auth.signOut();
+                window.location.href = `${window.location.origin}/index.html`;
+                return;
+            }
+            
+            console.log('✅ Usuário autorizado! Produtos:', authUser.purchased_products);
+            
+            // Vincular user_id se necessário (código da sua instrução)
+            if (!authUser.user_id) {
+                await supabase
+                    .from('authorized_users')
+                    .update({ user_id: currentUser.id })
+                    .eq('email', currentUser.email.toLowerCase());
+                console.log('✅ User ID vinculado');
+            }
+            
+            // --- Fim do código da instrução ---
+
+            // A função "await checkAuth()" foi removida daqui
+            
             updateTime();
             setInterval(updateTime, 1000);
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<div class="loading active">A carregar...</div>';
             try {
-                const [profileRes, authorizedUserRes, modulesRes, subModulesRes, allProfilesRes, contentsRes, productsRes] = await Promise.all([
+                // A busca por "authorizedUserRes" foi removida daqui, 
+                // pois já temos o "authUser" do código acima.
+                const [profileRes, modulesRes, subModulesRes, allProfilesRes, contentsRes, productsRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
-                    supabase.from('authorized_users').select('*').eq('email', currentUser.email).single(),
                     supabase.from('modules').select('*').eq('active', true).order('position', { ascending: true }),
                     supabase.from('sub_modules').select('*').eq('active', true).order('position', { ascending: true }),
                     supabase.from('profiles').select('id, name, avatar_url'),
@@ -179,15 +231,13 @@
                 subModules.forEach(sm => subModulesMap.set(sm.id, sm));
                 contents.forEach(c => contentsMap.set(c.id, c));
                 
-                // Verificar se usuário está autorizado
-                if (!authorizedUserRes.data) {
-                    mainContent.innerHTML = `<div class="empty-state">❌ Acesso não autorizado. <br><small>Entre em contato com o suporte.</small></div>`;
-                    return;
-                }
+                // A verificação "if (!authorizedUserRes.data)" foi removida
+                // pois já foi feita no início da função.
                 
-                const authUser = authorizedUserRes.data;
+                // A linha "const authUser = authorizedUserRes.data;" também foi removida.
                 
                 // Pegar produtos do usuário (aceita diferentes formatos de coluna)
+                // Esta linha agora usa o "authUser" definido no início.
                 const userProducts = authUser.purchased_products || authUser.products || [];
                 currentUser.purchasedProducts = Array.isArray(userProducts) ? userProducts : [];
                 
@@ -209,13 +259,12 @@
                 window.addEventListener('popstate', handleHashChange);
             } catch (error) { mainContent.innerHTML = `<div class="empty-state">Erro ao carregar os dados. <br><small>${error.message}</small></div>`; console.error(error); }
         }
+        // ===================================================================
+        // AQUI TERMINA A FUNÇÃO "init()" ATUALIZADA
+        // ===================================================================
 
-        async function checkAuth() {
-            const { data: { session } } = await supabase.auth.getSession();
-            if (!session) { window.location.href = `${window.location.origin}/index.html`; return; }
-            currentUser.id = session.user.id;
-            currentUser.email = session.user.email;
-        }
+
+        // A função "checkAuth()" foi REMOVIDA, pois não é mais necessária.
 
         function updateTime() {
             const now = new Date();
