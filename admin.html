@@ -331,6 +331,7 @@
                 subModules.forEach(sm => subModulesMap.set(sm.id, sm));
                 updateModuleSelects(modules);
                 updateProductSelects();
+                populateClientProductsSelect();
                 loadProducts();
                 loadContents();
                 loadModules();
@@ -351,7 +352,10 @@
             if (tabName === 'modules') loadModules();
             if (tabName === 'submodules') loadSubModules();
             if (tabName === 'products') loadProducts();
-            if (tabName === 'clients') loadClients();
+            if (tabName === 'clients') {
+                populateClientProductsSelect();
+                loadClients();
+            }
             if (tabName === 'feed') loadFeedPosts();
             if (tabName === 'community') loadCommunityMessages();
         }
@@ -575,7 +579,10 @@
             const container = document.getElementById('clientProductsSelect');
             if (!container) return;
             
+            console.log('📦 Produtos disponíveis:', products);
+            
             container.innerHTML = products.map(p => {
+                console.log('Produto ID:', p.id, 'Tipo:', typeof p.id);
                 const moduleNames = (p.module_keys || []).map(key => {
                     const module = modulesMap.get(key);
                     return module ? module.name : key;
@@ -615,7 +622,7 @@
                 
                 const formData = {
                     email: email,
-                    products: selectedProducts, // Alterado de purchased_products para products
+                    products: selectedProducts, // Array de UUIDs dos produtos
                     expires_at: expiresAt,
                     status: status,
                     subscription_type: subscriptionType
@@ -701,12 +708,12 @@
             }
             
             listEl.innerHTML = clientsList.map(client => {
-                // Pegar produtos do cliente (suporta tanto 'products' quanto 'purchased_products')
-                const clientProducts = client.products || client.purchased_products || [];
+                // Pegar produtos do cliente
+                const clientProducts = client.products || [];
                 
                 const productsList = clientProducts.map(productId => {
                     const product = products.find(p => p.id === productId);
-                    if (!product) return `${productId} (produto não encontrado)`;
+                    if (!product) return `ID: ${productId} (não encontrado)`;
                     
                     const moduleNames = (product.module_keys || []).map(key => {
                         const module = modulesMap.get(key);
@@ -749,7 +756,7 @@
         }
 
         async function editClient(id) {
-            const client = allClients.find(c => c.id === id);
+            const client = allClients.find(c => c.id == id);
             if (!client) {
                 showMessage('Cliente não encontrado.', 'error');
                 return;
@@ -761,13 +768,12 @@
             document.getElementById('clientEmail').value = client.email;
             document.getElementById('clientEmail').disabled = true;
             
-            // Marcar produtos (suporta tanto 'products' quanto 'purchased_products')
-            const clientProducts = client.products || client.purchased_products || [];
+            // Marcar produtos selecionados
+            const clientProducts = client.products || [];
             clientProducts.forEach(productId => {
                 const checkbox = document.querySelector(`.client-product-checkbox[value="${productId}"]`);
                 if (checkbox) {
                     checkbox.checked = true;
-                    console.log('Produto marcado:', productId);
                 }
             });
             

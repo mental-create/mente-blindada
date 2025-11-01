@@ -23,8 +23,9 @@
         .card { background: white; border-radius: 20px; padding: 15px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; min-height: 200px; position: relative; overflow: hidden; }
         .card:active { transform: scale(0.98); }
         .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
-        .card.locked { filter: grayscale(1); opacity: 0.7; cursor: not-allowed; }
-        .card.locked::after { content: '🔒'; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 40px; background: rgba(255,255,255,0.7); border-radius: 50%; padding: 10px; backdrop-filter: blur(2px); }
+        .card.locked { cursor: pointer; position: relative; }
+        .card.locked::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); border-radius: 20px; z-index: 1; }
+        .card.locked::after { content: '🔒'; position: absolute; top: 10px; right: 10px; font-size: 28px; z-index: 2; background: rgba(255,255,255,0.95); border-radius: 50%; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .card-image { width: 100%; height: 140px; background-size: contain; background-position: center; background-repeat: no-repeat; border-radius: 12px; margin-bottom: 12px; }
         .card-title { font-size: 18px; font-weight: 600; color: #2c3e50; text-align: center; font-family: 'Montserrat', sans-serif; }
         .back-button { grid-column: 1/-1; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px; }
@@ -74,6 +75,12 @@
         .content-player h2 { font-size: 26px; font-weight: 700; color: #333; margin-bottom: 20px; text-align: center; }
         .content-player video { width: 100%; border-radius: 12px; margin-bottom: 20px; }
         .content-player audio { width: 100%; margin-bottom: 20px; }
+        .audio-player-container { text-align: center; margin: 20px 0; }
+        .audio-cover { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
+        .audio-cover img { width: 100%; height: 100%; object-fit: cover; }
+        .audio-player-container audio { width: 100%; max-width: 400px; }
+        .iframe-container { position: relative; width: 100%; padding-bottom: 75%; margin: 20px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .content-player img { width: 100%; border-radius: 12px; margin-bottom: 20px; }
         .content-player p { color: #666; line-height: 1.8; font-size: 16px; }
         .content-player .content-description { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
@@ -116,7 +123,7 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const SUPABASE_URL = 'https://gvrnnfzflefecxqedgih.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzU2Njc4MDgsImV4cCI6MjA1MTI0MzgwOH0.zDlBuhNHpvYsCWX0XmpCZIJPjjq6Cp8H0_W7AHBCrXw';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imd2cm5uZnpmbGVmZWN4cWVkZ2loIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTg1NjE3MzIsImV4cCI6MjA3NDEzNzczMn0.kmvAFT7qlExTk2JQf5NjLB0sfwKaqb8RfxvdCbl8oXo';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let currentUser = { isPremium: false, purchasedProducts: [] };
@@ -236,29 +243,30 @@
                 // pois já temos o "authUser" do bloco acima.
                 const [profileRes, modulesRes, subModulesRes, allProfilesRes, contentsRes, productsRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
-                    supabase.from('modules').select('*').eq('active', true).order('position', { ascending: true }),
-                    supabase.from('sub_modules').select('*').eq('active', true).order('position', { ascending: true }),
+                    supabase.from('modules').select('*').order('order_position', { ascending: true }),
+                    supabase.from('sub_modules').select('*').order('order_position', { ascending: true }),
                     supabase.from('profiles').select('id, name, avatar_url'),
-                    supabase.from('contents').select('*').eq('active', true).order('position', { ascending: true }),
+                    supabase.from('contents').select('*').eq('active', true).order('order_position', { ascending: true }),
                     supabase.from('products').select('id, name, module_keys, duration_days')
                 ]);
                 
                 // Guardar produtos
                 productsData = productsRes.data || [];
-                console.log('Produtos carregados:', productsData.length);
+                console.log('📦 Produtos carregados:', productsData.length);
                 
                 currentUser.profile = profileRes.data || {};
                 modules = modulesRes.data || [];
                 subModules = subModulesRes.data || [];
                 contents = contentsRes.data || [];
+                console.log('📋 Conteúdos carregados no init:', contents.length);
                 const allProfiles = allProfilesRes.data || [];
                 allProfiles.forEach(p => profilesMap.set(p.id, p));
                 modules.forEach(m => modulesMap.set(m.key, m));
                 subModules.forEach(sm => subModulesMap.set(sm.id, sm));
                 contents.forEach(c => contentsMap.set(c.id, c));
                 
-                // Pegar produtos do usuário (usando o "authUser" do início da função)
-                const userProducts = authUser.purchased_products || authUser.products || [];
+                // Pegar produtos do usuário
+                const userProducts = authUser.products || [];
                 currentUser.purchasedProducts = Array.isArray(userProducts) ? userProducts : [];
                 
                 // Verificar se tem produto premium
@@ -333,8 +341,17 @@
                 const card = document.createElement('div');
                 card.className = `card ${!hasAccess ? 'locked' : ''}`;
                 card.innerHTML = `<div class="card-image" style="background-image: url('${mod.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${mod.name}</span>`;
-                if (hasAccess) card.onclick = () => loadSubModules(mod.key);
-                else card.onclick = () => alert('Você precisa adquirir este módulo para poder acessá-lo.');
+                if (hasAccess) {
+                    card.onclick = () => loadSubModules(mod.key);
+                } else {
+                    card.onclick = () => {
+                        if (mod.sale_link) {
+                            window.open(mod.sale_link, '_blank');
+                        } else {
+                            alert('Este módulo está bloqueado. Entre em contato com o suporte para mais informações.');
+                        }
+                    };
+                }
                 mainContent.appendChild(card);
             });
         }
@@ -358,7 +375,13 @@
                 if (hasAccess) {
                     card.onclick = () => loadModuleContents(sm.id);
                 } else {
-                    card.onclick = () => alert('Você precisa adquirir este módulo para poder acessá-lo.');
+                    card.onclick = () => {
+                        if (parentModule.sale_link) {
+                            window.open(parentModule.sale_link, '_blank');
+                        } else {
+                            alert('Este conteúdo está bloqueado. Entre em contato com o suporte para mais informações.');
+                        }
+                    };
                 }
                 mainContent.appendChild(card);
             });
@@ -382,13 +405,36 @@
             }
             
             setActiveNav('home');
-            const sm = subModulesMap.get(subModuleId);
+            const sm = subModulesMap.get(parseInt(subModuleId));
             document.getElementById('pageTitle').textContent = sm ? sm.name : 'Conteúdos';
             const mainContent = document.getElementById('mainContent');
             mainContent.innerHTML = '<button class="back-button" onclick="history.back()">← Voltar</button>';
-            const filteredContents = contents.filter(c => c.sub_module_id === subModuleId);
-            if (filteredContents.length === 0) mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível neste módulo.</div>';
-            else filteredContents.forEach(content => { contentsMap.set(content.id, content); const card = document.createElement('div'); card.className = 'card'; card.innerHTML = `<div class="card-image" style="background-image: url('${content.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${content.name}</span>`; card.onclick = () => openContent(content.id); mainContent.appendChild(card); });
+            
+            // Converter subModuleId para número e filtrar conteúdos ativos
+            const subModuleIdNum = parseInt(subModuleId);
+            const filteredContents = contents.filter(c => 
+                c.sub_module_id === subModuleIdNum && c.active === true
+            );
+            
+            console.log('🔍 Debug - Sub-módulo ID:', subModuleIdNum);
+            console.log('📦 Todos os conteúdos:', contents.length);
+            console.log('🎯 Conteúdos filtrados:', filteredContents.length);
+            console.log('📋 Conteúdos encontrados:', filteredContents);
+            
+            if (filteredContents.length === 0) {
+                mainContent.innerHTML += '<div class="empty-state">Nenhum conteúdo disponível neste módulo.</div>';
+            } else {
+                filteredContents.forEach((content, index) => {
+                    console.log(`Renderizando card ${index + 1}:`, content.title);
+                    contentsMap.set(content.id, content);
+                    const card = document.createElement('div');
+                    card.className = 'card';
+                    card.innerHTML = `<div class="card-image" style="background-image: url('${content.image_url || 'https://placehold.co/200x140/e0e0e0/333?text=Img'}');"></div><span class="card-title">${content.title}</span>`;
+                    card.onclick = () => openContent(content.id);
+                    mainContent.appendChild(card);
+                    console.log(`Card ${index + 1} adicionado ao DOM`);
+                });
+            }
         }
 
         async function openContent(contentId, push = true) {
@@ -396,17 +442,64 @@
             setActiveNav('home');
             const content = contentsMap.get(contentId);
             if (!content) return;
-            document.getElementById('pageTitle').textContent = content.name;
+            
+            console.log('🎬 Abrindo conteúdo:', content.title);
+            console.log('📋 Dados completos:', content);
+            console.log('🎯 Type:', content.content_type);
+            console.log('🔗 URL:', content.content_url);
+            console.log('📄 HTML:', content.content_html ? 'presente' : 'ausente');
+            
+            document.getElementById('pageTitle').textContent = content.title;
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = `<div class="content-player"><h2>${content.name}</h2>${content.description ? `<div class="content-description">${content.description}</div>` : ''}${getContentMedia(content)}<button class="back-to-list" onclick="goBackFromPlayer()">← Voltar à Lista</button></div>`;
+            mainContent.innerHTML = `<div class="content-player"><h2>${content.title}</h2>${content.description ? `<div class="content-description">${content.description}</div>` : ''}${getContentMedia(content)}<button class="back-to-list" onclick="goBackFromPlayer()">← Voltar à Lista</button></div>`;
         }
 
         function getContentMedia(content) {
-            if (!content.type || !content.url) return '<p style="color: #999; text-align: center;">Nenhum conteúdo disponível.</p>';
-            if (content.type === 'video') return `<video controls controlsList="nodownload" oncontextmenu="return false;"><source src="${content.url}" type="video/mp4">Seu navegador não suporta vídeo.</video>`;
-            if (content.type === 'audio') return `<audio controls controlsList="nodownload" oncontextmenu="return false;" onplay="handleAudioPlay(this)"><source src="${content.url}" type="audio/mpeg">Seu navegador não suporta áudio.</audio>`;
-            if (content.type === 'image') return `<img src="${content.url}" alt="${content.name}">`;
-            if (content.type === 'text') return `<p>${content.text_content || 'Sem conteúdo de texto disponível.'}</p>`;
+            console.log('🎬 getContentMedia chamada com:', {
+                content_type: content.content_type,
+                content_url: content.content_url,
+                content_html: content.content_html ? 'presente' : 'ausente'
+            });
+            
+            // Se tiver HTML customizado (iframe pré-montado), usa ele
+            if (content.content_html) {
+                return `<div class="content-html">${content.content_html}</div>`;
+            }
+            
+            // Se não tiver tipo ou URL
+            if (!content.content_type || !content.content_url) {
+                return '<p style="color: #999; text-align: center;">Nenhum conteúdo disponível.</p>';
+            }
+            
+            // Renderizar baseado no tipo
+            if (content.content_type === 'video') {
+                return `<video controls controlsList="nodownload" oncontextmenu="return false;"><source src="${content.content_url}" type="video/mp4">Seu navegador não suporta vídeo.</video>`;
+            }
+            
+            if (content.content_type === 'audio') {
+                return `
+                    <div class="audio-player-container">
+                        ${content.image_url ? `<div class="audio-cover"><img src="${content.image_url}" alt="${content.title}"></div>` : ''}
+                        <audio controls controlsList="nodownload" oncontextmenu="return false;" onplay="handleAudioPlay(this)">
+                            <source src="${content.content_url}" type="audio/mpeg">
+                            Seu navegador não suporta áudio.
+                        </audio>
+                    </div>
+                `;
+            }
+            
+            if (content.content_type === 'iframe') {
+                return `<div class="iframe-container"><iframe src="${content.content_url}" frameborder="0" allowfullscreen></iframe></div>`;
+            }
+            
+            if (content.content_type === 'image') {
+                return `<img src="${content.content_url}" alt="${content.title}">`;
+            }
+            
+            if (content.content_type === 'text') {
+                return `<div class="content-text">${content.description || 'Sem conteúdo disponível.'}</div>`;
+            }
+            
             return '<p style="color: #999; text-align: center;">Tipo de conteúdo desconhecido.</p>';
         }
 
