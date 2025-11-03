@@ -159,7 +159,16 @@
                 <div class="form-group"><label for="contentType">Tipo de Conteúdo</label><select id="contentType" onchange="toggleContentInput()"><option value="iframe">iFrame (Gamma, etc.)</option><option value="html">Código HTML</option><option value="audio">Áudio (Upload MP3)</option></select></div>
                 <div class="form-group" id="urlInput"><label for="contentUrl">URL do iFrame</label><input type="url" id="contentUrl" placeholder="https://..."></div>
                 <div class="form-group" id="htmlInput" style="display:none;"><label for="contentHtml">Código HTML</label><textarea id="contentHtml" placeholder="<div>...</div>"></textarea></div>
-                <div class="form-group" id="audioUploadInput" style="display:none;"><label for="audioFile">Arquivo de Áudio (MP3)</label><input type="file" id="audioFile" accept="audio/mpeg"><input type="hidden" id="contentAudioUrl"><div class="image-preview" id="audioFilePreview"></div></div>
+                <div class="form-group" id="audioUploadInput" style="display:none;">
+                    <label for="audioFile">Arquivo de Áudio (Upload MP3)</label>
+                    <input type="file" id="audioFile" accept="audio/mpeg">
+                    <input type="hidden" id="contentAudioUrl">
+                    <div class="image-preview" id="audioFilePreview"></div>
+                    <div style="margin: 15px 0; text-align: center; color: #666; font-weight: 600;">OU</div>
+                    <label for="audioExternalUrl">URL Externa do Áudio (Cloudflare R2)</label>
+                    <input type="url" id="audioExternalUrl" placeholder="https://pub-xxxxx.r2.dev/audio.mp3">
+                    <small style="color: #999; display: block; margin-top: 5px;">Cole o link do Cloudflare R2. Se preenchido, terá prioridade sobre o upload.</small>
+                </div>
                 <div class="form-group"><label for="orderPosition">Posição (Ordem)</label><input type="number" id="orderPosition" value="1" min="1"></div>
                 <div class="form-group"><label for="contentProduct">Produto Específico</label><select id="contentProduct"><option value="">Herdar do Módulo</option></select><small style="color: #666; font-size: 12px; margin-top: 5px; display: block;">Deixe em branco para herdar o produto do módulo pai</small></div>
                 <div class="form-group"><label for="contentSaleLink">Link de Venda (Order Bump)</label><input type="url" id="contentSaleLink" placeholder="https://pay.hotmart.com/..."><div class="sale-link-info">📝 Este link será exibido no conteúdo caso o usuário não tenha acesso.</div></div>
@@ -1012,9 +1021,122 @@
         // GESTÃO DE CONTEÚDOS, MÓDULOS E SUB-MÓDULOS
         // ============================================
 
-        document.getElementById('contentForm').addEventListener('submit', async (e) => { e.preventDefault(); const saveBtn = document.getElementById('saveContentBtn'); saveBtn.disabled = true; saveBtn.textContent = 'A guardar...'; try { let imageUrl = document.getElementById('imageUrl').value; if (document.getElementById('contentImageFile').files.length > 0) { saveBtn.textContent = 'A enviar imagem...'; const { url, error } = await uploadFile(document.getElementById('contentImageFile'), 'images'); if (error) throw new Error(error); imageUrl = url; } let audioUrl = document.getElementById('contentAudioUrl').value; if (document.getElementById('contentType').value === 'audio' && document.getElementById('audioFile').files.length > 0) { saveBtn.textContent = 'A enviar áudio...'; const { url, error } = await uploadFile(document.getElementById('audioFile'), 'audios'); if (error) throw new Error(error); audioUrl = url; } saveBtn.textContent = 'A guardar...'; const editId = document.getElementById('editContentId').value; const contentProduct = document.getElementById('contentProduct').value; const formData = { sub_module_id: parseInt(document.getElementById('subModule').value), title: document.getElementById('title').value, image_url: imageUrl || null, content_type: document.getElementById('contentType').value, content_url: document.getElementById('contentType').value === 'audio' ? audioUrl : document.getElementById('contentUrl').value, content_html: document.getElementById('contentHtml').value || null, order_position: parseInt(document.getElementById('orderPosition').value), active: document.getElementById('isActive').checked, module_key: document.getElementById('module').value, product_id: contentProduct || null, sale_link: document.getElementById('contentSaleLink').value || null }; const { error } = editId ? await supabase.from('contents').update(formData).eq('id', editId) : await supabase.from('contents').insert([formData]); if (error) throw error; showMessage(`Conteúdo ${editId ? 'atualizado' : 'guardado'}!`, 'success'); resetContentForm(); switchTab('list'); } catch (error) { showMessage(`Erro: ${error.message}`, 'error'); } finally { saveBtn.disabled = false; saveBtn.textContent = '💾 Guardar Conteúdo'; } });
-        function resetContentForm() { document.getElementById('contentForm').reset(); document.getElementById('editContentId').value = ''; document.getElementById('imageUrl').value = ''; document.getElementById('contentAudioUrl').value = ''; document.getElementById('contentImagePreview').innerHTML = ''; document.getElementById('audioFilePreview').innerHTML = ''; toggleContentInput(); updateSubModuleSelect(''); }
-        async function editContent(id) { const { data, error } = await supabase.from('contents').select('*').eq('id', id).single(); if (error) return showMessage('Erro ao carregar conteúdo.', 'error'); resetContentForm(); switchTab('add'); document.getElementById('editContentId').value = data.id; document.getElementById('title').value = data.title; document.getElementById('module').value = data.module_key; await updateSubModuleSelect(data.module_key, data.sub_module_id); document.getElementById('contentType').value = data.content_type; document.getElementById('orderPosition').value = data.order_position; document.getElementById('isActive').checked = data.active; document.getElementById('imageUrl').value = data.image_url; document.getElementById('contentProduct').value = data.product_id || ''; document.getElementById('contentSaleLink').value = data.sale_link || ''; if (data.image_url) document.getElementById('contentImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; if (data.content_type === 'audio') { document.getElementById('contentAudioUrl').value = data.content_url; if(data.content_url) document.getElementById('audioFilePreview').innerHTML = `<span>Áudio atual carregado.</span>`; } else { document.getElementById('contentUrl').value = data.content_url; } document.getElementById('contentHtml').value = data.content_html; toggleContentInput(); document.getElementById('saveContentBtn').textContent = '💾 Atualizar Conteúdo'; }
+        document.getElementById('contentForm').addEventListener('submit', async (e) => { 
+            e.preventDefault(); 
+            const saveBtn = document.getElementById('saveContentBtn'); 
+            saveBtn.disabled = true; 
+            saveBtn.textContent = 'A guardar...'; 
+            
+            try { 
+                let imageUrl = document.getElementById('imageUrl').value; 
+                
+                if (document.getElementById('contentImageFile').files.length > 0) { 
+                    saveBtn.textContent = 'A enviar imagem...'; 
+                    const { url, error } = await uploadFile(document.getElementById('contentImageFile'), 'images'); 
+                    if (error) throw new Error(error); 
+                    imageUrl = url; 
+                } 
+                
+                let audioUrl = document.getElementById('contentAudioUrl').value; 
+                
+                // PRIORIDADE: URL externa do Cloudflare
+                const externalAudioUrl = document.getElementById('audioExternalUrl').value.trim();
+                
+                if (document.getElementById('contentType').value === 'audio') {
+                    if (externalAudioUrl) {
+                        // Usar URL externa (Cloudflare R2)
+                        audioUrl = externalAudioUrl;
+                    } else if (document.getElementById('audioFile').files.length > 0) {
+                        // Upload para Supabase Storage (fallback)
+                        saveBtn.textContent = 'A enviar áudio...'; 
+                        const { url, error } = await uploadFile(document.getElementById('audioFile'), 'audios'); 
+                        if (error) throw new Error(error); 
+                        audioUrl = url; 
+                    }
+                }
+                
+                saveBtn.textContent = 'A guardar...'; 
+                const editId = document.getElementById('editContentId').value; 
+                const contentProduct = document.getElementById('contentProduct').value; 
+                
+                const formData = { 
+                    sub_module_id: parseInt(document.getElementById('subModule').value), 
+                    title: document.getElementById('title').value, 
+                    image_url: imageUrl || null, 
+                    content_type: document.getElementById('contentType').value, 
+                    content_url: document.getElementById('contentType').value === 'audio' ? audioUrl : document.getElementById('contentUrl').value, 
+                    content_html: document.getElementById('contentHtml').value || null, 
+                    order_position: parseInt(document.getElementById('orderPosition').value), 
+                    active: document.getElementById('isActive').checked, 
+                    module_key: document.getElementById('module').value, 
+                    product_id: contentProduct || null, 
+                    sale_link: document.getElementById('contentSaleLink').value || null 
+                }; 
+                
+                const { error } = editId 
+                    ? await supabase.from('contents').update(formData).eq('id', editId) 
+                    : await supabase.from('contents').insert([formData]); 
+                
+                if (error) throw error; 
+                
+                showMessage(`Conteúdo ${editId ? 'atualizado' : 'guardado'}!`, 'success'); 
+                resetContentForm(); 
+                switchTab('list'); 
+            } catch (error) { 
+                showMessage(`Erro: ${error.message}`, 'error'); 
+            } finally { 
+                saveBtn.disabled = false; 
+                saveBtn.textContent = '💾 Guardar Conteúdo'; 
+            } 
+        });
+        function resetContentForm() { 
+            document.getElementById('contentForm').reset(); 
+            document.getElementById('editContentId').value = ''; 
+            document.getElementById('imageUrl').value = ''; 
+            document.getElementById('contentAudioUrl').value = ''; 
+            document.getElementById('audioExternalUrl').value = ''; 
+            document.getElementById('contentImagePreview').innerHTML = ''; 
+            document.getElementById('audioFilePreview').innerHTML = ''; 
+            toggleContentInput(); 
+            updateSubModuleSelect(''); 
+        }
+        async function editContent(id) { 
+            const { data, error } = await supabase.from('contents').select('*').eq('id', id).single(); 
+            if (error) return showMessage('Erro ao carregar conteúdo.', 'error'); 
+            
+            resetContentForm(); 
+            switchTab('add'); 
+            
+            document.getElementById('editContentId').value = data.id; 
+            document.getElementById('title').value = data.title; 
+            document.getElementById('module').value = data.module_key; 
+            await updateSubModuleSelect(data.module_key, data.sub_module_id); 
+            document.getElementById('contentType').value = data.content_type; 
+            document.getElementById('orderPosition').value = data.order_position; 
+            document.getElementById('isActive').checked = data.active; 
+            document.getElementById('imageUrl').value = data.image_url; 
+            document.getElementById('contentProduct').value = data.product_id || ''; 
+            document.getElementById('contentSaleLink').value = data.sale_link || ''; 
+            
+            if (data.image_url) {
+                document.getElementById('contentImagePreview').innerHTML = `<span>Imagem atual:</span> <img src="${data.image_url}" alt="Preview">`; 
+            }
+            
+            if (data.content_type === 'audio') { 
+                document.getElementById('contentAudioUrl').value = data.content_url; 
+                document.getElementById('audioExternalUrl').value = data.content_url; 
+                
+                if(data.content_url) {
+                    document.getElementById('audioFilePreview').innerHTML = `<span>Áudio atual:</span> <a href="${data.content_url}" target="_blank" style="color: #4169E1;">Ouvir áudio</a>`; 
+                }
+            } else { 
+                document.getElementById('contentUrl').value = data.content_url; 
+            } 
+            
+            document.getElementById('contentHtml').value = data.content_html; 
+            toggleContentInput(); 
+            document.getElementById('saveContentBtn').textContent = '💾 Atualizar Conteúdo'; 
+        }
         function toggleContentInput() { const type = document.getElementById('contentType').value; document.getElementById('urlInput').style.display = type === 'iframe' ? 'block' : 'none'; document.getElementById('htmlInput').style.display = type === 'html' ? 'block' : 'none'; document.getElementById('audioUploadInput').style.display = type === 'audio' ? 'block' : 'none'; }
         function updateModuleSelects(modules) { const selects = document.querySelectorAll('#module, #filterModule, #parentModuleKey'); selects.forEach(select => { const currentVal = select.value; let placeholder = select.id === 'filterModule' ? 'Todos os Módulos' : 'Selecione...'; select.innerHTML = `<option value="">${placeholder}</option>`; (modules || []).forEach(mod => select.innerHTML += `<option value="${mod.key}">${mod.name}</option>`); select.value = currentVal; }); }
         async function updateSubModuleSelect(moduleKey, selectedId = null) { const subModuleSelect = document.getElementById('subModule'); subModuleSelect.innerHTML = '<option value="">A carregar...</option>'; if (!moduleKey) { subModuleSelect.innerHTML = '<option value="">Selecione um módulo</option>'; return; } const { data } = await supabase.from('sub_modules').select('id, name').eq('module_key', moduleKey).order('order_position'); subModuleSelect.innerHTML = '<option value="">Selecione o sub-módulo</option>'; data.forEach(sm => subModuleSelect.innerHTML += `<option value="${sm.id}">${sm.name}</option>`); if(selectedId) subModuleSelect.value = selectedId; }

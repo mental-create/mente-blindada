@@ -508,8 +508,20 @@
             currentAudio = audioElement;
         }
 
+        let isNavigating = false;
+        
         function goBackFromPlayer() {
+            if (isNavigating) {
+                return; // Ignorar clicks duplos rápidos
+            }
+            
+            isNavigating = true;
             history.back();
+            
+            // Resetar após 800ms
+            setTimeout(() => {
+                isNavigating = false;
+            }, 800);
         }
 
         async function loadFeed(push = true) {
