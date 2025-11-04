@@ -1,0 +1,24 @@
+{
+  "name": "VivaMente",
+  "short_name": "VivaMente",
+  "description": "A sua jornada para o bem-estar",
+  "start_url": "/index.html",
+  "display": "standalone",
+  "background_color": "#4169E1",
+  "theme_color": "#1a237e",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://gvrnnfzflefecxqedgih.supabase.co/storage/v1/object/public/public-assets/icone.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://gvrnnfzflefecxqedgih.supabase.co/storage/v1/object/public/public-assets/icone.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

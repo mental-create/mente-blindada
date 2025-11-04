@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VivaMente - Acesso</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="VivaMente - A sua jornada para o bem-estar">
+    <meta name="theme-color" content="#1a237e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VivaMente">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="https://gvrnnfzflefecxqedgih.supabase.co/storage/v1/object/public/public-assets/icone.png">
+    
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         * {
@@ -298,9 +309,86 @@
             opacity: 0.5;
             pointer-events: none;
         }
+
+        /* Botão Instalar App PWA */
+        .install-app-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 9999;
+            display: none;
+        }
+
+        .install-app-container.show {
+            display: block;
+            animation: slideInRight 0.5s ease;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .install-app-btn {
+            background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%);
+            color: white;
+            border: none;
+            border-radius: 50px;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(26, 35, 126, 0.4);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+
+        .install-app-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 12px 32px rgba(26, 35, 126, 0.5);
+        }
+
+        .install-app-btn:active {
+            transform: translateY(0);
+        }
+
+        .install-icon {
+            font-size: 20px;
+        }
+
+        @media (max-width: 480px) {
+            .install-app-container {
+                top: 10px;
+                right: 10px;
+                left: 10px;
+            }
+            
+            .install-app-btn {
+                width: 100%;
+                justify-content: center;
+                padding: 16px 24px;
+                font-size: 14px;
+            }
+        }
     </style>
 </head>
 <body>
+    <!-- Botão Instalar App PWA -->
+    <div class="install-app-container" id="installContainer">
+        <button class="install-app-btn" id="installButton">
+            <span class="install-icon">📥</span>
+            <span>Instalar App</span>
+        </button>
+    </div>
+
     <div class="login-container">
         <div class="header">
             <div class="welcome">BEM-VINDO À</div>
@@ -488,6 +576,58 @@
                 button.textContent = 'ENTRAR';
             }
         }
+    </script>
+
+    <!-- Registro do Service Worker para PWA -->
+    <script>
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Botão Instalar App PWA
+        let deferredPrompt;
+        const installContainer = document.getElementById('installContainer');
+        const installButton = document.getElementById('installButton');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            // Previne o prompt automático do Chrome
+            e.preventDefault();
+            // Salva o evento para usar depois
+            deferredPrompt = e;
+            // Mostra o botão de instalação
+            installContainer.classList.add('show');
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) {
+                return;
+            }
+            // Mostra o prompt de instalação
+            deferredPrompt.prompt();
+            // Aguarda a escolha do usuário
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuário ${outcome === 'accepted' ? 'aceitou' : 'recusou'} a instalação`);
+            // Limpa o prompt
+            deferredPrompt = null;
+            // Esconde o botão
+            installContainer.classList.remove('show');
+        });
+
+        // Detecta quando o app foi instalado
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ App instalado com sucesso!');
+            installContainer.classList.remove('show');
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>

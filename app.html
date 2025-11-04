@@ -4,30 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>VivaMente</title>
+    
+    <!-- PWA Meta Tags -->
+    <meta name="description" content="VivaMente - A sua jornada para o bem-estar">
+    <meta name="theme-color" content="#1a237e">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="VivaMente">
+    <link rel="manifest" href="/manifest.json">
+    <link rel="apple-touch-icon" href="https://gvrnnfzflefecxqedgih.supabase.co/storage/v1/object/public/public-assets/icone.png">
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <style>
-        /* [O CSS (style) permanece o mesmo, está oculto aqui por brevidade] */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Montserrat', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
-        .container { flex: 1; width: 100%; max-width: 480px; margin: 0 auto; background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 40%); display: flex; flex-direction: column; min-height: 100vh; }
+        .container { flex: 1; width: 100%; max-width: 480px; margin: 0 auto; background: linear-gradient(180deg, #4169E1 0%, #1E3A8A 40%); display: flex; flex-direction: column; min-height: 100vh; overflow-x: hidden; }
         .header { padding: 20px; color: white; position: relative; }
         .time { font-size: 72px; font-weight: 300; margin-bottom: 5px; letter-spacing: -2px; }
         .date { font-size: 20px; font-weight: 300; opacity: 0.95; margin-bottom: 20px; white-space: nowrap; }
         .app-icon { position: absolute; top: 30px; right: 20px; width: 80px; height: 80px; background: url('https://gvrnnfzflefecxqedgih.supabase.co/storage/v1/object/public/public-assets/icone.png') no-repeat center; background-size: contain; border-radius: 20px; }
-        .title-bar { background: rgba(255, 255, 255, 0.15); padding: 20px; border-radius: 20px; margin: 0 20px; backdrop-filter: blur(10px); }
-        .title { font-size: 24px; font-weight: 800; color: white; text-align: center; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: -0.5px; white-space: nowrap; }
+        .title-bar { background: rgba(255, 255, 255, 0.15); padding: 20px 15px; border-radius: 20px; margin: 0 20px; backdrop-filter: blur(10px); overflow: hidden; max-width: calc(100% - 40px); }
+        .title { font-size: 20px; font-weight: 800; color: white; text-align: center; margin-bottom: 10px; text-shadow: 0 2px 4px rgba(0,0,0,0.2); text-transform: uppercase; letter-spacing: -0.5px; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.2; padding: 0 10px; }
         .greeting { font-size: 26px; text-align: center; color: white; display: flex; align-items: center; justify-content: center; gap: 10px; }
-        .main-content { flex: 1; background: #f0f4f8; border-radius: 30px 30px 0 0; margin-top: 20px; padding: 30px 20px 100px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; align-content: start; overflow-y: auto; }
-        .card { background: white; border-radius: 20px; padding: 15px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; min-height: 200px; position: relative; overflow: hidden; }
+        .main-content { flex: 1; background: #f0f4f8; border-radius: 30px 30px 0 0; margin-top: 20px; padding: 30px 20px 100px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; align-content: start; overflow-y: auto; overflow-x: hidden; }
+        .card { background: white; border-radius: 20px; padding: 15px; display: flex; flex-direction: column; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.08); transition: transform 0.3s ease, box-shadow 0.3s ease; cursor: pointer; min-height: 200px; position: relative; overflow: hidden; width: 100%; max-width: 100%; }
         .card:active { transform: scale(0.98); }
         .card:hover { transform: translateY(-5px); box-shadow: 0 8px 25px rgba(0,0,0,0.15); }
         .card.locked { cursor: pointer; position: relative; }
         .card.locked::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.15); border-radius: 20px; z-index: 1; }
         .card.locked::after { content: '🔒'; position: absolute; top: 10px; right: 10px; font-size: 28px; z-index: 2; background: rgba(255,255,255,0.95); border-radius: 50%; padding: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.2); }
         .card-image { width: 100%; height: 140px; background-size: contain; background-position: center; background-repeat: no-repeat; border-radius: 12px; margin-bottom: 12px; }
-        .card-title { font-size: 18px; font-weight: 600; color: #2c3e50; text-align: center; font-family: 'Montserrat', sans-serif; }
+        .card-title { display: block; width: 100%; max-width: 100%; font-size: 15px; font-weight: 600; color: #2c3e50; text-align: center; font-family: 'Montserrat', sans-serif; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; line-height: 1.3; padding: 0 5px; hyphens: auto; }
         .back-button { grid-column: 1/-1; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; margin-bottom: 20px; }
         .back-button:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(102, 126, 234, 0.3); }
         .module-title { grid-column: 1/-1; text-align: center; font-size: 24px; font-weight: 700; color: #333; margin-bottom: 20px; }
@@ -72,22 +82,49 @@
         .loading.active { display: block; }
         .empty-state { grid-column: 1/-1; text-align: center; padding: 60px 20px; color: #999; font-size: 18px; }
         .content-player { grid-column: 1/-1; background: white; border-radius: 20px; padding: 25px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .content-player h2 { font-size: 26px; font-weight: 700; color: #333; margin-bottom: 20px; text-align: center; }
+        .content-player h2 { font-size: 24px; font-weight: 700; color: #333; margin-bottom: 20px; text-align: center; word-wrap: break-word; overflow-wrap: break-word; line-height: 1.3; }
         .content-player video { width: 100%; border-radius: 12px; margin-bottom: 20px; }
         .content-player audio { width: 100%; margin-bottom: 20px; }
         .audio-player-container { text-align: center; margin: 20px 0; }
         .audio-cover { width: 200px; height: 200px; margin: 0 auto 20px; border-radius: 50%; overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.15); }
         .audio-cover img { width: 100%; height: 100%; object-fit: cover; }
         .audio-player-container audio { width: 100%; max-width: 400px; }
-        .iframe-container { position: relative; width: 100%; padding-bottom: 75%; margin: 20px 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .iframe-container { position: relative; width: 100%; height: calc(100vh - 250px); min-height: 500px; margin: 0; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .iframe-container iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: none; }
         .content-player img { width: 100%; border-radius: 12px; margin-bottom: 20px; }
+        .content-player-fullscreen { padding: 10px !important; }
+        .content-player-fullscreen h2 { display: none; }
+        .content-player-fullscreen .iframe-container { border-radius: 8px; height: calc(100vh - 200px); min-height: 600px; }
+        .content-player-fullscreen .back-to-list { margin-top: 10px; }
         .content-player p { color: #666; line-height: 1.8; font-size: 16px; }
         .content-player .content-description { background: #f8f9fa; padding: 15px; border-radius: 10px; margin-bottom: 20px; }
         .back-to-list { margin-top: 20px; padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; transition: all 0.3s ease; width: 100%; }
+        .back-to-list:first-child { margin-top: 0; margin-bottom: 20px; }
+        .content-player-fullscreen .back-to-list:first-child { margin-bottom: 10px; }
+        
+        /* Botão Instalar App PWA */
+        .install-app-container { position: fixed; top: 20px; right: 20px; z-index: 9999; display: none; }
+        .install-app-container.show { display: block; animation: slideInRight 0.5s ease; }
+        @keyframes slideInRight { from { opacity: 0; transform: translateX(100px); } to { opacity: 1; transform: translateX(0); } }
+        .install-app-btn { background: linear-gradient(135deg, #1a237e 0%, #0d47a1 100%); color: white; border: none; border-radius: 50px; padding: 14px 28px; font-size: 15px; font-weight: 700; cursor: pointer; box-shadow: 0 8px 24px rgba(26, 35, 126, 0.4); display: flex; align-items: center; gap: 10px; transition: all 0.3s ease; }
+        .install-app-btn:hover { transform: translateY(-3px); box-shadow: 0 12px 32px rgba(26, 35, 126, 0.5); }
+        .install-app-btn:active { transform: translateY(0); }
+        .install-icon { font-size: 20px; }
+        @media (max-width: 480px) {
+            .install-app-container { top: 10px; right: 10px; left: 10px; }
+            .install-app-btn { width: 100%; justify-content: center; padding: 16px 24px; font-size: 14px; }
+        }
     </style>
 </head>
 <body>
+    <!-- Botão Instalar App PWA -->
+    <div class="install-app-container" id="installContainer">
+        <button class="install-app-btn" id="installButton">
+            <span class="install-icon">📥</span>
+            <span>Instalar App</span>
+        </button>
+    </div>
+
     <div class="container">
         <header class="header">
             <div class="app-icon"></div>
@@ -156,7 +193,7 @@
         }
 
         // ===================================================================
-        // AQUI COMEÇA A FUNÇÃO "init()" ATUALIZADA
+        // AQUI COMEÇA A FUNÇÃO "init()" (Limpa e correta)
         // ===================================================================
         async function init() {
             // Verificar sessão (código existente)
@@ -168,10 +205,9 @@
             currentUser = session.user;
 
             // Variável para guardar o usuário autorizado
-            // (Declarada aqui para ser acessível em toda a função init)
             let authUser;
 
-            // ✅✅✅ ADICIONAR ESTE CÓDIGO AQUI ✅✅✅
+            // Verificação de autorização
             console.log('🔍 Verificando autorização para:', currentUser.email);
             
             try {
@@ -229,7 +265,6 @@
                 window.location.href = `${window.location.origin}/index.html`;
                 return;
             }
-            // ✅✅✅ FIM DO CÓDIGO A ADICIONAR ✅✅✅
             
             // --- O resto do código init() continua aqui ---
             
@@ -239,8 +274,6 @@
             mainContent.innerHTML = '<div class="loading active">A carregar...</div>';
             
             try {
-                // A busca por "authorizedUserRes" foi REMOVIDA daqui,
-                // pois já temos o "authUser" do bloco acima.
                 const [profileRes, modulesRes, subModulesRes, allProfilesRes, contentsRes, productsRes] = await Promise.all([
                     supabase.from('profiles').select('*').eq('id', currentUser.id).single(),
                     supabase.from('modules').select('*').order('order_position', { ascending: true }),
@@ -281,14 +314,20 @@
                 console.log('Produtos (pós-load):', currentUser.purchasedProducts);
                 console.log('Premium (pós-load):', currentUser.isPremium);
                 
-                updateGreeting();
-                if (window.location.hash) handleHashChange();
-                else loadHomeModules(false);
+                updateGreeting(); // <-- CHAMA A FUNÇÃO DE SAUDAÇÃO
+                
+                if (window.location.hash && window.location.hash !== '#') {
+                    handleHashChange();
+                } else {
+                    // Garantir que sempre começa com #home no histórico
+                    history.replaceState({ view: 'home' }, '', '#home');
+                    loadHomeModules(false);
+                }
                 window.addEventListener('popstate', handleHashChange);
             } catch (error) { mainContent.innerHTML = `<div class="empty-state">Erro ao carregar os dados. <br><small>${error.message}</small></div>`; console.error(error); }
         }
         // ===================================================================
-        // AQUI TERMINA A FUNÇÃO "init()" ATUALIZADA
+        // AQUI TERMINA A FUNÇÃO "init()"
         // ===================================================================
 
         function updateTime() {
@@ -299,10 +338,37 @@
             document.getElementById('date').textContent = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
         }
 
+        // ================== FUNÇÃO MODIFICADA (SAUDAÇÃO) ==================
         function updateGreeting() {
+            // 1. Pega o nome do usuário (lógica existente)
             const name = currentUser.profile?.name || currentUser.email.split('@')[0];
-            document.getElementById('greeting').innerHTML = `👋 Olá, ${name}`;
+            
+            // 2. Pega a hora atual
+            const now = new Date();
+            const hour = now.getHours();
+            
+            // 3. Define a saudação e o emoji
+            let greetingMessage = '';
+            let greetingEmoji = '';
+
+            if (hour >= 5 && hour < 12) {
+                // Manhã (5:00 - 11:59)
+                greetingMessage = 'Bom dia';
+                greetingEmoji = '☀️';
+            } else if (hour >= 12 && hour < 18) {
+                // Tarde (12:00 - 17:59)
+                greetingMessage = 'Boa tarde';
+                greetingEmoji = '👋';
+            } else {
+                // Noite (18:00 - 4:59)
+                greetingMessage = 'Boa noite';
+                greetingEmoji = '🌙';
+            }
+            
+            // 4. Atualiza o HTML
+            document.getElementById('greeting').innerHTML = `${greetingEmoji} ${greetingMessage}, ${name}`;
         }
+        // ================== FIM DA MODIFICAÇÃO ==================
 
         function setActiveNav(navId) {
             document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
@@ -319,8 +385,14 @@
 
         function handleHashChange() {
             const hash = window.location.hash.substring(1);
-            if (!hash) return loadHomeModules(false);
+            
+            if (!hash || hash === 'home') {
+                loadHomeModules(false);
+                return;
+            }
+            
             const [view, id] = hash.split('/');
+            
             if (view === 'feed') loadFeed(false);
             else if (view === 'community') loadCommunity(false);
             else if (view === 'profile') loadProfile(false);
@@ -331,7 +403,10 @@
         }
 
         function loadHomeModules(push = true) {
-            if (push && (history.state?.view !== 'home')) history.pushState({ view: 'home' }, '', '#home');
+            const currentHash = '#home';
+            if (push && window.location.hash !== currentHash) {
+                history.pushState({ view: 'home' }, '', currentHash);
+            }
             setActiveNav('home');
             const mainContent = document.getElementById('mainContent');
             document.getElementById('pageTitle').textContent = 'Viva Mente';
@@ -356,15 +431,28 @@
             });
         }
 
+        // Função com a correção anterior do botão (intacta)
         async function loadSubModules(moduleKey, push = true) {
-            if (push) history.pushState({ view: 'sub-modules', id: moduleKey }, '', `#sub-modules/${moduleKey}`);
+            const currentHash = `#sub-modules/${moduleKey}`;
+            if (push && window.location.hash !== currentHash) {
+                history.pushState({ view: 'sub-modules', id: moduleKey }, '', currentHash);
+            }
             setActiveNav('home');
             const module = modulesMap.get(moduleKey);
             if (!module) return;
             const parentModule = module;
             document.getElementById('pageTitle').textContent = module.name;
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<button class="back-button" onclick="history.back()">← Voltar</button>';
+            
+            mainContent.innerHTML = ''; // Limpa o conteúdo
+
+            // --- Botão Voltar (Topo) ---
+            const topButton = document.createElement('button');
+            topButton.className = 'back-button';
+            topButton.textContent = '← Voltar para Módulos';
+            topButton.onclick = () => loadHomeModules(); // CORREÇÃO: Chama a função explícita
+            mainContent.appendChild(topButton);
+
             const filteredSubModules = subModules.filter(sm => sm.module_key === moduleKey);
             filteredSubModules.forEach(sm => {
                 subModulesMap.set(sm.id, sm);
@@ -385,16 +473,30 @@
                 }
                 mainContent.appendChild(card);
             });
+
+            // --- Botão Voltar (Rodapé) ---
+            const bottomButton = document.createElement('button');
+            bottomButton.className = 'back-button';
+            bottomButton.textContent = '← Voltar para Módulos';
+            bottomButton.onclick = () => loadHomeModules(); // CORREÇÃO: Chama a função explícita
+            mainContent.appendChild(bottomButton);
         }
 
+        // Função com a correção anterior do botão (intacta)
         async function loadModuleContents(subModuleId, push = true) {
-            if (push) history.pushState({ view: 'contentList', id: subModuleId }, '', `#content-list/${subModuleId}`);
+            const currentHash = `#content-list/${subModuleId}`;
+            if (push && window.location.hash !== currentHash) {
+                history.pushState({ view: 'contentList', id: subModuleId }, '', currentHash);
+            }
+            
+            let parentModuleKey = null; // Variável para guardar a key
             
             // Verificar acesso ao módulo
-            const subModule = subModulesMap.get(subModuleId);
+            const subModule = subModulesMap.get(parseInt(subModuleId));
             if (subModule) {
                 const parentModule = modulesMap.get(subModule.module_key);
                 if (parentModule) {
+                    parentModuleKey = parentModule.key; // <-- Guardamos a key aqui
                     const hasAccess = userHasAccessToModule(parentModule.key);
                     if (!hasAccess) {
                         alert('Você não tem acesso a este conteúdo. Adquira o módulo para continuar.');
@@ -408,7 +510,19 @@
             const sm = subModulesMap.get(parseInt(subModuleId));
             document.getElementById('pageTitle').textContent = sm ? sm.name : 'Conteúdos';
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = '<button class="back-button" onclick="history.back()">← Voltar</button>';
+            mainContent.innerHTML = ''; // Limpa o conteúdo
+
+            // --- Botão Voltar (Topo) ---
+            const topButton = document.createElement('button');
+            topButton.className = 'back-button';
+            topButton.textContent = '← Voltar';
+            // CORREÇÃO: Chama a função explícita
+            if (parentModuleKey) {
+                topButton.onclick = () => loadSubModules(parentModuleKey);
+            } else {
+                topButton.onclick = () => goBackFromPlayer(); // Fallback
+            }
+            mainContent.appendChild(topButton);
             
             // Converter subModuleId para número e filtrar conteúdos ativos
             const subModuleIdNum = parseInt(subModuleId);
@@ -435,10 +549,25 @@
                     console.log(`Card ${index + 1} adicionado ao DOM`);
                 });
             }
+
+            // --- Botão Voltar (Rodapé) ---
+            const bottomButton = document.createElement('button');
+            bottomButton.className = 'back-button';
+            bottomButton.textContent = '← Voltar';
+            // CORREÇÃO: Chama a função explícita
+            if (parentModuleKey) {
+                bottomButton.onclick = () => loadSubModules(parentModuleKey);
+            } else {
+                bottomButton.onclick = () => goBackFromPlayer(); // Fallback
+            }
+            mainContent.appendChild(bottomButton);
         }
 
         async function openContent(contentId, push = true) {
-            if (push) history.pushState({ view: 'content', id: contentId }, '', `#content/${contentId}`);
+            const currentHash = `#content/${contentId}`;
+            if (push && window.location.hash !== currentHash) {
+                history.pushState({ view: 'content', id: contentId }, '', currentHash);
+            }
             setActiveNav('home');
             const content = contentsMap.get(contentId);
             if (!content) return;
@@ -451,7 +580,17 @@
             
             document.getElementById('pageTitle').textContent = content.title;
             const mainContent = document.getElementById('mainContent');
-            mainContent.innerHTML = `<div class="content-player"><h2>${content.title}</h2>${content.description ? `<div class="content-description">${content.description}</div>` : ''}${getContentMedia(content)}<button class="back-to-list" onclick="goBackFromPlayer()">← Voltar à Lista</button></div>`;
+            const isIframe = content.content_type === 'iframe' || (content.content_html && content.content_html.includes('<iframe'));
+            const playerClass = isIframe ? 'content-player content-player-fullscreen' : 'content-player';
+            mainContent.innerHTML = `
+                <div class="${playerClass}">
+                    <button class="back-to-list" onclick="goBackFromPlayer()">← Voltar à Lista</button>
+                    <h2>${content.title}</h2>
+                    ${content.description ? `<div class="content-description">${content.description}</div>` : ''}
+                    ${getContentMedia(content)}
+                    <button class="back-to-list" onclick="goBackFromPlayer()">← Voltar à Lista</button>
+                </div>
+            `;
         }
 
         function getContentMedia(content) {
@@ -508,20 +647,9 @@
             currentAudio = audioElement;
         }
 
-        let isNavigating = false;
-        
         function goBackFromPlayer() {
-            if (isNavigating) {
-                return; // Ignorar clicks duplos rápidos
-            }
-            
-            isNavigating = true;
+            // Esta função agora é usada APENAS pelo player de conteúdo
             history.back();
-            
-            // Resetar após 800ms
-            setTimeout(() => {
-                isNavigating = false;
-            }, 800);
         }
 
         async function loadFeed(push = true) {
@@ -595,6 +723,48 @@
         Object.assign(window, { handleNavClick, loadModuleContents, openContent, sendCommunityMessage, logout, saveProfile, uploadAvatar, goBackFromPlayer, loadSubModules });
 
         document.addEventListener('DOMContentLoaded', init);
+    </script>
+
+    <!-- Registro do Service Worker para PWA -->
+    <script>
+        // Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registrado:', registration.scope);
+                    })
+                    .catch(error => {
+                        console.log('❌ Falha ao registrar Service Worker:', error);
+                    });
+            });
+        }
+
+        // Botão Instalar App PWA
+        let deferredPrompt;
+        const installContainer = document.getElementById('installContainer');
+        const installButton = document.getElementById('installButton');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installContainer.classList.add('show');
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`Usuário ${outcome === 'accepted' ? 'aceitou' : 'recusou'} a instalação`);
+            deferredPrompt = null;
+            installContainer.classList.remove('show');
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ App instalado com sucesso!');
+            installContainer.classList.remove('show');
+            deferredPrompt = null;
+        });
     </script>
 </body>
 </html>
